@@ -1,0 +1,14 @@
+runtime: go
+api_version: go1.8
+
+handlers:
+    - url: /api/admin/.*
+      secure: always
+      login: admin
+      script: _go_app
+
+    - url: /api/.*
+      secure: always
+      login: required
+      script: _go_app
+

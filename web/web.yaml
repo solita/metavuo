@@ -1,0 +1,26 @@
+service: web
+runtime: go
+api_version: go1.8
+
+handlers:
+    - url: /admin/
+      secure: always
+      login: admin
+      static_files: dist_admin/index.html
+      upload: dist_admin/index\.html
+
+    - url: /admin
+      secure: always
+      login: admin
+      static_dir: dist_admin
+
+    - url: /
+      secure: always
+      login: required
+      static_files: dist/index.html
+      upload: dist/index\.html
+
+    - url: /
+      secure: always
+      login: required
+      static_dir: dist/

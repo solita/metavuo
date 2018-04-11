@@ -1,0 +1,8 @@
+# Tools
+.idea/
+
+# Front-end
+web/node_modules/
+web/dist/
+web/package-lock.json
+

@@ -13,8 +13,9 @@
   "parser": "babel-eslint",
   "rules": {
     "react/prefer-stateless-function": 0,
-    "react/forbid-prop-types": 0,
-    "react/prop-types": 0,
-    "linebreak-style": 0
+    "react/forbid-prop-types": 1,
+    "react/prop-types": 1,
+    "linebreak-style": 1,
+    "import/extensions": 1
   }
 }

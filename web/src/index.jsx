@@ -1,8 +1,24 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App/components/App';
+import Grid from 'material-ui/Grid';
+import Typography from 'material-ui/Typography';
+import Header from './common/components/Header';
+import CreateProject from './Project/components/CreateProject';
+import './common/fonts/fonts.css';
 
 ReactDOM.render(
-  <App />,
+  <div>
+    <Header />
+    <Grid container spacing={16}>
+      <Grid item sm={3}>
+        <Typography variant="body2" color="inherit">
+          Sivumenu
+        </Typography>
+      </Grid>
+      <Grid item sm={9}>
+        <CreateProject />
+      </Grid>
+    </Grid>
+  </div>,
   document.getElementById('root'),
 );

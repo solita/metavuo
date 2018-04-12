@@ -2,6 +2,17 @@ service: web
 runtime: go
 api_version: go1.8
 
+skip_files:
+  - ^(.*/)?.*/node_modules/.*$
+  - ^(node_modules/.*)
+
+  - ^(.*/)?#.*#$
+  - ^(.*/)?.*~$
+  - ^(.*/)?.*\.DS_Store$
+  - ^(.*/)?.*\.py[co]$
+  - ^(.*/)?.*/RCS/.*$
+  - ^(.*/)?\..*$
+
 handlers:
     - url: /admin/
       secure: always

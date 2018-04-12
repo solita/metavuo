@@ -1,5 +1,5 @@
 import React from 'react';
-import Button from 'material-ui/Button';
+import ProjectForm from './ProjectForm';
 
 class CreateProject extends React.Component {
   constructor(props) {
@@ -13,8 +13,7 @@ class CreateProject extends React.Component {
     return (
       <div>
         <h2>Create new project</h2>
-        <p>Here be fields</p>
-        <Button variant="raised" color="primary">Save</Button>
+        <ProjectForm />
       </div>
     );
   }

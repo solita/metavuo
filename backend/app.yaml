@@ -1,6 +1,9 @@
 runtime: go
 api_version: go1.8
 
+skip_files:
+  - ^(.*/)?.*\.DS_Store$
+
 handlers:
     - url: /api/admin/.*
       secure: always

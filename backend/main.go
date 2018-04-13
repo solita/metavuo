@@ -8,6 +8,7 @@ import (
 
 func init() {
 	http.HandleFunc("/api/", routeApi)
+	http.HandleFunc("/api/projects/add", createProject)
 }
 
 func routeApi(w http.ResponseWriter, r *http.Request) {

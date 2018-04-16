@@ -3,26 +3,30 @@ package main
 import (
 	"net/http"
 	"encoding/json"
-	"google.golang.org/appengine/log"
-	"context"
-	"google.golang.org/appengine/datastore"
 	"time"
+	"context"
+
+	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine"
+	"google.golang.org/appengine/user"
 )
 
-var kind = "Project"
+const projectKind = "Project"
 
 type Project struct {
-	ID        int64     `datastore:"-"`
-	Name      string    `json:"project_name"`
-	ProjectID string    `json:"project_id"`
-	CreatedBy string    `json:"createdby_email"`
-	Created   time.Time `datastore:"created"`
+	ID          int64  `datastore:"-"`
+	Name        string `json:"project_name"`
+	ProjectID   string `json:"project_id"`
+	Description string `json:"project_description"`
+	CreatedBy   string `json:"createdby_email"`
+	CreatedByID string
+	Created     time.Time
 	// TODO Add Google user ID
 }
 
 func createProject(resp http.ResponseWriter, req *http.Request) {
-	ctx := appengine.NewContext(req) // Is this ok or should context be passed as a param?
+	ctx := appengine.NewContext(req)
 	dec := json.NewDecoder(req.Body)
 	var project Project
 
@@ -32,7 +36,7 @@ func createProject(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	key, err := AddProject(ctx, project)
+	_, err := AddProject(ctx, project)
 
 	if err != nil {
 		log.Errorf(ctx, "Adding project failed", err)
@@ -40,16 +44,16 @@ func createProject(resp http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	log.Infof(ctx, "Added project with key: "+key.String()) // Do we have an actual use for the key?
-
 	resp.WriteHeader(http.StatusOK)
 
 }
 func AddProject(ctx context.Context, project Project) (*datastore.Key, error) {
 
-	key := datastore.NewIncompleteKey(ctx, kind, nil)
+	key := datastore.NewIncompleteKey(ctx, projectKind, nil)
 
-	project.Created = time.Now()
+	project.CreatedByID = user.Current(ctx).ID // Comment this line if testing locally without auth
+
+	project.Created = time.Now().UTC()
 
 	return datastore.Put(ctx, key, &project)
 

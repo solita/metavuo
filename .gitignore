@@ -3,6 +3,9 @@
 
 # Front-end
 web/node_modules/
-web/dist/
 web/package-lock.json
 
+web/dist/bundle.js
+web/dist/index.html
+
+__snapshots__/

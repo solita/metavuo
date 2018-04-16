@@ -1,8 +1,10 @@
 import React from 'react';
+import axios from 'axios';
 import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
-import TextField from 'material-ui/TextField';
+import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
 import '../css/ProjectForm.scss';
+
 
 class ProjectForm extends React.Component {
   constructor(props) {
@@ -10,6 +12,7 @@ class ProjectForm extends React.Component {
     this.state = {
       name: '',
       description: '',
+      message: '',
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -21,44 +24,67 @@ class ProjectForm extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
-    // const data = new FormData(event.target);
-    // todo fetch
-    this.setState({ name: '', description: '' });
+    axios.post(
+      'http://localhost:8080/api/projects/add',
+      JSON.stringify({
+        project_name: this.state.name,
+        project_description: this.state.description,
+        project_id: 'ABC123',
+        createdby_email: 'test-mail',
+      }),
+    )
+      .then((res) => {
+        console.log(res);
+        // this.setState({ message: res });
+        this.setState({ name: '', description: '' });
+      })
+      .catch((err) => {
+        console.log(err);
+        // this.setState({ message: err });
+      });
   }
 
   render() {
     return (
       <Grid
-        direction="column"
+        className="form-container"
       >
-        <form
-          autoComplete="off"
+        {this.state.message}
+        <ValidatorForm
+          id="form-object"
           onSubmit={this.handleSubmit}
+          autoComplete="off"
         >
-          <TextField
-            className="form-item"
+          <TextValidator
+            className="form-item form-control"
             id="name"
             name="name"
             label="Project name"
             value={this.state.name}
             onChange={this.handleChange}
             margin="normal"
+            validators={['required']}
+            errorMessages={['Name cannot be blank.']}
           />
-          <TextField
-            className="form-item"
+          <TextValidator
+            className="form-item form-control"
             id="description"
             name="description"
             label="Description"
             multiline
-            rows="4"
+            rowsMax="8"
             value={this.state.description}
             onChange={this.handleChange}
             margin="normal"
+            validators={['required']}
+            errorMessages={['Description is mandatory.']}
           />
           <div className="form-item">
-            <Button type="submit" variant="raised" color="primary">Save</Button>
+            <Button type="submit" id="submit-project" variant="raised" color="primary">
+              <i className="material-icons margin-right">save</i> Save
+            </Button>
           </div>
-        </form>
+        </ValidatorForm>
       </Grid>
     );
   }

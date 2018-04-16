@@ -4,7 +4,8 @@ import Grid from 'material-ui/Grid';
 import Typography from 'material-ui/Typography';
 import Header from './common/components/Header';
 import CreateProject from './Project/components/CreateProject';
-import './common/fonts/fonts.css';
+import '../dist/fonts/fonts.css';
+import './common/css/main.scss';
 
 ReactDOM.render(
   <div>

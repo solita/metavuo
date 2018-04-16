@@ -5,6 +5,7 @@ api_version: go1.8
 skip_files:
   - ^(.*/)?.*/node_modules/.*$
   - ^(node_modules/.*)
+  - ^(.*/)?.*/test/.*$
 
   - ^(.*/)?#.*#$
   - ^(.*/)?.*~$

@@ -4,13 +4,13 @@
     "node": true,
     "es6": true
   },
+  "parser": "babel-eslint",
   "plugins": [
     "react",
     "jsx-a11y",
     "import"
   ],
   "extends": "airbnb",
-  "parser": "babel-eslint",
   "rules": {
     "react/prefer-stateless-function": 0,
     "react/forbid-prop-types": 1,

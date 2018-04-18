@@ -7,7 +7,7 @@ Install dependencies by running `npm install`.
 ## Running
 
 #### Development mode
-`npm start` - Starts webpack-dev-server in localhost:8080
+`npm start` - Starts webpack-dev-server in localhost:9000
 
 #### Testing
 `npm test` - Runs all tests

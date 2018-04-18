@@ -25,7 +25,13 @@ handlers:
       login: admin
       static_dir: dist_admin
 
-    - url: /
+    - url: /(.*\..*)
+      secure: always
+      login: admin
+      static_files: dist/\1
+      upload: dist/(.*\..*)
+
+    - url: /.*
       secure: always
       #login: required
       login: admin

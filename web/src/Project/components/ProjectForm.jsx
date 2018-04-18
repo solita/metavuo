@@ -1,4 +1,5 @@
 import React from 'react';
+import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
@@ -6,7 +7,7 @@ import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
 import '../css/ProjectForm.scss';
 
 
-class ProjectForm extends React.Component {
+export class ProjectForm extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -25,18 +26,16 @@ class ProjectForm extends React.Component {
   handleSubmit(event) {
     event.preventDefault();
     axios.post(
-      'http://localhost:8080/api/projects/add',
+      '/api/projects',
       JSON.stringify({
         project_name: this.state.name,
         project_description: this.state.description,
-        project_id: 'ABC123',
-        createdby_email: 'test-mail',
       }),
     )
       .then((res) => {
-        console.log(res);
-        // this.setState({ message: res });
-        this.setState({ name: '', description: '' });
+        // console.log(res);
+        const id = res.data;
+        this.props.history.push(`/projects/${id}`);
       })
       .catch((err) => {
         console.log(err);
@@ -90,4 +89,4 @@ class ProjectForm extends React.Component {
   }
 }
 
-export default ProjectForm;
+export default withRouter(ProjectForm);

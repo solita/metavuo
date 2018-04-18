@@ -8,10 +8,14 @@ module.exports = {
   ],
   output: {
     path: path.join(__dirname, 'dist'),
-    filename: 'bundle.js'
+    filename: 'bundle.js',
+    publicPath: '/',
   },
   devServer: {
-    contentBase: './dist'
+    contentBase: './dist',
+    historyApiFallback: true,
+    port: '9000',
+    proxy: { '/api': { target: 'http://localhost:8080' }}
   },
   resolve: {
     extensions: ['.js', '.jsx']

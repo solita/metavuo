@@ -16,10 +16,12 @@
   },
   "dependencies": {
     "axios": "^0.18.0",
+    "history": "^4.7.2",
     "material-ui": "^1.0.0-beta.41",
     "react": "^16.3.1",
     "react-dom": "^16.3.1",
-    "react-material-ui-form-validator": "^2.0.0-beta.8"
+    "react-material-ui-form-validator": "^2.0.0-beta.8",
+    "react-router-dom": "^4.2.2"
   },
   "devDependencies": {
     "babel-core": "^6.26.0",

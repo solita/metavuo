@@ -26,7 +26,7 @@ class ProjectList extends React.Component {
       <div>
         <h2>Project list page</h2>
         <ul>
-          {this.state.projects.map(project => <li><Link to={`/projects/${project}`}>{project}</Link></li>)}
+          {this.state.projects.map(project => <li><Link to={`/projects/${project.ID}`}>{project.project_name}</Link></li>)}
         </ul>
       </div>
     );

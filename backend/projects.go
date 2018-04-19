@@ -29,7 +29,7 @@ type Project struct {
 }
 
 type ProjectList struct {
-	Projects  []string `json:"projects"`
+	Projects  []Project `json:"projects"`
 	NextBatch string   `json:"next"`
 }
 
@@ -91,7 +91,7 @@ func addProject(c context.Context, project Project) (*datastore.Key, error) {
 }
 
 func createProjectId() string {
-	var idString string = "ABC123"
+	var idString = "ABC123"
 	return idString
 }
 
@@ -118,7 +118,6 @@ func routeProjectsList(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
 	q := datastore.NewQuery(projectKind).
-		KeysOnly().
 		Limit(listPageSize).
 		Order("Created")
 
@@ -137,7 +136,8 @@ func routeProjectsList(w http.ResponseWriter, r *http.Request) {
 	t := q.Run(c)
 
 	for {
-		key, err := t.Next(nil)
+		var p Project
+		key, err := t.Next(&p)
 		if err == datastore.Done {
 			break
 		}
@@ -145,7 +145,10 @@ func routeProjectsList(w http.ResponseWriter, r *http.Request) {
 			log.Errorf(c, "Could not fetch next item: %v", err)
 			break
 		}
-		pList.Projects = append(pList.Projects, strconv.FormatInt(key.IntID(), 10))
+
+		p.ID = key.IntID()
+
+		pList.Projects = append(pList.Projects, p)
 	}
 
 	if len(pList.Projects) == listPageSize {

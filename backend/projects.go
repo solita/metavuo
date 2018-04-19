@@ -3,10 +3,12 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
 
+	"github.com/tealeg/xlsx"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
@@ -30,13 +32,15 @@ type Project struct {
 
 type ProjectList struct {
 	Projects  []Project `json:"projects"`
-	NextBatch string   `json:"next"`
+	NextBatch string    `json:"next"`
 }
 
 func routeProjects(w http.ResponseWriter, r *http.Request) {
 	var head string
 	head, r.URL.Path = shiftPath(r.URL.Path)
 
+	c := appengine.NewContext(r)
+	log.Debugf(c, "%s", string(head))
 	if head == "" {
 		switch r.Method {
 		case http.MethodPost:
@@ -44,6 +48,17 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 			return
 		case http.MethodGet:
 			routeProjectsList(w, r)
+			return
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+			return
+		}
+	}
+
+	if head == "metadata" {
+		switch r.Method {
+		case http.MethodPost:
+			routeProjectMetadataUpload(w, r)
 			return
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
@@ -164,4 +179,30 @@ func routeProjectsList(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(mustJSON(pList))
+}
+
+func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+
+	r.ParseMultipartForm(64 << 20)
+	file, header, _ := r.FormFile("file")
+	description := r.FormValue("description")
+
+	bytes, _ := ioutil.ReadAll(file)
+
+	log.Debugf(c, "%s %s", description, header.Filename)
+
+	xlFile, err := xlsx.OpenBinary(bytes)
+	if err != nil {
+		log.Debugf(c, "Error opening file %s", err)
+	}
+	for _, sheet := range xlFile.Sheets {
+		log.Debugf(c, sheet.Name)
+		for _, row := range sheet.Rows {
+			for _, cell := range row.Cells {
+				text := cell.String()
+				log.Debugf(c, "%s\n", text)
+			}
+		}
+	}
 }

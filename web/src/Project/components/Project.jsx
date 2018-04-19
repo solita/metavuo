@@ -1,5 +1,8 @@
 import React from 'react';
 import axios from 'axios';
+import Paper from 'material-ui/Paper';
+import FileUpload from '../../common/components/FileUpload';
+import '../css/Project.scss';
 
 class Project extends React.Component {
   constructor(props) {
@@ -42,6 +45,10 @@ class Project extends React.Component {
         <p>Description: {this.state.description}</p>
         <p>Project started: {this.state.createdAt}</p>
         <p>Project creator: {this.state.createdbyEmail}</p>
+
+        <Paper className="upload-container">
+          <FileUpload heading="Metadata file upload" url="/api/projects/metadata" />
+        </Paper>
       </div>
     );
   }

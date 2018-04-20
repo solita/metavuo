@@ -18,6 +18,7 @@ import (
 const (
 	projectKind  = "Project"
 	listPageSize = 20
+	statusInProgress = "In Progress"
 )
 
 type Project struct {
@@ -26,6 +27,7 @@ type Project struct {
 	ProjectID   string `json:"project_id"`
 	Description string `json:"project_description"`
 	CreatedBy   string `json:"createdby_email"`
+	Status 		string `json:"project_status"`
 	CreatedByID string
 	Created     time.Time
 }
@@ -102,6 +104,7 @@ func addProject(c context.Context, project Project) (*datastore.Key, error) {
 	project.CreatedByID = user.Current(c).ID
 	project.CreatedBy = user.Current(c).Email
 	project.Created = time.Now().UTC()
+	project.Status = statusInProgress
 	return datastore.Put(c, key, &project)
 }
 

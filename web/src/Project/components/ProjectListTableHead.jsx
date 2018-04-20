@@ -1,11 +1,7 @@
 import React from 'react';
-import { TableCell, TableHead, TableRow} from 'material-ui';
+import { TableCell, TableHead, TableRow } from 'material-ui';
 
 class ProjectListTableHead extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     return (
       <TableHead>

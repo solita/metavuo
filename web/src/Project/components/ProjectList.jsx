@@ -3,10 +3,6 @@ import ProjectListTable from './ProjectListTable';
 
 
 class ProjectList extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
   render() {
     return (
       <div>

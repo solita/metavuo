@@ -1,5 +1,5 @@
 import { Paper, Table, TableBody, TableCell, TableRow } from 'material-ui';
-import {Link} from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import React from 'react';
 import axios from 'axios/index';
 import ProjectListTableHead from './ProjectListTableHead';
@@ -38,7 +38,7 @@ class ProjectListTable extends React.Component {
                 <TableRow key={project.ID}>
                   <TableCell>{project.project_id}</TableCell>
                   <TableCell>
-                      <Link to={`/projects/${project.ID}`}>{project.project_name}</Link>
+                    <Link to={`/projects/${project.ID}`}>{project.project_name}</Link>
                   </TableCell>
                   <TableCell>{new Date(Date.parse(project.Created)).toLocaleDateString()}
                   </TableCell>

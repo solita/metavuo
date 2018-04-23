@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"strconv"
 	"time"
+	"regexp"
 
 	"github.com/tealeg/xlsx"
 	"google.golang.org/appengine"
@@ -145,6 +146,12 @@ func routeProjectsCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	 isValid, error := validateName(c, &project)
+	 if !isValid {
+		 http.Error(w, error, http.StatusBadRequest)
+		 return
+	 }
+
 	key, err := addProject(c, project)
 
 	if err != nil {
@@ -266,4 +273,22 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 	}
+}
+
+func validateName(c context.Context, project *Project) (bool, string) {
+
+	match, _ := regexp.MatchString("^[\\w_-]*$", project.Name)
+
+	if !match {
+		return false, "Project name is invalid"
+	}
+
+	q := datastore.NewQuery(projectKind).KeysOnly().Filter("Name = ", project.Name).Limit(1)
+	t := q.Run(c)
+	key, _ := t.Next(nil)
+
+	if key != nil {
+		return false, "Project name is not unique"
+	}
+	return true, ""
 }

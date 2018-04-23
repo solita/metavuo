@@ -18,8 +18,15 @@ import (
 const (
 	projectKind  = "Project"
 	listPageSize = 20
+)
+
+const (
+	statusComplete   = "Complete"
+	statusArchived   = "Archived"
 	statusInProgress = "In Progress"
 )
+
+var validStatus = []string{statusArchived, statusComplete, statusInProgress}
 
 type Project struct {
 	ID          int64  `datastore:"-"`
@@ -27,7 +34,7 @@ type Project struct {
 	ProjectID   string `json:"project_id"`
 	Description string `json:"project_description"`
 	CreatedBy   string `json:"createdby_email"`
-	Status 		string `json:"project_status"`
+	Status      string `json:"project_status"`
 	CreatedByID string
 	Created     time.Time
 }
@@ -35,6 +42,11 @@ type Project struct {
 type ProjectList struct {
 	Projects  []Project `json:"projects"`
 	NextBatch string    `json:"next"`
+}
+
+type StatusUpdateReq struct {
+	ID        int64
+	NewStatus string
 }
 
 func routeProjects(w http.ResponseWriter, r *http.Request) {
@@ -68,12 +80,58 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	if head == "status" {
+		switch r.Method {
+		case http.MethodPost:
+			routeProjectStatusUpdate(w, r)
+			return
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+			return
+		}
+	}
+
 	id, err := strconv.ParseInt(head, 10, 64)
 	if err != nil {
 		http.Error(w, "", http.StatusNotFound)
 		return
 	}
+
 	routeProjectsGet(w, r, id)
+}
+
+func routeProjectStatusUpdate(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+
+	var p Project
+	var statusUpdate StatusUpdateReq
+
+	dec := json.NewDecoder(r.Body)
+
+	if err := dec.Decode(&statusUpdate); err != nil {
+		log.Errorf(c, "Decoding JSON failed while updating status", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if !arrayContains(validStatus, statusUpdate.NewStatus) {
+		http.Error(w, "", http.StatusBadRequest)
+		return
+	}
+
+	key := datastore.NewKey(c, projectKind, "", statusUpdate.ID, nil)
+	err := datastore.Get(c, key, &p)
+	if err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			http.Error(w, "", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	p.Status = statusUpdate.NewStatus
+	datastore.Put(c, key, &p)
 }
 
 func routeProjectsCreate(w http.ResponseWriter, r *http.Request) {
@@ -82,7 +140,7 @@ func routeProjectsCreate(w http.ResponseWriter, r *http.Request) {
 	var project Project
 
 	if err := dec.Decode(&project); err != nil {
-		log.Errorf(c, "Decoding JSON failed", err)
+		log.Errorf(c, "Decoding JSON failed while creating project", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}

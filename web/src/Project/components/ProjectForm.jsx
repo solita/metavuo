@@ -62,8 +62,8 @@ export class ProjectForm extends React.Component {
             value={this.state.name}
             onChange={this.handleChange}
             margin="normal"
-            validators={['required']}
-            errorMessages={['Name cannot be blank.']}
+            validators={['required', 'matchRegexp:^[\\w_-]*$']}
+            errorMessages={['Name cannot be blank.', 'Only alphanumeric characters including dash and underscore allowed']}
           />
           <TextValidator
             className="form-item form-control"

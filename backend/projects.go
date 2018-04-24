@@ -3,13 +3,11 @@ package main
 import (
 	"context"
 	"encoding/json"
-	"io/ioutil"
 	"net/http"
 	"strconv"
 	"time"
 	"regexp"
 
-	"github.com/tealeg/xlsx"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
@@ -54,8 +52,6 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 	var head string
 	head, r.URL.Path = shiftPath(r.URL.Path)
 
-	c := appengine.NewContext(r)
-	log.Debugf(c, "%s", string(head))
 	if head == "" {
 		switch r.Method {
 		case http.MethodPost:
@@ -247,32 +243,6 @@ func routeProjectsList(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(mustJSON(pList))
-}
-
-func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
-
-	r.ParseMultipartForm(64 << 20)
-	file, header, _ := r.FormFile("file")
-	description := r.FormValue("description")
-
-	bytes, _ := ioutil.ReadAll(file)
-
-	log.Debugf(c, "%s %s", description, header.Filename)
-
-	xlFile, err := xlsx.OpenBinary(bytes)
-	if err != nil {
-		log.Debugf(c, "Error opening file %s", err)
-	}
-	for _, sheet := range xlFile.Sheets {
-		log.Debugf(c, sheet.Name)
-		for _, row := range sheet.Rows {
-			for _, cell := range row.Cells {
-				text := cell.String()
-				log.Debugf(c, "%s\n", text)
-			}
-		}
-	}
 }
 
 func validateName(c context.Context, project *Project) (bool, string) {

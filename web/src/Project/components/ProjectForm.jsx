@@ -3,6 +3,7 @@ import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
+import PropTypes from 'prop-types';
 import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
 import '../css/ProjectForm.scss';
 
@@ -25,6 +26,8 @@ export class ProjectForm extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
+    this.setState({ message: '' });
+
     axios.post(
       '/api/projects',
       JSON.stringify({
@@ -33,13 +36,15 @@ export class ProjectForm extends React.Component {
       }),
     )
       .then((res) => {
-        // console.log(res);
         const id = res.data;
         this.props.history.push(`/projects/${id}`);
       })
       .catch((err) => {
-        console.log(err);
-        // this.setState({ message: err });
+        if (err.response.status === 400) {
+          this.setState({ message: 'form is not valid' });
+        } else {
+          this.setState({ message: 'something went wrong' });
+        }
       });
   }
 
@@ -88,5 +93,9 @@ export class ProjectForm extends React.Component {
     );
   }
 }
+
+ProjectForm.propTypes = {
+  history: PropTypes.object.isRequired,
+};
 
 export default withRouter(ProjectForm);

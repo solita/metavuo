@@ -1,7 +1,9 @@
 import React from 'react';
 import axios from 'axios';
-import Paper from 'material-ui/Paper';
+import Button from 'material-ui/Button';
+import Dialog from 'material-ui/Dialog';
 import { CircularProgress } from 'material-ui/Progress';
+import PropTypes from 'prop-types';
 import FileUpload from '../../common/components/FileUpload';
 import '../css/Project.scss';
 
@@ -16,7 +18,12 @@ class Project extends React.Component {
       createdbyEmail: '',
       fetching: true,
       errorMsg: '',
+      metadataProps: '',
+      dialogOpen: '',
     };
+    this.openDialog = this.openDialog.bind(this);
+    this.closeDialog = this.closeDialog.bind(this);
+    this.passResponse = this.passResponse.bind(this);
   }
 
   componentDidMount() {
@@ -42,6 +49,19 @@ class Project extends React.Component {
       });
   }
 
+  openDialog() {
+    this.setState({ dialogOpen: true });
+  }
+
+  closeDialog() {
+    this.setState({ dialogOpen: false });
+  }
+
+  passResponse(res) {
+    this.closeDialog();
+    this.setState({ metadataProps: res });
+    // TODO set upload button disabled
+  }
 
   render() {
     return (
@@ -60,9 +80,36 @@ class Project extends React.Component {
               <p>Project started: {this.state.createdAt}</p>
               <p>Project creator: {this.state.createdbyEmail}</p>
 
-              <Paper className="upload-container">
-                <FileUpload heading="Metadata file upload" url="/api/projects/metadata" />
-              </Paper>
+              <Button variant="raised" color="primary" onClick={this.openDialog}>
+                Upload metadata file.
+              </Button>
+
+              {this.state.metadataProps
+                ?
+                  <div>
+                    <p>Metadata file metadata:</p>
+                    <p>{JSON.stringify(this.state.metadataProps)}</p>
+                    <Button variant="raised">Accept</Button><Button variant="raised">Discard</Button>
+                  </div>
+                : ''
+              }
+
+              <Dialog
+                open={this.state.dialogOpen}
+                onClose={this.closeDialog}
+                disableBackdropClick
+              >
+                <div className="upload-container">
+                  <Button onClick={this.closeDialog}>
+                    Close<i className="material-icons icon-right">close</i>
+                  </Button>
+                  <FileUpload
+                    heading="Metadata file upload"
+                    url="/api/projects/metadata"
+                    passResponse={this.passResponse}
+                  />
+                </div>
+              </Dialog>
             </div>
           }
         </div>
@@ -71,5 +118,13 @@ class Project extends React.Component {
     );
   }
 }
+
+Project.propTypes = {
+  match: PropTypes.shape({
+    params: PropTypes.shape({
+      id: PropTypes.node,
+    }).isRequired,
+  }).isRequired,
+};
 
 export default Project;

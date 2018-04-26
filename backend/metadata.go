@@ -1,22 +1,27 @@
 package main
 
 import (
-	// "context"
-	// "encoding/json"
 	"io/ioutil"
 	"net/http"
-	// "strconv"
 
 	"github.com/tealeg/xlsx"
 	"google.golang.org/appengine"
-	// "google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
+	"strings"
+	"strconv"
 )
 
 type MetaUploadResponse struct {
-	RowCount	int			`json:"rows"`
-	ColumnCount	int			`json:"cols"`
-	Headers		[]string	`json:"headers"`
+	RowCount    int      `json:"rows"`
+	ColumnCount int      `json:"cols"`
+	Headers     []string `json:"headers"`
+}
+
+var validHeaders = []string{"sample_id", "group", "sample_type", "sample_source"}
+
+type validationErrors struct {
+	Error  string `json:"error"`
+	Detail string `json:"detail"`
 }
 
 func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
@@ -49,29 +54,79 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var response MetaUploadResponse
+	var errList []validationErrors
 
+	if len(xlFile.Sheets) > 1 {
+		var valError = validationErrors{
+			Error:  "The file can only contain one sheet",
+			Detail: "",
+		}
+		errList = append(errList, valError)
+	}
+
+	if len(xlFile.Sheets[0].Rows) == 1 {
+		var valError = validationErrors{
+			Error:  "The file contained no data rows",
+			Detail: "",
+		}
+		errList = append(errList, valError)
+	}
+
+	var response MetaUploadResponse
 	var headers []string
 	for _, sheet := range xlFile.Sheets {
-		log.Debugf(c, "Sheet name: %s", sheet.Name)
-
 		response.RowCount = len(sheet.Rows)
 		response.ColumnCount = len(sheet.Cols)
 		for j, row := range sheet.Rows {
-			log.Debugf(c, "Row: %d", j)
 			for k, cell := range row.Cells {
 				text := cell.String()
+
+				if isMandatoryDataMissing(j, k, text) {
+					var valError = validationErrors{
+						Error:  "The file has an empty row in a mandatory cell",
+						Detail: "Row: " + strconv.Itoa(j+1) + " Cell: " + strconv.Itoa(k+1),
+					}
+					errList = append(errList, valError)
+				}
 
 				if j == 0 {
 					headers = append(headers, text)
 				}
-				log.Debugf(c, "Cell: %d %s\n", k, text)
 			}
 		}
 	}
+	validateHeaders(headers[:4], &errList)
+
+	if len(errList) > 0 {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusBadRequest)
+		w.Write(mustJSON(errList))
+		return
+	}
 
 	log.Debugf(c, "%v", headers)
+
 	response.Headers = headers
 
 	w.Write(mustJSON(response))
+}
+
+// Skip the header row j and check the first four cells k
+func isMandatoryDataMissing(j int, k int, text string) bool {
+	return (j > 0 && k < 4) && len(text) < 1
+}
+
+func validateHeaders(a []string, errList *[]validationErrors) {
+
+	for i := 0; i < len(a); i++ {
+		if len(a) != len(validHeaders) || strings.Compare(a[i], validHeaders[i]) != 0 {
+			var valError = validationErrors{
+				Error: "The file headers are invalid",
+				Detail: "The first four headers are mandatory and must be in the following order: " +
+					strings.Join(validHeaders, ","),
+			}
+			*errList = append(*errList, valError)
+			break
+		}
+	}
 }

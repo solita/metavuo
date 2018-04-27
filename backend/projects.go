@@ -19,13 +19,19 @@ const (
 	listPageSize = 20
 )
 
-const (
-	statusComplete   = "Complete"
-	statusArchived   = "Archived"
-	statusInProgress = "In Progress"
-)
 
-var validStatus = []string{statusArchived, statusComplete, statusInProgress}
+var (
+	inProgress = Status{
+		0, "In Progress",
+	}
+	complete = Status{
+		1, "Complete",
+	}
+	archive = Status{
+		2, "Archived",
+	}
+)
+var statusMap = map[int]Status{0: inProgress, 1 :complete, 2: archive}
 
 type Project struct {
 	ID          int64  `datastore:"-"`
@@ -33,7 +39,7 @@ type Project struct {
 	ProjectID   string `json:"project_id"`
 	Description string `json:"project_description"`
 	CreatedBy   string `json:"createdby_email"`
-	Status      string `json:"project_status"`
+	Status      Status `json:"project_status"`
 	CreatedByID string
 	Created     time.Time
 }
@@ -44,8 +50,12 @@ type ProjectList struct {
 }
 
 type StatusUpdateReq struct {
-	ID        int64
-	NewStatus string
+	ID int64 `json:",string"`
+}
+
+type Status struct {
+	ID   int    `json:",string"`
+	Text string `json:"text"`
 }
 
 func routeProjects(w http.ResponseWriter, r *http.Request) {
@@ -106,13 +116,8 @@ func routeProjectStatusUpdate(w http.ResponseWriter, r *http.Request) {
 	dec := json.NewDecoder(r.Body)
 
 	if err := dec.Decode(&statusUpdate); err != nil {
-		log.Errorf(c, "Decoding JSON failed while updating status", err)
+		log.Errorf(c, "Decoding JSON failed while updating project status", err)
 		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	if !arrayContains(validStatus, statusUpdate.NewStatus) {
-		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
@@ -120,15 +125,25 @@ func routeProjectStatusUpdate(w http.ResponseWriter, r *http.Request) {
 	err := datastore.Get(c, key, &p)
 	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
+			log.Errorf(c, "Entity not found", err)
 			http.Error(w, "", http.StatusNotFound)
 			return
 		}
+		log.Errorf(c, "Error while getting entity", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 
-	p.Status = statusUpdate.NewStatus
+	if p.Status.ID == statusMap[2].ID {
+		http.Error(w, "Project is archived, status can't be changed", http.StatusBadRequest)
+		return
+	}
+
+	p.Status = statusMap[p.Status.ID+1]
+
 	datastore.Put(c, key, &p)
+
+	w.Write(mustJSON(p.Status))
 }
 
 func routeProjectsCreate(w http.ResponseWriter, r *http.Request) {
@@ -142,11 +157,11 @@ func routeProjectsCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	 isValid, error := validateName(c, &project)
-	 if !isValid {
-		 http.Error(w, error, http.StatusBadRequest)
-		 return
-	 }
+	isValid, errorMsg := validateName(c, &project)
+	if !isValid {
+		http.Error(w, errorMsg, http.StatusBadRequest)
+		return
+	}
 
 	key, err := addProject(c, project)
 
@@ -165,7 +180,7 @@ func addProject(c context.Context, project Project) (*datastore.Key, error) {
 	project.CreatedByID = user.Current(c).ID
 	project.CreatedBy = user.Current(c).Email
 	project.Created = time.Now().UTC()
-	project.Status = statusInProgress
+	project.Status = statusMap[0]
 	return datastore.Put(c, key, &project)
 }
 

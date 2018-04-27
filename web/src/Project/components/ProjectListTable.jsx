@@ -16,7 +16,6 @@ class ProjectListTable extends React.Component {
   componentDidMount() {
     axios.get('/api/projects')
       .then((res) => {
-        console.log(res.data);
         this.setState({ projects: res.data.projects });
       })
       .catch((err) => {
@@ -43,7 +42,7 @@ class ProjectListTable extends React.Component {
                   <TableCell>{new Date(Date.parse(project.Created)).toLocaleDateString()}
                   </TableCell>
                   <TableCell>{project.project_description} </TableCell>
-                  <TableCell>{project.project_status} </TableCell>
+                  <TableCell>{project.project_status.text} </TableCell>
                 </TableRow>
               ))}
             </TableBody>

@@ -6,6 +6,7 @@ import { CircularProgress } from 'material-ui/Progress';
 import PropTypes from 'prop-types';
 import FileUpload from '../../common/components/FileUpload';
 import '../css/Project.scss';
+import ProjectStatusButton from './ProjectStatusButton';
 
 class Project extends React.Component {
   constructor(props) {
@@ -19,11 +20,13 @@ class Project extends React.Component {
       fetching: true,
       errorMsg: '',
       metadataProps: '',
-      dialogOpen: '',
+      dialogOpen: false,
+      status: '',
     };
     this.openDialog = this.openDialog.bind(this);
     this.closeDialog = this.closeDialog.bind(this);
     this.passResponse = this.passResponse.bind(this);
+    this.handler = this.handler.bind(this);
   }
 
   componentDidMount() {
@@ -37,6 +40,7 @@ class Project extends React.Component {
           description: project.project_description,
           createdAt: res.data.Created,
           createdbyEmail: res.data.createdby_email,
+          status: res.data.project_status,
           fetching: false,
         });
       })
@@ -48,6 +52,11 @@ class Project extends React.Component {
         }
       });
   }
+
+  handler(value) {
+    this.setState({ status: value });
+  }
+
 
   openDialog() {
     this.setState({ dialogOpen: true });
@@ -79,10 +88,18 @@ class Project extends React.Component {
               <p>Description: {this.state.description}</p>
               <p>Project started: {this.state.createdAt}</p>
               <p>Project creator: {this.state.createdbyEmail}</p>
+              <p>Project status: {this.state.status.text}</p>
 
               <Button variant="raised" color="primary" onClick={this.openDialog}>
-                Upload metadata file.
+                Upload metadata file
               </Button>
+
+              <ProjectStatusButton
+                id={this.props.match.params.id}
+                projectStatus={this.state.status}
+                buttonText={this.state.status.text}
+                handler={this.handler}
+              />
 
               {this.state.metadataProps
                 ?

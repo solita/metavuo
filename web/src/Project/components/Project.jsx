@@ -123,6 +123,7 @@ class Project extends React.Component {
                   <FileUpload
                     heading="Metadata file upload"
                     url="/api/projects/metadata"
+                    id={this.props.match.params.id}
                     passResponse={this.passResponse}
                   />
                 </div>

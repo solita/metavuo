@@ -3,12 +3,14 @@ package main
 import (
 	"io/ioutil"
 	"net/http"
+	"context"
+	"strconv"
+	"strings"
 
 	"github.com/tealeg/xlsx"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
-	"strings"
-	"strconv"
+	"google.golang.org/appengine/datastore"
 )
 
 type MetaUploadResponse struct {
@@ -24,8 +26,22 @@ type validationErrors struct {
 	Detail string `json:"detail"`
 }
 
+type sampleMetaData struct {
+	SampleID     string
+	Group        string
+	SampleType   string
+	SampleSource string
+	CustomField  []string
+}
+
 func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
+	id, err := strconv.ParseInt(r.FormValue("projectId"), 10, 64)
+
+	if err != nil {
+		log.Debugf(c, "Parsing project id failed", err)
+		http.Error(w, "", http.StatusBadRequest)
+	}
 
 	r.ParseMultipartForm(64 << 20)
 	file, header, err := r.FormFile("file")
@@ -74,28 +90,42 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
 
 	var response MetaUploadResponse
 	var headers []string
-	for _, sheet := range xlFile.Sheets {
-		response.RowCount = len(sheet.Rows)
-		response.ColumnCount = len(sheet.Cols)
-		for j, row := range sheet.Rows {
-			for k, cell := range row.Cells {
-				text := cell.String()
+	var metadata []sampleMetaData
+	var sheet = xlFile.Sheets[0]
 
-				if isMandatoryDataMissing(j, k, text) {
-					var valError = validationErrors{
-						Error:  "The file has an empty row in a mandatory cell",
-						Detail: "Row: " + strconv.Itoa(j+1) + " Cell: " + strconv.Itoa(k+1),
-					}
-					errList = append(errList, valError)
-				}
+	response.RowCount = len(sheet.Rows) - 1
+	response.ColumnCount = len(sheet.Cols)
 
-				if j == 0 {
-					headers = append(headers, text)
-				}
-			}
-		}
+
+	for _, cell := range sheet.Rows[0].Cells {
+		text := cell.String()
+
+		headers = append(headers, text)
 	}
 	validateHeaders(headers[:4], &errList)
+
+	for j, row := range sheet.Rows[1:] {
+		var metadataCell sampleMetaData
+
+		for k, cell := range row.Cells {
+			text := cell.String()
+
+			if isMandatoryColumn(k) {
+				setCellValue(k, &metadataCell, &text)
+			} else {
+				metadataCell.CustomField = append(metadataCell.CustomField, text)
+			}
+			if isMandatoryDataMissing(j, k, text) {
+				var valError = validationErrors{
+					Error:  "The file has an empty row in a mandatory cell",
+					Detail: "Row: " + strconv.Itoa(j+1) + " Cell: " + strconv.Itoa(k+1),
+				}
+				errList = append(errList, valError)
+			}
+		}
+
+		metadata = append(metadata, metadataCell)
+	}
 
 	if len(errList) > 0 {
 		w.Header().Set("Content-Type", "application/json")
@@ -104,16 +134,73 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	log.Debugf(c, "%v", metadata)
+
 	log.Debugf(c, "%v", headers)
+
+	var p Project
+	key := datastore.NewKey(c, projectKind, "", id, nil)
+	err = datastore.Get(c, key, &p)
+
+	if err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			http.Error(w, "Project not found", http.StatusNotFound)
+			log.Errorf(c, "", err)
+			return
+		}
+		http.Error(w, "Internal server error", http.StatusInternalServerError)
+		log.Errorf(c, "", err)
+		return
+	}
+
+	err = saveMetadata(metadata, c, key)
+
+	if err != nil {
+		http.Error(w, "Saving metadata failed", http.StatusInternalServerError)
+		log.Errorf(c, "Saving metadata failed", err)
+	}
 
 	response.Headers = headers
 
 	w.Write(mustJSON(response))
 }
+func saveMetadata(a []sampleMetaData, c context.Context, projectKey *datastore.Key) error {
+
+	keys := make([]*datastore.Key, 0, len(a))
+
+	for range a {
+		key := datastore.NewIncompleteKey(c, metaDataKind, projectKey)
+		keys = append(keys, key)
+	}
+
+	return datastore.RunInTransaction(c, func(ctx context.Context) error {
+
+		_, err := datastore.PutMulti(ctx, keys, a)
+
+		return err
+	}, nil)
+}
+
+func setCellValue(k int, metadataCell *sampleMetaData, text *string) {
+	switch k {
+	case 0:
+		metadataCell.SampleID = *text
+	case 1:
+		metadataCell.Group = *text
+	case 2:
+		metadataCell.SampleType = *text
+	case 3:
+		metadataCell.SampleSource = *text
+	}
+}
 
 // Skip the header row j and check the first four cells k
 func isMandatoryDataMissing(j int, k int, text string) bool {
 	return (j > 0 && k < 4) && len(text) < 1
+}
+
+func isMandatoryColumn(k int) bool {
+	return k < 4
 }
 
 func validateHeaders(a []string, errList *[]validationErrors) {

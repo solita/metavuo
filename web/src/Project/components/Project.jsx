@@ -123,8 +123,7 @@ class Project extends React.Component {
 
               {this.state.showMetadata
                 ? <MetadataSummary
-                  rows={this.state.metadataProps.rows}
-                  cols={this.state.metadataProps.cols}
+                  rows={this.state.metadataProps.rowcount}
                   headers={this.state.metadataProps.headers.slice(4)}
                   discardMetadata={this.discardMetadata}
                 />

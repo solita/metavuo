@@ -11,13 +11,9 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/datastore"
+	"time"
+	"google.golang.org/appengine/user"
 )
-
-type MetaUploadResponse struct {
-	RowCount    int      `json:"rows"`
-	ColumnCount int      `json:"cols"`
-	Headers     []string `json:"headers"`
-}
 
 var validHeaders = []string{"sample_id", "group", "sample_type", "sample_source"}
 
@@ -32,6 +28,15 @@ type sampleMetaData struct {
 	SampleType   string
 	SampleSource string
 	CustomField  []string
+}
+
+type MetadataSummary struct {
+	ProjectID    int64     `json:"-"`
+	Headers      []string  `json:"headers"`
+	RowCount     int64     `json:"rowcount"`
+	UploadedAt   time.Time `json:"uploadedat"`
+	UploadedBy   string    `json:"uploadedby"`
+	UploadedByID string    `json:"-"`
 }
 
 func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
@@ -88,14 +93,9 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
 		errList = append(errList, valError)
 	}
 
-	var response MetaUploadResponse
 	var headers []string
 	var metadata []sampleMetaData
 	var sheet = xlFile.Sheets[0]
-
-	response.RowCount = len(sheet.Rows) - 1
-	response.ColumnCount = len(sheet.Cols)
-
 
 	for _, cell := range sheet.Rows[0].Cells {
 		text := cell.String()
@@ -153,32 +153,53 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = saveMetadata(metadata, c, key)
+	summary, err := saveMetadata(metadata, c, headers, id)
 
 	if err != nil {
 		http.Error(w, "Saving metadata failed", http.StatusInternalServerError)
 		log.Errorf(c, "Saving metadata failed", err)
 	}
 
-	response.Headers = headers
-
-	w.Write(mustJSON(response))
+	w.Write(mustJSON(summary))
 }
-func saveMetadata(a []sampleMetaData, c context.Context, projectKey *datastore.Key) error {
+func saveMetadata(a []sampleMetaData, c context.Context, headers []string, id int64) (*MetadataSummary, error) {
 
-	keys := make([]*datastore.Key, 0, len(a))
-
-	for range a {
-		key := datastore.NewIncompleteKey(c, metaDataKind, projectKey)
-		keys = append(keys, key)
+	metadataSummary := MetadataSummary{
+		ProjectID:    id,
+		Headers:      headers,
+		RowCount:     int64(len(a)),
+		UploadedAt:   time.Now().UTC(),
+		UploadedByID: user.Current(c).ID,
+		UploadedBy:   user.Current(c).Email,
 	}
 
-	return datastore.RunInTransaction(c, func(ctx context.Context) error {
+	summaryKey := datastore.NewIncompleteKey(c, summaryKind, nil)
 
-		_, err := datastore.PutMulti(ctx, keys, a)
+	err := datastore.RunInTransaction(c, func(ctx context.Context) error {
+		summaryKey, err := datastore.Put(c, summaryKey, &metadataSummary)
+
+		if err != nil {
+			log.Errorf(c, "Failed to save metadata summary")
+			return err
+		}
+
+		keys := make([]*datastore.Key, 0, len(a))
+
+		for range a {
+			key := datastore.NewIncompleteKey(c, metaDataKind, summaryKey)
+			keys = append(keys, key)
+		}
+
+		_, err = datastore.PutMulti(ctx, keys, a)
 
 		return err
 	}, nil)
+
+	if err != nil {
+		return nil, err
+	}
+
+	return &metadataSummary, nil
 }
 
 func setCellValue(k int, metadataCell *sampleMetaData, text *string) {

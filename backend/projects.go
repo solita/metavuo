@@ -16,10 +16,10 @@ import (
 
 const (
 	projectKind  = "Project"
-	metaDataKind = "Metadata"
+	metaDataKind = "SampleMetadata"
+	summaryKind  = "SampleSummary"
 	listPageSize = 20
 )
-
 
 var (
 	inProgress = Status{
@@ -32,7 +32,7 @@ var (
 		2, "Archived",
 	}
 )
-var statusMap = map[int]Status{0: inProgress, 1 :complete, 2: archive}
+var statusMap = map[int]Status{0: inProgress, 1: complete, 2: archive}
 
 type Project struct {
 	ID          int64  `datastore:"-"`
@@ -43,6 +43,17 @@ type Project struct {
 	Status      Status `json:"project_status"`
 	CreatedByID string
 	Created     time.Time
+}
+
+type ProjectDetailsDTO struct {
+	ID            int64
+	Name          string           `json:"project_name"`
+	ProjectID     string           `json:"project_id"`
+	Description   string           `json:"project_description"`
+	CreatedBy     string           `json:"createdby_email"`
+	Status        Status           `json:"project_status"`
+	Created       time.Time
+	SampleSummary *MetadataSummary `json:"sample_summary"`
 }
 
 type ProjectList struct {
@@ -192,9 +203,9 @@ func createProjectId(c context.Context) string {
 	if err != nil {
 		log.Errorf(c, "Creating project id failed", err)
 	}
-	var letter = string('A' +(time.Now().UTC().Year()-2018))
+	var letter = string('A' + (time.Now().UTC().Year() - 2018))
 	var number = count + 1
-	return letter+strconv.Itoa(number)
+	return letter + strconv.Itoa(number)
 }
 
 func routeProjectsGet(w http.ResponseWriter, r *http.Request, id int64) {
@@ -212,8 +223,34 @@ func routeProjectsGet(w http.ResponseWriter, r *http.Request, id int64) {
 		return
 	}
 
+	var summaryArray []MetadataSummary
+	q := datastore.NewQuery(summaryKind).Filter("ProjectID = ", id).Limit(1)
+	_, err = q.GetAll(c, &summaryArray)
+
+	var summary *MetadataSummary
+
+	if err != nil {
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if len(summaryArray) > 0 {
+		summary = &summaryArray[0]
+	}
+
+	details := ProjectDetailsDTO{
+		ProjectID:     p.ProjectID,
+		ID:            id,
+		Name:          p.Name,
+		Description:   p.Description,
+		CreatedBy:     p.CreatedBy,
+		Status:        p.Status,
+		Created:       p.Created,
+		SampleSummary: summary,
+	}
+
 	w.Header().Set("Content-Type", "application/json")
-	w.Write(mustJSON(p))
+	w.Write(mustJSON(details))
 }
 
 func routeProjectsList(w http.ResponseWriter, r *http.Request) {

@@ -17,7 +17,7 @@ class MetadataSummary extends React.Component {
     return (
       <Grid container className="metadata-container">
         <Grid item xs={10}>
-          <p>The uploaded metadata file has {this.props.rows || '?'} data rows and {this.props.cols || '?'} columns.</p>
+          <p>The uploaded metadata file has {this.props.rows || '?'} data rows.</p>
           <p>Custom fields: {this.props.headers.length > 0
             ? this.props.headers
               .map((h, index) => (index ? ', ' : '') + h)

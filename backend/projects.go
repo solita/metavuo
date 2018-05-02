@@ -16,6 +16,7 @@ import (
 
 const (
 	projectKind  = "Project"
+	metaDataKind = "Metadata"
 	listPageSize = 20
 )
 
@@ -176,7 +177,7 @@ func routeProjectsCreate(w http.ResponseWriter, r *http.Request) {
 
 func addProject(c context.Context, project Project) (*datastore.Key, error) {
 	key := datastore.NewIncompleteKey(c, projectKind, nil)
-	project.ProjectID = createProjectId()
+	project.ProjectID = createProjectId(c)
 	project.CreatedByID = user.Current(c).ID
 	project.CreatedBy = user.Current(c).Email
 	project.Created = time.Now().UTC()
@@ -184,9 +185,16 @@ func addProject(c context.Context, project Project) (*datastore.Key, error) {
 	return datastore.Put(c, key, &project)
 }
 
-func createProjectId() string {
-	var idString = "ABC123"
-	return idString
+func createProjectId(c context.Context) string {
+	currentBOY := time.Date(time.Now().UTC().Year(), 01, 01, 00, 00, 00, 000, time.UTC)
+	q := datastore.NewQuery(projectKind).KeysOnly().Filter("Created >=", currentBOY)
+	count, err := q.Count(c)
+	if err != nil {
+		log.Errorf(c, "Creating project id failed", err)
+	}
+	var letter = string('A' +(time.Now().UTC().Year()-2018))
+	var number = count + 1
+	return letter+strconv.Itoa(number)
 }
 
 func routeProjectsGet(w http.ResponseWriter, r *http.Request, id int64) {

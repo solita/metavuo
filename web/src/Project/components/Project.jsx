@@ -1,5 +1,6 @@
 import React from 'react';
 import axios from 'axios';
+import Grid from 'material-ui/Grid';
 import Button from 'material-ui/Button';
 import Dialog from 'material-ui/Dialog';
 import { CircularProgress } from 'material-ui/Progress';
@@ -7,6 +8,7 @@ import PropTypes from 'prop-types';
 import FileUpload from '../../common/components/FileUpload';
 import '../css/Project.scss';
 import ProjectStatusButton from './ProjectStatusButton';
+import MetadataSummary from './MetadataSummary';
 
 class Project extends React.Component {
   constructor(props) {
@@ -19,20 +21,22 @@ class Project extends React.Component {
       createdbyEmail: '',
       fetching: true,
       errorMsg: '',
-      metadataProps: '',
+      showMetadata: false,
+      metadataProps: {},
       dialogOpen: false,
+      uploadDisabled: false,
       status: '',
     };
     this.openDialog = this.openDialog.bind(this);
     this.closeDialog = this.closeDialog.bind(this);
     this.passResponse = this.passResponse.bind(this);
+    this.discardMetadata = this.discardMetadata.bind(this);
     this.handler = this.handler.bind(this);
   }
 
   componentDidMount() {
     axios.get(`/api/projects/${this.props.match.params.id}`)
       .then((res) => {
-        console.log(res);
         const project = res.data;
         this.setState({
           id: project.project_id,
@@ -68,14 +72,32 @@ class Project extends React.Component {
 
   passResponse(res) {
     this.closeDialog();
-    this.setState({ metadataProps: res });
-    // TODO set upload button disabled
+    console.log(res);
+    this.setState({ metadataProps: res, showMetadata: true, uploadDisabled: true });
+  }
+
+  discardMetadata() {
+    this.setState({ uploadDisabled: false, showMetadata: false });
   }
 
   render() {
     return (
       <div>
-        <h1>Project page</h1>
+        <Grid container>
+          <Grid item xs={6}>
+            <h1>Project page</h1>
+          </Grid>
+          <Grid item xs={6}>
+            {!this.state.fetching && !this.state.errorMsg
+              ? <ProjectStatusButton
+                id={this.props.match.params.id}
+                projectStatus={this.state.status}
+                buttonText={this.state.status.text}
+                handler={this.handler}
+              />
+              : ''}
+          </Grid>
+        </Grid>
 
         {this.state.fetching ? <CircularProgress /> :
         <div>
@@ -86,28 +108,26 @@ class Project extends React.Component {
               <p>Name: {this.state.name}</p>
               <p>Id: {this.state.id}</p>
               <p>Description: {this.state.description}</p>
-              <p>Project started: {this.state.createdAt}</p>
+              <p>Project started: {new Date(this.state.createdAt).toLocaleString()}</p>
               <p>Project creator: {this.state.createdbyEmail}</p>
               <p>Project status: {this.state.status.text}</p>
 
-              <Button variant="raised" color="primary" onClick={this.openDialog}>
-                Upload metadata file
+              <Button
+                variant="raised"
+                color="primary"
+                onClick={this.openDialog}
+                disabled={this.state.uploadDisabled}
+              >
+                <i className="material-icons icon-left">add_circle</i>Add metadata file
               </Button>
 
-              <ProjectStatusButton
-                id={this.props.match.params.id}
-                projectStatus={this.state.status}
-                buttonText={this.state.status.text}
-                handler={this.handler}
-              />
-
-              {this.state.metadataProps
-                ?
-                  <div>
-                    <p>Metadata file metadata:</p>
-                    <p>{JSON.stringify(this.state.metadataProps)}</p>
-                    <Button variant="raised">Accept</Button><Button variant="raised">Discard</Button>
-                  </div>
+              {this.state.showMetadata
+                ? <MetadataSummary
+                  rows={this.state.metadataProps.rows}
+                  cols={this.state.metadataProps.cols}
+                  headers={this.state.metadataProps.headers.slice(4)}
+                  discardMetadata={this.discardMetadata}
+                />
                 : ''
               }
 

@@ -7,3 +7,16 @@ body {
 .content-container {
   padding: 20px;
 }
+
+.icon-right, .margin-left {
+  margin-left: 10px;
+}
+
+.icon-left, .margin-right {
+  margin-right: 10px;
+}
+
+.button-container {
+  display: flex;
+  align-items: center;
+}

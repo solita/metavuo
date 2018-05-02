@@ -29,6 +29,8 @@ class FileUpload extends React.Component {
 
   handleSubmit(event) {
     event.preventDefault();
+    this.setState({ message: '' });
+
     const data = new FormData();
     data.append('file', this.state.file);
     data.append('description', this.state.description);
@@ -36,18 +38,20 @@ class FileUpload extends React.Component {
     axios.post(this.props.url, data, { headers: { 'content-type': 'multipart/form-data' } })
       .then((res) => {
         this.props.passResponse(res.data);
-        // this.setState({ message: JSON.stringify(res.data) });
       })
       .catch((err) => {
-        console.log(err);
-        this.setState({ message: err.response.status });
+        if (err.response.data) {
+          err.response.data.forEach((error) => {
+            this.setState({ message: this.state.message.concat(`${error.error}: ${error.detail} `) });
+          });
+        }
       });
   }
 
   render() {
     return (
       <div className="form-container">
-        {this.state.message}
+        <p className="form-errors">{this.state.message}</p>
         <h2>{this.props.heading}</h2>
         <form
           id="form-object"

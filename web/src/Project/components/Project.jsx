@@ -2,36 +2,35 @@ import React from 'react';
 import axios from 'axios';
 import Grid from 'material-ui/Grid';
 import Button from 'material-ui/Button';
-import Dialog from 'material-ui/Dialog';
 import { CircularProgress } from 'material-ui/Progress';
 import PropTypes from 'prop-types';
-import FileUpload from '../../common/components/FileUpload';
 import '../css/Project.scss';
 import ProjectStatusButton from './ProjectStatusButton';
 import MetadataSummary from './MetadataSummary';
+import MetadataDialog from './MetadataDialog';
 
 class Project extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      fetching: true,
+      errorMsg: '',
       id: '',
       name: '',
       description: '',
       createdAt: '',
       createdbyEmail: '',
-      fetching: true,
-      errorMsg: '',
+      status: '',
       showMetadata: false,
       metadataProps: {},
       dialogOpen: false,
-      uploadDisabled: false,
-      status: '',
+
     };
     this.openDialog = this.openDialog.bind(this);
     this.closeDialog = this.closeDialog.bind(this);
     this.passResponse = this.passResponse.bind(this);
     this.discardMetadata = this.discardMetadata.bind(this);
-    this.handler = this.handler.bind(this);
+    this.setStatus = this.setStatus.bind(this);
   }
 
   componentDidMount() {
@@ -47,6 +46,13 @@ class Project extends React.Component {
           status: res.data.project_status,
           fetching: false,
         });
+        if (res.data.sample_summary !== null) {
+          console.log(res.data.sample_summary);
+          this.setState({
+            showMetadata: true,
+            metadataProps: res.data.sample_summary,
+          });
+        }
       })
       .catch((err) => {
         if (err.response.status === 404) {
@@ -57,10 +63,9 @@ class Project extends React.Component {
       });
   }
 
-  handler(value) {
+  setStatus(value) {
     this.setState({ status: value });
   }
-
 
   openDialog() {
     this.setState({ dialogOpen: true });
@@ -73,11 +78,11 @@ class Project extends React.Component {
   passResponse(res) {
     this.closeDialog();
     console.log(res);
-    this.setState({ metadataProps: res, showMetadata: true, uploadDisabled: true });
+    this.setState({ metadataProps: res, showMetadata: true });
   }
 
   discardMetadata() {
-    this.setState({ uploadDisabled: false, showMetadata: false });
+    this.setState({ showMetadata: false });
   }
 
   render() {
@@ -93,7 +98,7 @@ class Project extends React.Component {
                 id={this.props.match.params.id}
                 projectStatus={this.state.status}
                 buttonText={this.state.status.text}
-                handler={this.handler}
+                handler={this.setStatus}
               />
               : ''}
           </Grid>
@@ -112,41 +117,26 @@ class Project extends React.Component {
               <p>Project creator: {this.state.createdbyEmail}</p>
               <p>Project status: {this.state.status.text}</p>
 
-              <Button
-                variant="raised"
-                color="primary"
-                onClick={this.openDialog}
-                disabled={this.state.uploadDisabled}
-              >
-                <i className="material-icons icon-left">add_circle</i>Add metadata file
-              </Button>
-
               {this.state.showMetadata
                 ? <MetadataSummary
-                  rows={this.state.metadataProps.rowcount}
+                  rowcount={this.state.metadataProps.rowcount}
                   headers={this.state.metadataProps.headers.slice(4)}
+                  uploadedat={this.state.metadataProps.uploadedat}
+                  uploadedby={this.state.metadataProps.uploadedby}
                   discardMetadata={this.discardMetadata}
                 />
-                : ''
+                :
+                <Button variant="raised" color="primary" onClick={this.openDialog}>
+                  <i className="material-icons icon-left">add_circle</i>Add metadata file
+                </Button>
               }
 
-              <Dialog
-                open={this.state.dialogOpen}
-                onClose={this.closeDialog}
-                disableBackdropClick
-              >
-                <div className="upload-container">
-                  <Button onClick={this.closeDialog}>
-                    Close<i className="material-icons icon-right">close</i>
-                  </Button>
-                  <FileUpload
-                    heading="Metadata file upload"
-                    url="/api/projects/metadata"
-                    id={this.props.match.params.id}
-                    passResponse={this.passResponse}
-                  />
-                </div>
-              </Dialog>
+              <MetadataDialog
+                dialogOpen={this.state.dialogOpen}
+                projectId={this.props.match.params.id}
+                closeDialog={this.closeDialog}
+                passResponse={this.passResponse}
+              />
             </div>
           }
         </div>

@@ -13,6 +13,7 @@ class FileUpload extends React.Component {
       description: '',
       message: '',
       id: props.id,
+      hasFile: false,
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.addFile = this.addFile.bind(this);
@@ -24,7 +25,7 @@ class FileUpload extends React.Component {
   }
 
   addFile(event) {
-    this.setState({ file: event.target.files[0] });
+    this.setState({ file: event.target.files[0], hasFile: true });
   }
 
   handleSubmit(event) {
@@ -60,17 +61,21 @@ class FileUpload extends React.Component {
         >
           <input type="file" name="file" className="form-item" onChange={this.addFile} />
 
-          <TextField
-            name="description"
-            label="Description"
-            className="form-item"
-            value={this.state.description}
-            margin="normal"
-            onChange={this.handleChange}
-          />
+          {this.props.askDescription
+          ?
+            <TextField
+              name="description"
+              label="Description"
+              className="form-item"
+              value={this.state.description}
+              margin="normal"
+              onChange={this.handleChange}
+            />
+            : ''
+          }
 
           <div className="form-item">
-            <Button type="submit" id="submit-project" variant="raised" color="primary">
+            <Button type="submit" id="submit-project" variant="raised" color="primary" disabled={!this.state.hasFile}>
               Upload<i className="material-icons icon-right">file_upload</i>
             </Button>
           </div>
@@ -83,11 +88,13 @@ class FileUpload extends React.Component {
 FileUpload.propTypes = {
   heading: PropTypes.string,
   url: PropTypes.string.isRequired,
+  askDescription: PropTypes.bool,
   passResponse: PropTypes.func.isRequired,
 };
 
 FileUpload.defaultProps = {
   heading: '',
+  askDescription: true,
 };
 
 export default FileUpload;

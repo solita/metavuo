@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import React from 'react';
 import axios from 'axios/index';
 import ProjectListTableHead from './ProjectListTableHead';
-
+import convertStatus from '../../common/components/ProjectStatusConverter';
 
 class ProjectListTable extends React.Component {
   constructor(props) {
@@ -42,7 +42,7 @@ class ProjectListTable extends React.Component {
                   <TableCell>{new Date(Date.parse(project.Created)).toLocaleDateString()}
                   </TableCell>
                   <TableCell>{project.project_description} </TableCell>
-                  <TableCell>{project.project_status.text} </TableCell>
+                  <TableCell>{convertStatus(project.project_status)} </TableCell>
                 </TableRow>
               ))}
             </TableBody>

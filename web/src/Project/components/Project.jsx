@@ -8,6 +8,7 @@ import '../css/Project.scss';
 import ProjectStatusButton from './ProjectStatusButton';
 import MetadataSummary from './MetadataSummary';
 import MetadataDialog from './MetadataDialog';
+import convertStatus from '../../common/components/ProjectStatusConverter';
 
 class Project extends React.Component {
   constructor(props) {
@@ -115,7 +116,7 @@ class Project extends React.Component {
               <p>Description: {this.state.description}</p>
               <p>Project started: {new Date(this.state.createdAt).toLocaleString()}</p>
               <p>Project creator: {this.state.createdbyEmail}</p>
-              <p>Project status: {this.state.status.text}</p>
+              <p>Project status: {convertStatus(this.state.status)}</p>
 
               {this.state.showMetadata
                 ? <MetadataSummary

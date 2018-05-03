@@ -21,26 +21,22 @@ const (
 	listPageSize = 20
 )
 
-var (
-	inProgress = Status{
-		0, "In Progress",
-	}
-	complete = Status{
-		1, "Complete",
-	}
-	archive = Status{
-		2, "Archived",
-	}
+type ProjectStatus int
+
+const (
+	Unknown    ProjectStatus = iota
+	InProgress
+	Complete
+	Archived
 )
-var statusMap = map[int]Status{0: inProgress, 1: complete, 2: archive}
 
 type Project struct {
-	ID          int64  `datastore:"-"`
-	Name        string `json:"project_name"`
-	ProjectID   string `json:"project_id"`
-	Description string `json:"project_description"`
-	CreatedBy   string `json:"createdby_email"`
-	Status      Status `json:"project_status"`
+	ID          int64         `datastore:"-"`
+	Name        string        `json:"project_name"`
+	ProjectID   string        `json:"project_id"`
+	Description string        `json:"project_description"`
+	CreatedBy   string        `json:"createdby_email"`
+	Status      ProjectStatus `json:"project_status"`
 	CreatedByID string
 	Created     time.Time
 }
@@ -51,7 +47,7 @@ type ProjectDetailsDTO struct {
 	ProjectID     string           `json:"project_id"`
 	Description   string           `json:"project_description"`
 	CreatedBy     string           `json:"createdby_email"`
-	Status        Status           `json:"project_status"`
+	Status        ProjectStatus    `json:"project_status"`
 	Created       time.Time
 	SampleSummary *MetadataSummary `json:"sample_summary"`
 }
@@ -146,12 +142,12 @@ func routeProjectStatusUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if p.Status.ID == statusMap[2].ID {
+	if p.Status == Archived {
 		http.Error(w, "Project is archived, status can't be changed", http.StatusBadRequest)
 		return
 	}
 
-	p.Status = statusMap[p.Status.ID+1]
+	p.Status = p.Status + 1
 
 	datastore.Put(c, key, &p)
 
@@ -182,7 +178,6 @@ func routeProjectsCreate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
-
 	w.Write(mustJSON(strconv.FormatInt(key.IntID(), 10)))
 }
 
@@ -192,7 +187,7 @@ func addProject(c context.Context, project Project) (*datastore.Key, error) {
 	project.CreatedByID = user.Current(c).ID
 	project.CreatedBy = user.Current(c).Email
 	project.Created = time.Now().UTC()
-	project.Status = statusMap[0]
+	project.Status = InProgress
 	return datastore.Put(c, key, &project)
 }
 
@@ -255,7 +250,6 @@ func routeProjectsGet(w http.ResponseWriter, r *http.Request, id int64) {
 
 func routeProjectsList(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
-
 	q := datastore.NewQuery(projectKind).
 		Limit(listPageSize).
 		Order("Created")

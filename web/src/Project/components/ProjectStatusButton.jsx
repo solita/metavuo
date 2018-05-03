@@ -13,18 +13,18 @@ class ProjectStatusButton extends React.Component {
       handler: props.handler,
     };
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.setButtonText(Number.parseInt(props.projectStatus.ID, 10));
+    this.setButtonText(Number.parseInt(props.projectStatus, 10));
   }
 
   setButtonText(id) {
     switch (id) {
-      case 0:
+      case 1:
         this.state.buttonText = 'Complete Project';
         break;
-      case 1:
+      case 2:
         this.state.buttonText = 'Archive Project';
         break;
-      case 2:
+      case 3:
         this.state.isEnabled = false;
         this.state.buttonText = 'Archived';
         break;
@@ -40,7 +40,7 @@ class ProjectStatusButton extends React.Component {
       '/api/projects/status',
       JSON.stringify({ id: this.state.id }),
     ).then((res) => {
-      this.setButtonText(Number.parseInt(res.data.ID, 10));
+      this.setButtonText(Number.parseInt(res.data, 10));
       this.setState({ projectStatus: res.data });
       this.state.handler(this.state.projectStatus);
     });

@@ -176,17 +176,17 @@ func saveMetadata(a []sampleMetaData, c context.Context, headers []string, id in
 	summaryKey := datastore.NewIncompleteKey(c, summaryKind, nil)
 
 	err := datastore.RunInTransaction(c, func(ctx context.Context) error {
-		summaryKey, err := datastore.Put(c, summaryKey, &metadataSummary)
+		summaryKey, err := datastore.Put(ctx, summaryKey, &metadataSummary)
 
 		if err != nil {
-			log.Errorf(c, "Failed to save metadata summary")
+			log.Errorf(ctx, "Failed to save metadata summary")
 			return err
 		}
 
 		keys := make([]*datastore.Key, 0, len(a))
 
 		for range a {
-			key := datastore.NewIncompleteKey(c, metaDataKind, summaryKey)
+			key := datastore.NewIncompleteKey(ctx, metaDataKind, summaryKey)
 			keys = append(keys, key)
 		}
 

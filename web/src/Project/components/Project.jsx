@@ -2,10 +2,11 @@ import React from 'react';
 import axios from 'axios';
 import Grid from 'material-ui/Grid';
 import Button from 'material-ui/Button';
-import CircularProgress from 'material-ui/Progress/CircularProgress';
+import { CircularProgress } from 'material-ui/Progress';
 import PropTypes from 'prop-types';
 import ProjectStatusButton from './ProjectStatusButton';
 import MetadataSummary from './MetadataSummary';
+import StorageFileUpload from '../../common/components/StorageFileUpload';
 import ConfirmDialog from '../../common/components/ConfirmDialog';
 import UploadDialog from '../../common/components/UploadDialog';
 import ConvertStatus from '../../common/components/ProjectStatusConverter';
@@ -27,10 +28,13 @@ class Project extends React.Component {
       metadataProps: {},
       dialogOpen: false,
       delDialogOpen: false,
+      fileDialogOpen: false,
 
     };
     this.openDialog = this.openDialog.bind(this);
     this.closeDialog = this.closeDialog.bind(this);
+    this.openFileDialog = this.openFileDialog.bind(this);
+    this.closeFileDialog = this.closeFileDialog.bind(this);
     this.passResponse = this.passResponse.bind(this);
     this.discardMetadata = this.discardMetadata.bind(this);
     this.setStatus = this.setStatus.bind(this);
@@ -105,6 +109,14 @@ class Project extends React.Component {
     this.closeDelDialog();
   }
 
+  openFileDialog() {
+    this.setState({ fileDialogOpen: true });
+  }
+
+  closeFileDialog() {
+    this.setState({ fileDialogOpen: false });
+  }
+
   render() {
     return (
       <div>
@@ -137,7 +149,7 @@ class Project extends React.Component {
 
               {this.state.showMetadata
                 ? <MetadataSummary
-                  rowCount={this.state.metadataProps.rowCount}
+                  rowCount={this.state.metadataProps.rowcount}
                   headers={this.state.metadataProps.headers.slice(4)}
                   uploadedat={this.state.metadataProps.uploadedat}
                   uploadedby={this.state.metadataProps.uploadedby}
@@ -149,6 +161,14 @@ class Project extends React.Component {
                   <i className="material-icons icon-left">add_circle</i>Add metadata file
                 </Button>
               }
+              <Button variant="raised" color="primary" onClick={this.openFileDialog} style={{ margin: 12 }}>
+                <i className="material-icons icon-left">add_circle</i>Add file
+              </Button>
+
+              <StorageFileUpload
+                dialogOpen={this.state.fileDialogOpen}
+                closeFileDialog={this.closeFileDialog}
+              />
 
               <UploadDialog
                 dialogOpen={this.state.dialogOpen}

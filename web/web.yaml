@@ -33,13 +33,11 @@ handlers:
 
     - url: /.*
       secure: always
-      #login: required
       login: admin
       static_files: dist/index.html
       upload: dist/index\.html
 
     - url: /
       secure: always
-      #login: required
       login: admin
       static_dir: dist/

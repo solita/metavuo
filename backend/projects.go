@@ -4,9 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"regexp"
 	"strconv"
 	"time"
-	"regexp"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
@@ -24,7 +24,7 @@ const (
 type ProjectStatus int
 
 const (
-	Unknown    ProjectStatus = iota
+	Unknown ProjectStatus = iota
 	InProgress
 	Complete
 	Archived
@@ -43,11 +43,11 @@ type Project struct {
 
 type ProjectDetailsDTO struct {
 	ID            int64
-	Name          string           `json:"project_name"`
-	ProjectID     string           `json:"project_id"`
-	Description   string           `json:"project_description"`
-	CreatedBy     string           `json:"createdby_email"`
-	Status        ProjectStatus    `json:"project_status"`
+	Name          string        `json:"project_name"`
+	ProjectID     string        `json:"project_id"`
+	Description   string        `json:"project_description"`
+	CreatedBy     string        `json:"createdby_email"`
+	Status        ProjectStatus `json:"project_status"`
 	Created       time.Time
 	SampleSummary *MetadataSummary `json:"sample_summary"`
 }
@@ -55,10 +55,6 @@ type ProjectDetailsDTO struct {
 type ProjectList struct {
 	Projects  []Project `json:"projects"`
 	NextBatch string    `json:"next"`
-}
-
-type StatusUpdateReq struct {
-	ID int64 `json:",string"`
 }
 
 type Status struct {
@@ -85,14 +81,8 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if head == "metadata" {
-		switch r.Method {
-		case http.MethodPost:
-			routeProjectMetadataUpload(w, r)
-			return
-		default:
-			http.Error(w, "", http.StatusMethodNotAllowed)
-			return
-		}
+		routeProjectMetadata(w, r)
+		return
 	}
 
 	if head == "status" {
@@ -118,19 +108,16 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 func routeProjectStatusUpdate(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
-	var p Project
-	var statusUpdate StatusUpdateReq
-
-	dec := json.NewDecoder(r.Body)
-
-	if err := dec.Decode(&statusUpdate); err != nil {
-		log.Errorf(c, "Decoding JSON failed while updating project status", err)
-		http.Error(w, "", http.StatusInternalServerError)
-		return
+	projectId, err := strconv.ParseInt(r.FormValue("id"), 10, 64)
+	if err != nil {
+		log.Errorf(c, "Parsing project id failed", err)
+		http.Error(w, "", http.StatusBadRequest)
 	}
 
-	key := datastore.NewKey(c, projectKind, "", statusUpdate.ID, nil)
-	err := datastore.Get(c, key, &p)
+	key := datastore.NewKey(c, projectKind, "", projectId, nil)
+
+	var p Project
+	err = datastore.Get(c, key, &p)
 	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
 			log.Errorf(c, "Entity not found", err)
@@ -258,7 +245,7 @@ func routeProjectsList(w http.ResponseWriter, r *http.Request) {
 	if cursorStr != "" {
 		cursor, err := datastore.DecodeCursor(cursorStr)
 		if err != nil {
-			log.Infof(c, "Could not decode cursor '%v': '%v'", cursorStr, err)
+			log.Errorf(c, "Could not decode cursor '%v': '%v'", cursorStr, err)
 			http.Error(w, "", http.StatusBadRequest)
 			return
 		}

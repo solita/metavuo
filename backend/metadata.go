@@ -1,17 +1,19 @@
 package main
 
 import (
+	"context"
 	"io/ioutil"
 	"net/http"
-	"context"
+	"net/url"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/tealeg/xlsx"
 	"google.golang.org/appengine"
-	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/datastore"
-	"time"
+	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/taskqueue"
 	"google.golang.org/appengine/user"
 )
 
@@ -39,38 +41,66 @@ type MetadataSummary struct {
 	UploadedByID string    `json:"-"`
 }
 
+func routeProjectMetadata(w http.ResponseWriter, r *http.Request) {
+	var head string
+	head, r.URL.Path = shiftPath(r.URL.Path)
+
+	if head == "" {
+		switch r.Method {
+		case http.MethodPost:
+			routeProjectMetadataUpload(w, r)
+			return
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+			return
+		}
+	}
+
+	id, err := strconv.ParseInt(head, 10, 64)
+	if err != nil {
+		http.Error(w, "", http.StatusNotFound)
+		return
+	}
+
+	switch r.Method {
+	case http.MethodDelete:
+		routeProjectMetadataDelete(w, r, id)
+		return
+	default:
+		http.Error(w, "", http.StatusMethodNotAllowed)
+		return
+	}
+}
+
 func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
-	id, err := strconv.ParseInt(r.FormValue("projectId"), 10, 64)
 
+	id, err := strconv.ParseInt(r.FormValue("projectId"), 10, 64)
 	if err != nil {
-		log.Debugf(c, "Parsing project id failed", err)
+		log.Errorf(c, "Parsing project id failed", err)
 		http.Error(w, "", http.StatusBadRequest)
 	}
 
 	r.ParseMultipartForm(64 << 20)
-	file, header, err := r.FormFile("file")
-	description := r.FormValue("description")
+	file, _, err := r.FormFile("file")
+	// description := r.FormValue("description")
 
 	if err != nil {
-		log.Debugf(c, "Error getting file: %s", err)
+		log.Errorf(c, "Error getting file: %s", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 
 	bytes, err := ioutil.ReadAll(file)
-
 	if err != nil {
-		log.Debugf(c, "Error reading file: %s", err)
+		log.Errorf(c, "Error reading file: %s", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 
-	log.Debugf(c, "File name: %s, description: %s", header.Filename, description)
-
 	xlFile, err := xlsx.OpenBinary(bytes)
 	if err != nil {
-		log.Debugf(c, "Error opening xlsx-file %s", err)
+		log.Errorf(c, "Error opening xlsx-file %s", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -134,10 +164,6 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Debugf(c, "%v", metadata)
-
-	log.Debugf(c, "%v", headers)
-
 	var p Project
 	key := datastore.NewKey(c, projectKind, "", id, nil)
 	err = datastore.Get(c, key, &p)
@@ -162,6 +188,7 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
 
 	w.Write(mustJSON(summary))
 }
+
 func saveMetadata(a []sampleMetaData, c context.Context, headers []string, id int64) (*MetadataSummary, error) {
 
 	metadataSummary := MetadataSummary{
@@ -237,4 +264,53 @@ func validateHeaders(a []string, errList *[]validationErrors) {
 			break
 		}
 	}
+}
+
+func routeProjectMetadataDelete(w http.ResponseWriter, r *http.Request, projectId int64) {
+	c := appengine.NewContext(r)
+
+	q := datastore.NewQuery(summaryKind).Filter("ProjectID = ", projectId).Limit(1).KeysOnly()
+	metaDataKeyArray, err := q.GetAll(c, nil)
+
+	if err != nil {
+		log.Errorf(c, "Error while getting project metadata to be removed: %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if len(metaDataKeyArray) > 0 {
+		metaDataKey := &*metaDataKeyArray[0]
+		encodedMetaDataKey := metaDataKey.Encode()
+
+		err = datastore.RunInTransaction(c, func(c context.Context) error {
+			// Delete samples
+			t := taskqueue.NewPOSTTask("/api/tasks/remove-sample-metadata",
+				url.Values{"cursor": {""}, "metadataKey": {encodedMetaDataKey}})
+			_, err := taskqueue.Add(c, t, "")
+			if err != nil {
+				log.Criticalf(c, "Could not add task to queue: %v", err)
+				return err
+			}
+
+			// Delete metadata
+			err = datastore.Delete(c, metaDataKey)
+			if err != nil {
+				log.Errorf(c, "Error while removing metatada summayr: %v", err)
+				return err
+			}
+			return err
+		}, nil)
+
+		if err != nil {
+			log.Errorf(c, "Transaction error: %v", err)
+			http.Error(w, "Internal Server Error", 500)
+			return
+		}
+	} else {
+		log.Errorf(c, "No metadata found")
+		http.Error(w, "Internal Server Error", 500)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent) // 204
 }

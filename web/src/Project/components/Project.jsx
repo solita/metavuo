@@ -2,13 +2,13 @@ import React from 'react';
 import axios from 'axios';
 import Grid from 'material-ui/Grid';
 import Button from 'material-ui/Button';
-import { CircularProgress } from 'material-ui/Progress';
+import CircularProgress from 'material-ui/Progress/CircularProgress';
 import PropTypes from 'prop-types';
-import '../css/Project.scss';
 import ProjectStatusButton from './ProjectStatusButton';
 import MetadataSummary from './MetadataSummary';
-import MetadataDialog from './MetadataDialog';
-import convertStatus from '../../common/components/ProjectStatusConverter';
+import ConfirmDialog from '../../common/components/ConfirmDialog';
+import UploadDialog from '../../common/components/UploadDialog';
+import ConvertStatus from '../../common/components/ProjectStatusConverter';
 
 class Project extends React.Component {
   constructor(props) {
@@ -23,8 +23,10 @@ class Project extends React.Component {
       createdbyEmail: '',
       status: '',
       showMetadata: false,
+      metadataError: '',
       metadataProps: {},
       dialogOpen: false,
+      delDialogOpen: false,
 
     };
     this.openDialog = this.openDialog.bind(this);
@@ -32,6 +34,8 @@ class Project extends React.Component {
     this.passResponse = this.passResponse.bind(this);
     this.discardMetadata = this.discardMetadata.bind(this);
     this.setStatus = this.setStatus.bind(this);
+    this.discardMetadataClick = this.discardMetadataClick.bind(this);
+    this.closeDelDialog = this.closeDelDialog.bind(this);
   }
 
   componentDidMount() {
@@ -48,7 +52,6 @@ class Project extends React.Component {
           fetching: false,
         });
         if (res.data.sample_summary !== null) {
-          console.log(res.data.sample_summary);
           this.setState({
             showMetadata: true,
             metadataProps: res.data.sample_summary,
@@ -76,14 +79,30 @@ class Project extends React.Component {
     this.setState({ dialogOpen: false });
   }
 
+  closeDelDialog() {
+    this.setState({ delDialogOpen: false });
+  }
+
   passResponse(res) {
     this.closeDialog();
-    console.log(res);
     this.setState({ metadataProps: res, showMetadata: true });
   }
 
+  discardMetadataClick() {
+    this.setState({ delDialogOpen: true });
+  }
+
   discardMetadata() {
-    this.setState({ showMetadata: false });
+    axios.delete(`/api/projects/metadata/${this.props.match.params.id}`)
+      .then((res) => {
+        if (res.status === 204) {
+          this.setState({ metadataProps: {}, showMetadata: false });
+        }
+      })
+      .catch((err) => {
+        this.setState({ metadataError: `Metadata could not be removed: ${err}` });
+      });
+    this.closeDelDialog();
   }
 
   render() {
@@ -94,14 +113,12 @@ class Project extends React.Component {
             <h1>Project page</h1>
           </Grid>
           <Grid item xs={6}>
-            {!this.state.fetching && !this.state.errorMsg
-              ? <ProjectStatusButton
-                id={this.props.match.params.id}
+            {!this.state.fetching && !this.state.errorMsg &&
+              <ProjectStatusButton
+                projectId={this.props.match.params.id}
                 projectStatus={this.state.status}
-                buttonText={this.state.status.text}
-                handler={this.setStatus}
-              />
-              : ''}
+                setStatus={this.setStatus}
+              />}
           </Grid>
         </Grid>
 
@@ -116,15 +133,16 @@ class Project extends React.Component {
               <p>Description: {this.state.description}</p>
               <p>Project started: {new Date(this.state.createdAt).toLocaleString()}</p>
               <p>Project creator: {this.state.createdbyEmail}</p>
-              <p>Project status: {convertStatus(this.state.status)}</p>
+              <p>Project status: {ConvertStatus(this.state.status)}</p>
 
               {this.state.showMetadata
                 ? <MetadataSummary
-                  rowcount={this.state.metadataProps.rowcount}
+                  rowCount={this.state.metadataProps.rowCount}
                   headers={this.state.metadataProps.headers.slice(4)}
                   uploadedat={this.state.metadataProps.uploadedat}
                   uploadedby={this.state.metadataProps.uploadedby}
-                  discardMetadata={this.discardMetadata}
+                  metadataError={this.state.metadataError}
+                  discardMetadata={this.discardMetadataClick}
                 />
                 :
                 <Button variant="raised" color="primary" onClick={this.openDialog}>
@@ -132,11 +150,21 @@ class Project extends React.Component {
                 </Button>
               }
 
-              <MetadataDialog
+              <UploadDialog
                 dialogOpen={this.state.dialogOpen}
                 projectId={this.props.match.params.id}
+                titleText="Metadata file upload"
+                url="/api/projects/metadata"
                 closeDialog={this.closeDialog}
                 passResponse={this.passResponse}
+              />
+              <ConfirmDialog
+                dialogOpen={this.state.delDialogOpen}
+                closeDialog={this.closeDelDialog}
+                titleText="Remove metadata"
+                contentText="Are you sure you want to remove metadata permanently?"
+                action={this.discardMetadata}
+                actionButtonText="Delete metadata"
               />
             </div>
           }

@@ -43,7 +43,7 @@ class FileUpload extends React.Component {
       .catch((err) => {
         if (err.response.data) {
           err.response.data.forEach((error) => {
-            this.setState({ message: this.state.message.concat(`${error.error}: ${error.detail} `) });
+            this.setState({ message: this.state.message.concat(`${error.error}:\n${error.detail}\n`) });
           });
         }
       });
@@ -51,9 +51,8 @@ class FileUpload extends React.Component {
 
   render() {
     return (
-      <div className="form-container">
+      <div>
         <p className="form-errors">{this.state.message}</p>
-        <h2>{this.props.heading}</h2>
         <form
           id="form-object"
           autoComplete="off"
@@ -74,11 +73,9 @@ class FileUpload extends React.Component {
             : ''
           }
 
-          <div className="form-item">
-            <Button type="submit" id="submit-project" variant="raised" color="primary" disabled={!this.state.hasFile}>
-              Upload<i className="material-icons icon-right">file_upload</i>
-            </Button>
-          </div>
+          <Button type="submit" id="submit-project" variant="raised" color="primary" disabled={!this.state.hasFile}>
+            Upload<i className="material-icons icon-right">file_upload</i>
+          </Button>
         </form>
       </div>
     );
@@ -86,14 +83,13 @@ class FileUpload extends React.Component {
 }
 
 FileUpload.propTypes = {
-  heading: PropTypes.string,
+  id: PropTypes.string.isRequired,
   url: PropTypes.string.isRequired,
   askDescription: PropTypes.bool,
   passResponse: PropTypes.func.isRequired,
 };
 
 FileUpload.defaultProps = {
-  heading: '',
   askDescription: true,
 };
 

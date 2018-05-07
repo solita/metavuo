@@ -26,6 +26,11 @@ func routeApi(w http.ResponseWriter, r *http.Request) {
 	case "projects":
 		routeProjects(w, r)
 		return
+
+	// /api/tasks/
+	case "tasks":
+		routeTasks(w, r)
+		return
 	}
 
 	http.Error(w, "", http.StatusNotFound)

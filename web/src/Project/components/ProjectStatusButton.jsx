@@ -1,49 +1,47 @@
 import React from 'react';
 import { Button } from 'material-ui';
 import axios from 'axios';
+import PropTypes from 'prop-types';
 
 class ProjectStatusButton extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       buttonText: '',
-      projectStatus: props.projectStatus,
-      id: props.id,
-      isEnabled: props.projectStatus.text !== 'Archived',
-      handler: props.handler,
+      isEnabled: true,
     };
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.setButtonText(Number.parseInt(props.projectStatus, 10));
+  }
+
+  componentDidMount() {
+    this.setButtonText(this.props.projectStatus);
   }
 
   setButtonText(id) {
     switch (id) {
       case 1:
-        this.state.buttonText = 'Complete Project';
+        this.setState({ isEnabled: true, buttonText: 'Complete Project' });
         break;
       case 2:
-        this.state.buttonText = 'Archive Project';
+        this.setState({ isEnabled: true, buttonText: 'Archive Project' });
         break;
       case 3:
-        this.state.isEnabled = false;
-        this.state.buttonText = 'Archived';
+        this.setState({ isEnabled: false, buttonText: 'Archived' });
         break;
       default:
-        this.state.isEnabled = false;
-        this.state.buttonText = 'Error';
+        this.setState({ isEnabled: false, buttonText: 'Error' });
     }
   }
 
   handleSubmit(event) {
     event.preventDefault();
-    axios.post(
-      '/api/projects/status',
-      JSON.stringify({ id: this.state.id }),
-    ).then((res) => {
-      this.setButtonText(Number.parseInt(res.data, 10));
-      this.setState({ projectStatus: res.data });
-      this.state.handler(this.state.projectStatus);
-    });
+    const data = new FormData();
+    data.append('id', this.props.projectId);
+    axios.post('/api/projects/status', data)
+      .then((res) => {
+        this.setButtonText(Number.parseInt(res.data, 10));
+        this.props.setStatus(res.data);
+      });
   }
   render() {
     return (
@@ -61,5 +59,11 @@ class ProjectStatusButton extends React.Component {
     );
   }
 }
+
+ProjectStatusButton.propTypes = {
+  projectId: PropTypes.string.isRequired,
+  projectStatus: PropTypes.number.isRequired,
+  setStatus: PropTypes.func.isRequired,
+};
 
 export default ProjectStatusButton;

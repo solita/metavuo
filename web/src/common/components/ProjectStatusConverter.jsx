@@ -1,4 +1,4 @@
-const convertStatus = (id) => {
+const ConvertStatus = (id) => {
   switch (id) {
     case 1:
       return 'In Progress';
@@ -10,4 +10,4 @@ const convertStatus = (id) => {
   }
 };
 
-export { convertStatus as default };
+export default ConvertStatus;

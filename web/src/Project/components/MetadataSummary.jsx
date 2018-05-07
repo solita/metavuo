@@ -1,6 +1,7 @@
 import React from 'react';
 import Button from 'material-ui/Button';
 import Grid from 'material-ui/Grid';
+import PropTypes from 'prop-types';
 import '../css/MetadataSummary.scss';
 
 class MetadataSummary extends React.Component {
@@ -17,9 +18,10 @@ class MetadataSummary extends React.Component {
     return (
       <div className="metadata-container">
         <h3>Metadata</h3>
+        <p className="message-errors">{this.props.metadataError}</p>
         <Grid container>
           <Grid item xs={10}>
-            <p>The uploaded metadata file has {this.props.rowcount || '?'} data rows.</p>
+            <p>The uploaded metadata file has {this.props.rowCount || '?'} data rows.</p>
             <p>Custom fields: {this.props.headers.length > 0
               ? this.props.headers
                 .map((h, index) => (index ? ', ' : '') + h)
@@ -38,5 +40,20 @@ class MetadataSummary extends React.Component {
     );
   }
 }
+
+MetadataSummary.propTypes = {
+  metadataError: PropTypes.string,
+  rowCount: PropTypes.number,
+  headers: PropTypes.arrayOf(PropTypes.string),
+  uploadedat: PropTypes.string.isRequired,
+  uploadedby: PropTypes.string.isRequired,
+  discardMetadata: PropTypes.func.isRequired,
+};
+
+MetadataSummary.defaultProps = {
+  metadataError: '',
+  rowCount: null,
+  headers: [],
+};
 
 export default MetadataSummary;

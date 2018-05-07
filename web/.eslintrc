@@ -17,7 +17,7 @@
     "react/prop-types": 1,
     "linebreak-style": 1,
     "import/extensions": 1,
-    "import/no-named-as-default": 1,
+    "import/no-named-as-default": 0,
     "jsx-a11y/anchor-is-valid": [ "error", {
       "components": [ "Link" ],
       "specialLink": [ "to", "hrefLeft", "hrefRight" ],

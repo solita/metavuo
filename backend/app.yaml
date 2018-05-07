@@ -10,6 +10,11 @@ handlers:
       login: admin
       script: _go_app
 
+    - url: /api/tasks/.*
+      secure: always
+      login: admin
+      script: _go_app
+
     - url: /api/.*
       secure: always
       login: required

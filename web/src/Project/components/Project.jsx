@@ -97,7 +97,7 @@ class Project extends React.Component {
   }
 
   discardMetadata() {
-    axios.delete(`/api/projects/metadata/${this.props.match.params.id}`)
+    axios.delete(`/api/projects/${this.props.match.params.id}/metadata`)
       .then((res) => {
         if (res.status === 204) {
           this.setState({ metadataProps: {}, showMetadata: false });
@@ -167,14 +167,14 @@ class Project extends React.Component {
 
               <StorageFileUpload
                 dialogOpen={this.state.fileDialogOpen}
-                closeFileDialog={this.closeFileDialog}
+                closeDialog={this.closeFileDialog}
+                titleText="Upload file"
               />
 
               <UploadDialog
                 dialogOpen={this.state.dialogOpen}
-                projectId={this.props.match.params.id}
                 titleText="Metadata file upload"
-                url="/api/projects/metadata"
+                url={`/api/projects/${this.props.match.params.id}/metadata`}
                 closeDialog={this.closeDialog}
                 passResponse={this.passResponse}
               />

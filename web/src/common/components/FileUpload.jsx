@@ -12,7 +12,6 @@ class FileUpload extends React.Component {
       file: null,
       description: '',
       message: '',
-      id: props.id,
       hasFile: false,
     };
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -34,8 +33,7 @@ class FileUpload extends React.Component {
 
     const data = new FormData();
     data.append('file', this.state.file);
-    data.append('description', this.state.description);
-    data.append('projectId', this.state.id);
+    if (this.props.askDescription) data.append('description', this.state.description);
     axios.post(this.props.url, data, { headers: { 'content-type': 'multipart/form-data' } })
       .then((res) => {
         this.props.passResponse(res.data);
@@ -83,7 +81,6 @@ class FileUpload extends React.Component {
 }
 
 FileUpload.propTypes = {
-  id: PropTypes.string.isRequired,
   url: PropTypes.string.isRequired,
   askDescription: PropTypes.bool,
   passResponse: PropTypes.func.isRequired,

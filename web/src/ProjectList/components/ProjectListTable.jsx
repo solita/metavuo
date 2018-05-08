@@ -16,7 +16,10 @@ class ProjectListTable extends React.Component {
   componentDidMount() {
     axios.get('/api/projects')
       .then((res) => {
-        this.setState({ projects: res.data.projects });
+        // sort newest first
+        const projects = res.data.projects
+          .sort((a, b) => new Date(b.Created) - new Date(a.Created));
+        this.setState({ projects });
       })
       .catch((err) => {
         console.log(err);

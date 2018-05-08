@@ -80,11 +80,6 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if head == "metadata" {
-		routeProjectMetadata(w, r)
-		return
-	}
-
 	if head == "status" {
 		switch r.Method {
 		case http.MethodPost:
@@ -96,13 +91,31 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// /api/projects/123
 	id, err := strconv.ParseInt(head, 10, 64)
 	if err != nil {
 		http.Error(w, "", http.StatusNotFound)
 		return
 	}
 
-	routeProjectsGet(w, r, id)
+	head, r.URL.Path = shiftPath(r.URL.Path)
+
+	if head == "" {
+		switch r.Method {
+		case http.MethodGet:
+			routeProjectsGet(w, r, id)
+			return
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+		}
+	}
+
+	if head == "metadata" {
+		routeProjectMetadata(w, r, id)
+		return
+	}
+
+	http.Error(w, "", http.StatusMethodNotAllowed)
 }
 
 func routeProjectStatusUpdate(w http.ResponseWriter, r *http.Request) {

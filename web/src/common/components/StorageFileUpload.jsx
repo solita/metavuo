@@ -1,11 +1,14 @@
 import React from 'react';
-import { Button, Dialog } from 'material-ui';
+import Button from 'material-ui/Button';
+import Dialog from 'material-ui/Dialog';
+import DialogTitle from 'material-ui/Dialog/DialogTitle';
+import DialogContent from 'material-ui/Dialog/DialogContent';
+import DialogActions from 'material-ui/Dialog/DialogActions';
 import PropTypes from 'prop-types';
 
 class StorageFileUpload extends React.Component {
   constructor(props) {
     super(props);
-    this.closeDialog = this.closeDialog.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.addFile = this.addFile.bind(this);
     this.state = {
@@ -25,11 +28,8 @@ class StorageFileUpload extends React.Component {
       body: data.get('file'),
     }).then((res) => {
       console.log(res);
-      this.closeDialog();
+      this.props.closeDialog();
     });
-  }
-  closeDialog() {
-    this.props.closeFileDialog();
   }
 
   addFile(event) {
@@ -40,12 +40,15 @@ class StorageFileUpload extends React.Component {
     return (
       <Dialog
         open={this.props.dialogOpen}
-        onClose={this.closeDialog}
+        onClose={this.props.closeDialog}
       >
-        <div>
-          <Button onClick={this.closeDialog}>
+        <DialogActions>
+          <Button onClick={this.props.closeDialog}>
             Close<i className="material-icons icon-right">close</i>
           </Button>
+        </DialogActions>
+        <DialogTitle>{this.props.titleText}</DialogTitle>
+        <DialogContent>
           <form
             id="form-object"
             onSubmit={this.handleSubmit}
@@ -55,16 +58,20 @@ class StorageFileUpload extends React.Component {
               Upload<i className="material-icons icon-right">file_upload</i>
             </Button>
           </form>
-        </div>
+        </DialogContent>
       </Dialog>
     );
   }
 }
 
 StorageFileUpload.propTypes = {
-  closeFileDialog: PropTypes.func.isRequired,
   dialogOpen: PropTypes.bool.isRequired,
+  closeDialog: PropTypes.func.isRequired,
+  titleText: PropTypes.string,
 };
 
+StorageFileUpload.defaultProps = {
+  titleText: '',
+};
 
 export default StorageFileUpload;

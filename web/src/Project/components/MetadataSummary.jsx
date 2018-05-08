@@ -21,14 +21,14 @@ class MetadataSummary extends React.Component {
         <p className="message-errors">{this.props.metadataError}</p>
         <Grid container>
           <Grid item xs={10}>
-            <p>The uploaded metadata file has {this.props.rowCount || '?'} data rows.</p>
+            <p>The metadata file has {this.props.rowCount || '?'} data rows.</p>
             <p>Custom fields: {this.props.headers.length > 0
               ? this.props.headers
                 .map((h, index) => (index ? ', ' : '') + h)
               : 'no custom fields'}
             </p>
-            <p>{this.props.uploadedat}</p>
-            <p>{this.props.uploadedby}</p>
+            <p>Uploaded at: {new Date(this.props.uploadedat).toLocaleString()}</p>
+            <p>Added by: {this.props.uploadedby}</p>
           </Grid>
           <Grid item xs={2} className="button-container">
             <Button variant="fab" onClick={this.discardMetadata}>

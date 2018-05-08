@@ -41,14 +41,17 @@ type MetadataSummary struct {
 	UploadedByID string    `json:"-"`
 }
 
-func routeProjectMetadata(w http.ResponseWriter, r *http.Request) {
+func routeProjectMetadata(w http.ResponseWriter, r *http.Request, projectId int64) {
 	var head string
 	head, r.URL.Path = shiftPath(r.URL.Path)
 
 	if head == "" {
 		switch r.Method {
 		case http.MethodPost:
-			routeProjectMetadataUpload(w, r)
+			routeProjectMetadataUpload(w, r, projectId)
+			return
+		case http.MethodDelete:
+			routeProjectMetadataDelete(w, r, projectId)
 			return
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
@@ -56,30 +59,12 @@ func routeProjectMetadata(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	id, err := strconv.ParseInt(head, 10, 64)
-	if err != nil {
-		http.Error(w, "", http.StatusNotFound)
-		return
-	}
-
-	switch r.Method {
-	case http.MethodDelete:
-		routeProjectMetadataDelete(w, r, id)
-		return
-	default:
-		http.Error(w, "", http.StatusMethodNotAllowed)
-		return
-	}
+	http.Error(w, "", http.StatusMethodNotAllowed)
+	return
 }
 
-func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
+func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request, projectId int64) {
 	c := appengine.NewContext(r)
-
-	id, err := strconv.ParseInt(r.FormValue("projectId"), 10, 64)
-	if err != nil {
-		log.Errorf(c, "Parsing project id failed", err)
-		http.Error(w, "", http.StatusBadRequest)
-	}
 
 	r.ParseMultipartForm(64 << 20)
 	file, _, err := r.FormFile("file")
@@ -165,7 +150,7 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var p Project
-	key := datastore.NewKey(c, projectKind, "", id, nil)
+	key := datastore.NewKey(c, projectKind, "", projectId, nil)
 	err = datastore.Get(c, key, &p)
 
 	if err != nil {
@@ -179,7 +164,7 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	summary, err := saveMetadata(metadata, c, headers, id)
+	summary, err := saveMetadata(metadata, c, headers, projectId)
 
 	if err != nil {
 		http.Error(w, "Saving metadata failed", http.StatusInternalServerError)
@@ -298,7 +283,7 @@ func routeProjectMetadataDelete(w http.ResponseWriter, r *http.Request, projectI
 				log.Errorf(c, "Error while removing metatada summayr: %v", err)
 				return err
 			}
-			return err
+			return nil
 		}, nil)
 
 		if err != nil {
@@ -308,7 +293,7 @@ func routeProjectMetadataDelete(w http.ResponseWriter, r *http.Request, projectI
 		}
 	} else {
 		log.Errorf(c, "No metadata found")
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, "Bad Request", http.StatusBadRequest)
 		return
 	}
 

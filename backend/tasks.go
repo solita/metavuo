@@ -99,7 +99,7 @@ func routeTasksRemoveSampleMetadata(w http.ResponseWriter, r *http.Request) {
 				return err
 			}
 		}
-		return err
+		return nil
 	}, nil)
 
 	if err != nil {

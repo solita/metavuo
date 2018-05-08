@@ -23,7 +23,6 @@ const UploadDialog = props => (
       <FileUpload
         url={props.url}
         askDescription={false}
-        id={props.projectId}
         passResponse={props.passResponse}
       />
     </DialogContent>
@@ -33,7 +32,6 @@ const UploadDialog = props => (
 UploadDialog.propTypes = {
   titleText: PropTypes.string,
   url: PropTypes.string.isRequired,
-  projectId: PropTypes.string.isRequired,
   dialogOpen: PropTypes.bool.isRequired,
   closeDialog: PropTypes.func.isRequired,
   passResponse: PropTypes.func.isRequired,

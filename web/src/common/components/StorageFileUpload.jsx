@@ -5,6 +5,7 @@ import DialogTitle from 'material-ui/Dialog/DialogTitle';
 import DialogContent from 'material-ui/Dialog/DialogContent';
 import DialogActions from 'material-ui/Dialog/DialogActions';
 import PropTypes from 'prop-types';
+import axios from 'axios';
 
 class StorageFileUpload extends React.Component {
   constructor(props) {
@@ -13,23 +14,26 @@ class StorageFileUpload extends React.Component {
     this.addFile = this.addFile.bind(this);
     this.state = {
       file: null,
-      signedUrl: '',
     };
   }
 
   handleSubmit(e) {
     e.preventDefault();
     const data = new FormData();
-    data.append('file', this.state.file);
+    data.append('filename', this.state.file.name);
 
-    fetch(this.state.signedUrl, {
+    axios.post(this.props.url, data).then((res) => {
+      console.log(res);
+    });
+
+    /* fetch(this.state.signedUrl, {
       method: 'PUT',
       headers: { 'content-type': 'text/plain' },
       body: data.get('file'),
     }).then((res) => {
       console.log(res);
       this.props.closeDialog();
-    });
+    }); */
   }
 
   addFile(event) {

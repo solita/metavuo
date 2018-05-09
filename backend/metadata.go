@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -52,6 +53,17 @@ func routeProjectMetadata(w http.ResponseWriter, r *http.Request, projectId int6
 			return
 		case http.MethodDelete:
 			routeProjectMetadataDelete(w, r, projectId)
+			return
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+			return
+		}
+	}
+
+	if head == "download" {
+		switch r.Method {
+		case http.MethodGet:
+			routeProjectMetadataDownload(w, r, projectId)
 			return
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
@@ -298,4 +310,158 @@ func routeProjectMetadataDelete(w http.ResponseWriter, r *http.Request, projectI
 	}
 
 	w.WriteHeader(http.StatusNoContent) // 204
+}
+
+func routeProjectMetadataDownload(w http.ResponseWriter, r *http.Request, projectId int64) {
+	c := appengine.NewContext(r)
+
+	var summaryArray []MetadataSummary
+	var summaryKeyArray []*datastore.Key
+	q := datastore.NewQuery(summaryKind).Filter("ProjectID = ", projectId).Limit(1)
+	summaryKeyArray, err := q.GetAll(c, &summaryArray)
+
+	if err != nil {
+		log.Errorf(c, "Error while getting metadat summary: %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if len(summaryArray) > 0 && len(summaryKeyArray) > 0 {
+		var summary *MetadataSummary
+		summary = &summaryArray[0]
+		metaDataKey := &*summaryKeyArray[0]
+		q := datastore.NewQuery(metaDataKind).Ancestor(metaDataKey).Limit(1000)
+
+		var samplerows []sampleMetaData
+		t := q.Run(c)
+		for {
+			var s sampleMetaData
+			_, err := t.Next(&s)
+			if err == datastore.Done {
+				break
+			}
+			if err != nil {
+				log.Errorf(c, "Error while getting sample metadata rows: %v", err)
+				break
+			}
+			samplerows = append(samplerows, s)
+		}
+
+		sampleResultCount := len(samplerows)
+
+		if sampleResultCount <= 0 {
+			log.Errorf(c, "No sample rows found to be added to file")
+			http.Error(w, "Bad Request", http.StatusBadRequest)
+			return
+		}
+
+		for {
+			if sampleResultCount == 1000 {
+				cursor, err := t.Cursor()
+				if err != nil {
+					log.Errorf(c, "Could not get cursor: %v", err)
+					http.Error(w, "Internal Server Error", 500)
+					return
+				}
+
+				q := datastore.NewQuery(metaDataKind).Ancestor(metaDataKey).Limit(1000)
+				q = q.Start(cursor)
+
+				sampleResultCount = 0
+				t := q.Run(c)
+				for {
+					var s sampleMetaData
+					_, err := t.Next(&s)
+					if err == datastore.Done {
+						break
+					}
+					if err != nil {
+						log.Errorf(c, "Error while getting more sample metadata rows: %v", err)
+						break
+					}
+					sampleResultCount++
+					samplerows = append(samplerows, s)
+				}
+
+				if sampleResultCount <= 0 {
+					log.Debugf(c, "No more sample rows found to be added to file")
+					break
+				}
+			} else {
+				break
+			}
+		}
+
+		var file *xlsx.File
+		var sheet *xlsx.Sheet
+		var row *xlsx.Row
+		var cell *xlsx.Cell
+
+		file = xlsx.NewFile()
+		sheet, err = file.AddSheet("Sheet1")
+		if err != nil {
+			log.Errorf(c, "Could not add sheet to xlsx: %v", err)
+			http.Error(w, "Internal Server Error", 500)
+			return
+		}
+
+		// Write headers to sheet
+		row = sheet.AddRow()
+		for _, hrow := range summary.Headers {
+			cell = row.AddCell()
+			cell.Value = hrow
+		}
+
+		// Write content cells
+		for _, srow := range samplerows {
+			row = sheet.AddRow()
+
+			cell = row.AddCell()
+			sid, err := strconv.ParseFloat(srow.SampleID, 64)
+			if err == nil {
+				cell.SetFloat(sid)
+			} else {
+				cell.Value = srow.SampleID
+			}
+
+			cell = row.AddCell()
+			sg, err := strconv.ParseFloat(srow.Group, 64)
+			if err == nil {
+				cell.SetFloat(sg)
+			} else {
+				cell.Value = srow.Group
+			}
+
+			cell = row.AddCell()
+			cell.Value = srow.SampleType
+
+			cell = row.AddCell()
+			cell.Value = srow.SampleSource
+
+			for _, custom := range srow.CustomField {
+				cell = row.AddCell()
+				i, err := strconv.ParseFloat(custom, 64)
+				if err == nil {
+					cell.SetFloat(i)
+				} else {
+					cell.Value = custom
+				}
+			}
+		}
+
+		headerString := fmt.Sprintf("attachment; filename=metadata-%d.xlsx", summary.ProjectID)
+		w.Header().Set("Content-Disposition", headerString)
+		w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
+
+		err = file.Write(w)
+		if err != nil {
+			log.Errorf(c, "Error writing file: %v", err)
+		}
+		return
+	} else {
+		log.Errorf(c, "No metadata found")
+		http.Error(w, "Bad Request", http.StatusBadRequest)
+		return
+	}
+
 }

@@ -154,6 +154,7 @@ class Project extends React.Component {
                   uploadedat={this.state.metadataProps.uploadedat}
                   uploadedby={this.state.metadataProps.uploadedby}
                   metadataError={this.state.metadataError}
+                  projectId={this.props.match.params.id}
                   discardMetadata={this.discardMetadataClick}
                 />
                 :

@@ -15,6 +15,11 @@ handlers:
       login: admin
       script: _go_app
 
+    - url: /api/users/.*
+      secure: always
+      login: required
+      script: _go_app
+
     - url: /api/.*
       secure: always
       login: required

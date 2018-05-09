@@ -31,6 +31,11 @@ func routeApi(w http.ResponseWriter, r *http.Request) {
 	case "tasks":
 		routeTasks(w, r)
 		return
+
+	// /api/users/
+	case "users":
+		routeUsers(w, r)
+		return
 	}
 
 	http.Error(w, "", http.StatusNotFound)

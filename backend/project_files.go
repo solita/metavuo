@@ -54,7 +54,16 @@ func isFileNameAvailable(c context.Context, fileName string, id int64) bool {
 	defer client.Close()
 
 	bucketName, err := file.DefaultBucketName(c)
+
+	if err != nil {
+		log.Errorf(c, "Getting default bucket name failed", err)
+	}
+
 	_, err = client.Bucket(bucketName).Object(strconv.Itoa(int(id)) + "/" + fileName).Attrs(c)
+
+	if err != nil && err != storage.ErrObjectNotExist {
+		log.Errorf(c, "File name availability check failed", err)
+	}
 
 	if err == storage.ErrObjectNotExist {
 		return true
@@ -76,7 +85,7 @@ func getStorageUrl(c context.Context, fileName string, w http.ResponseWriter, id
 		Expires:        time.Now().Add(time.Hour * 24),
 		Method:         http.MethodPut,
 		GoogleAccessID: acc,
-		ContentType: "text/plain",
+		ContentType:    "text/plain",
 		SignBytes: func(b []byte) ([]byte, error) {
 			_, signedBytes, err := appengine.SignBytes(c, b)
 			return signedBytes, err

@@ -3,6 +3,11 @@ api_version: go1.9
 
 skip_files:
   - ^(.*/)?.*\.DS_Store$
+  - ^(.*/)?#.*#$
+  - ^(.*/)?.*~$
+  - ^(.*/)?.*\.py[co]$
+  - ^(.*/)?.*/RCS/.*$
+  - ^(.*/)?\..*$
 
 handlers:
     - url: /api/admin/.*

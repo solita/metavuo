@@ -86,6 +86,7 @@ StorageFileUpload.propTypes = {
   dialogOpen: PropTypes.bool.isRequired,
   closeDialog: PropTypes.func.isRequired,
   titleText: PropTypes.string,
+  url: PropTypes.string.isRequired,
 };
 
 StorageFileUpload.defaultProps = {

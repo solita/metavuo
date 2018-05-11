@@ -9,7 +9,7 @@ import MetadataSummary from './MetadataSummary';
 import StorageFileUpload from '../../common/components/StorageFileUpload';
 import ConfirmDialog from '../../common/components/ConfirmDialog';
 import UploadDialog from '../../common/components/UploadDialog';
-import ConvertStatus from '../../common/components/ProjectStatusConverter';
+import ConvertStatus from '../../common/util/ProjectStatusConverter';
 
 class Project extends React.Component {
   constructor(props) {

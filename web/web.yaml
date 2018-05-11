@@ -4,7 +4,14 @@ api_version: go1.8
 
 skip_files:
   - node_modules/
+  - src/
   - ^(.*/)?.*/test/.*$
+  - .babelrc
+  - .eslintrc
+  - package.json
+  - package-lock.json
+  - README.md
+  - webpack.config.js
 
   - ^(.*/)?#.*#$
   - ^(.*/)?.*~$
@@ -14,17 +21,6 @@ skip_files:
   - ^(.*/)?\..*$
 
 handlers:
-    - url: /admin/
-      secure: always
-      login: admin
-      static_files: dist_admin/index.html
-      upload: dist_admin/index\.html
-
-    - url: /admin
-      secure: always
-      login: admin
-      static_dir: dist_admin
-
     - url: /(.*\..*)
       secure: always
       login: admin

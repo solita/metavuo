@@ -1,4 +1,17 @@
-.header-link {
-    color: white;
-    text-decoration: none;
+.header-root {
+    flex-grow: 1;
+
+    .header-title {
+        flex: 1;
+    }
+
+    .header-button-link {
+        text-decoration: none;
+        margin: 0 10px;
+    }
+
+    .header-link {
+        color: white;
+        text-decoration: none;
+    }
 }

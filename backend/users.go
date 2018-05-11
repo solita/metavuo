@@ -36,39 +36,34 @@ func routeUsers(w http.ResponseWriter, r *http.Request) {
 func routeUsersGetMe(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
-	q := datastore.NewQuery(userKind).Filter("Email = ", user.Current(c).Email).Limit(1).KeysOnly()
-	userKeyArray, err := q.GetAll(c, nil)
-	if err != nil {
-		log.Errorf(c, "Error while getting user: %v", err)
-		// http.Error(w, "", http.StatusInternalServerError)
-		http.Error(w, "", http.StatusUnauthorized)
-		return
-	}
-	if len(userKeyArray) <= 0 {
-		log.Errorf(c, "Error while getting user key: %v", err)
-		// http.Error(w, "", http.StatusInternalServerError)
-		http.Error(w, "", http.StatusUnauthorized)
-		return
-	}
+	var currentUser CurrentUser
 
-	key := &*userKeyArray[0]
-	var au AppUser
-	err = datastore.Get(c, key, &au)
-	if err != nil {
-		if err == datastore.ErrNoSuchEntity {
-			log.Errorf(c, "User not found: %v", err)
+	if user.IsAdmin(c) {
+		currentUser.Name = user.Current(c).Email
+		currentUser.Role = "admin"
+	} else {
+
+		q := datastore.NewQuery(userKind).Filter("Email = ", user.Current(c).Email).Limit(1)
+
+		var uList []AppUser
+		_, err := q.GetAll(c, &uList)
+		if err != nil {
+			log.Errorf(c, "Error while getting user: %v", err)
 			http.Error(w, "", http.StatusUnauthorized)
 			return
 		}
-		log.Errorf(c, "Error getting user details: %v", err)
-		// http.Error(w, "", http.StatusInternalServerError)
-		http.Error(w, "", http.StatusUnauthorized)
-		return
-	}
 
-	currentUser := CurrentUser{
-		Name: au.Name,
-		Role: au.Role,
+		if len(uList) == 0 {
+			log.Errorf(c, "Error while getting user: %v", err)
+			http.Error(w, "", http.StatusUnauthorized)
+			return
+		}
+
+		var u AppUser
+		u = uList[0]
+
+		currentUser.Name = u.Name
+		currentUser.Role = "user"
 	}
 
 	w.Header().Set("Content-Type", "application/json")

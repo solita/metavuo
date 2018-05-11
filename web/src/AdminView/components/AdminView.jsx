@@ -1,113 +1,85 @@
 import React from 'react';
 import axios from 'axios';
 import Button from 'material-ui/Button';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import Dialog from 'material-ui/Dialog';
+import DialogTitle from 'material-ui/Dialog/DialogTitle';
+import DialogContent from 'material-ui/Dialog/DialogContent';
+import DialogActions from 'material-ui/Dialog/DialogActions';
+import AddUserForm from './AddUserForm';
+import UserList from './UserList';
 
 class AdminView extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      name: '',
-      email: '',
-      organization: '',
+      userDialogOpen: false,
+      users: [],
       message: '',
     };
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
+    this.openUserDialog = this.openUserDialog.bind(this);
+    this.closeUserDialog = this.closeUserDialog.bind(this);
+    this.closeForm = this.closeForm.bind(this);
   }
 
-  handleChange(event) {
-    this.setState({ [event.target.name]: event.target.value });
+  componentDidMount() {
+    this.getUsers();
   }
 
-  handleSubmit(event) {
-    event.preventDefault();
-    this.setState({ message: '' });
-
-    axios.post(
-      '/api/admin/users',
-      JSON.stringify({
-        name: this.state.name,
-        email: this.state.email,
-        organization: this.state.organization,
-      }),
-    )
+  getUsers() {
+    axios.get('/api/admin/users')
       .then((res) => {
-        console.log(`got response user_id: ${res.data}`);
-        if (res.status === 200) {
-          this.setState({
-            name: '',
-            email: '',
-            organization: '',
-            message: '',
-          });
+        if (res.data !== null) {
+          this.setState({ users: res.data });
         }
       })
       .catch((err) => {
-        if (err.response.status === 400) {
-          this.setState({ message: 'form is not valid' });
-        } else {
-          this.setState({ message: 'something went wrong' });
-        }
+        console.log(err);
+        this.setState({ message: 'Could not get users' });
       });
   }
 
+  openUserDialog() {
+    this.setState({ userDialogOpen: true });
+  }
+
+  closeUserDialog() {
+    this.setState({ userDialogOpen: false });
+  }
+
+  closeForm() {
+    this.closeUserDialog();
+    this.getUsers();
+  }
 
   render() {
     return (
       <div>
         <h2>Admin panel</h2>
         <p>{this.state.message}</p>
-        <div>
-          <h3>Add new user</h3>
-          <ValidatorForm
-            id="user-form"
-            onSubmit={this.handleSubmit}
-            autoComplete="off"
-          >
-            <TextValidator
-              className="form-item form-control"
-              id="name"
-              name="name"
-              label="User name"
-              value={this.state.name}
-              onChange={this.handleChange}
-              margin="normal"
-              validators={['required']}
-              errorMessages={['Name cannot be blank.']}
+        <Button variant="raised" color="primary" onClick={this.openUserDialog}>
+          <i className="material-icons icon-left">add</i>Add user
+        </Button>
+
+        {this.state.users.length > 0
+          ? <UserList users={this.state.users} />
+          : <p>No users added</p>
+        }
+        <Dialog
+          open={this.state.userDialogOpen}
+          onClose={this.closeUserDialog}
+        >
+          <DialogActions>
+            <Button onClick={this.closeUserDialog}>
+              Close<i className="material-icons icon-right">close</i>
+            </Button>
+          </DialogActions>
+          <DialogTitle>Add user</DialogTitle>
+          <DialogContent>
+            <AddUserForm
+              closeForm={this.closeForm}
             />
-            <TextValidator
-              className="form-item form-control"
-              id="email"
-              name="email"
-              label="Email"
-              value={this.state.email}
-              onChange={this.handleChange}
-              margin="normal"
-              validators={['required']}
-              errorMessages={['Email is mandatory.']}
-            />
-            <TextValidator
-              className="form-item form-control"
-              id="organization"
-              name="organization"
-              label="Organization"
-              value={this.state.organization}
-              onChange={this.handleChange}
-              margin="normal"
-              validators={['required']}
-              errorMessages={['Organization is mandatory.']}
-            />
-            <div className="form-item">
-              <Button type="submit" id="submit-user" variant="raised" color="primary">
-                <i className="material-icons icon-left">save</i>Add
-              </Button>
-            </div>
-          </ValidatorForm>
-        </div>
-        <div>
-          Here be user list
-        </div>
+          </DialogContent>
+        </Dialog>
       </div>
     );
   }

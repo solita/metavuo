@@ -1,61 +1,41 @@
-import { Paper, Table, TableBody, TableCell, TableRow } from 'material-ui';
-import { Link } from 'react-router-dom';
 import React from 'react';
-import axios from 'axios/index';
+import { Link } from 'react-router-dom';
+import Paper from 'material-ui/Paper';
+import Table from 'material-ui/Table';
+import TableBody from 'material-ui/Table/TableBody';
+import TableRow from 'material-ui/Table/TableRow';
+import TableCell from 'material-ui/Table/TableCell';
+import PropTypes from 'prop-types';
 import ProjectListTableHead from './ProjectListTableHead';
-import convertStatus from '../../common/components/ProjectStatusConverter';
+import convertStatus from '../../common/util/ProjectStatusConverter';
 
-class ProjectListTable extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      projects: [],
-    };
-  }
+const ProjectListTable = props => (
+  <div>
+    <Paper>
+      <Table>
+        <ProjectListTableHead />
+        <TableBody>
+          {props.projects.map(project => (
+            <TableRow key={project.ID}>
+              <TableCell>{project.project_id}</TableCell>
+              <TableCell>
+                <Link to={`/projects/${project.ID}`}>{project.project_name}</Link>
+              </TableCell>
+              <TableCell>{new Date(Date.parse(project.Created)).toLocaleDateString()}
+              </TableCell>
+              <TableCell>{project.project_description} </TableCell>
+              <TableCell>{convertStatus(project.project_status)} </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
+    </Paper>
+  </div>
+);
 
-  componentDidMount() {
-    axios.get('/api/projects')
-      .then((res) => {
-        // sort newest first
-        const projects = res.data.projects
-          .sort((a, b) => new Date(b.Created) - new Date(a.Created));
-        this.setState({ projects });
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-
-  render() {
-    if (!this.state.projects || this.state.projects.length === 0) {
-      return (<p>Loading</p>);
-    }
-    return (
-      <div>
-        <Paper>
-          <Table>
-            <ProjectListTableHead headerData={this.state.projects} />
-            <TableBody>
-              {this.state.projects.map(project => (
-                <TableRow key={project.ID}>
-                  <TableCell>{project.project_id}</TableCell>
-                  <TableCell>
-                    <Link to={`/projects/${project.ID}`}>{project.project_name}</Link>
-                  </TableCell>
-                  <TableCell>{new Date(Date.parse(project.Created)).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell>{project.project_description} </TableCell>
-                  <TableCell>{convertStatus(project.project_status)} </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </Paper>
-      </div>
-
-    );
-  }
-}
+ProjectListTable.propTypes = {
+  projects: PropTypes.arrayOf(PropTypes.string).isRequired,
+};
 
 
 export default ProjectListTable;

@@ -7,6 +7,7 @@ import DialogContent from 'material-ui/Dialog/DialogContent';
 import DialogActions from 'material-ui/Dialog/DialogActions';
 import AddUserForm from './AddUserForm';
 import UserList from './UserList';
+import ConfirmDialog from '../../common/components/ConfirmDialog';
 
 class AdminView extends React.Component {
   constructor(props) {
@@ -15,10 +16,17 @@ class AdminView extends React.Component {
       userDialogOpen: false,
       users: [],
       message: '',
+      removeUserId: '',
+      removeUser: '',
+      delDialogOpen: false,
+      deleting: false,
     };
     this.openUserDialog = this.openUserDialog.bind(this);
     this.closeUserDialog = this.closeUserDialog.bind(this);
     this.closeForm = this.closeForm.bind(this);
+    this.deleteUser = this.deleteUser.bind(this);
+    this.deleteUserClick = this.deleteUserClick.bind(this);
+    this.closeDelDialog = this.closeDelDialog.bind(this);
   }
 
   componentDidMount() {
@@ -29,11 +37,32 @@ class AdminView extends React.Component {
     axios.get('/api/admin/users')
       .then((res) => {
         if (res.data !== null) {
-          this.setState({ users: res.data });
+          this.setState({ users: res.data, deleting: false });
         }
       })
       .catch(() => {
-        this.setState({ message: 'Could not get users' });
+        this.setState({ message: 'Could not get users', deleting: false });
+      });
+  }
+
+  deleteUserClick(userId, userName) {
+    this.setState({ delDialogOpen: true, removeUserId: userId, removeUser: userName });
+  }
+
+  deleteUser(userId, userName) {
+    console.log(`deleting user ${userId} ${userName}`);
+    this.setState({ delDialogOpen: false });
+    axios.delete(`/api/admin/users/${userId}`)
+      .then((res) => {
+        if (res.status === 204) {
+          this.setState({ deleting: true });
+          setTimeout(() => {
+            this.getUsers();
+          }, 500);
+        }
+      })
+      .catch(() => {
+        this.setState({ message: `User ${userName} couldn't be removed.` });
       });
   }
 
@@ -52,6 +81,10 @@ class AdminView extends React.Component {
     }, 500);
   }
 
+  closeDelDialog() {
+    this.setState({ delDialogOpen: false, removeUserId: '', removeUser: '' });
+  }
+
   render() {
     return (
       <div>
@@ -62,7 +95,11 @@ class AdminView extends React.Component {
         </Button>
 
         {this.state.users.length > 0
-          ? <UserList users={this.state.users} />
+          ? <UserList
+            users={this.state.users}
+            deleteUser={this.deleteUserClick}
+            deleting={this.state.deleting}
+          />
           : <p>No users added</p>
         }
 
@@ -83,6 +120,15 @@ class AdminView extends React.Component {
             />
           </DialogContent>
         </Dialog>
+
+        <ConfirmDialog
+          dialogOpen={this.state.delDialogOpen}
+          closeDialog={this.closeDelDialog}
+          titleText="Remove user"
+          contentText={`Are you sure you want to remove user ${this.state.removeUser} permanently?`}
+          action={() => this.deleteUser(this.state.removeUserId, this.state.removeUser)}
+          actionButtonText="Delete user"
+        />
       </div>
     );
   }

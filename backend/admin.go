@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"regexp"
+	"strconv"
 	"time"
 
 	"google.golang.org/appengine"
@@ -18,7 +19,7 @@ const (
 )
 
 type AppUser struct {
-	ID           int64     `datastore:"-" json:"-"`
+	ID           int64     `datastore:"-" json:"user_id"`
 	Name         string    `json:"name"`
 	Email        string    `json:"email"`
 	Organization string    `json:"organization"`
@@ -32,17 +33,43 @@ func routeAdmin(w http.ResponseWriter, r *http.Request) {
 	head, r.URL.Path = shiftPath(r.URL.Path)
 
 	if head == "users" {
-		switch r.Method {
-		case http.MethodGet:
-			routeAdminUsersGet(w, r)
-			return
-		case http.MethodPost:
-			routeAdminUsersCreate(w, r)
-			return
-		default:
-			http.Error(w, "", http.StatusMethodNotAllowed)
+		var head string
+		head, r.URL.Path = shiftPath(r.URL.Path)
+
+		if head == "" {
+			switch r.Method {
+			case http.MethodGet:
+				routeAdminUsersGet(w, r)
+				return
+			case http.MethodPost:
+				routeAdminUsersCreate(w, r)
+				return
+			default:
+				http.Error(w, "", http.StatusMethodNotAllowed)
+				return
+			}
+		}
+
+		// /api/admin/users/123
+		id, err := strconv.ParseInt(head, 10, 64)
+		if err != nil {
+			http.Error(w, "", http.StatusNotFound)
 			return
 		}
+
+		head, r.URL.Path = shiftPath(r.URL.Path)
+
+		if head == "" {
+			switch r.Method {
+			case http.MethodDelete:
+				routeAdminUsersDelete(w, r, id)
+				return
+			default:
+				http.Error(w, "", http.StatusMethodNotAllowed)
+				return
+			}
+		}
+
 	}
 
 	http.Error(w, "", http.StatusMethodNotAllowed)
@@ -58,7 +85,7 @@ func routeAdminUsersGet(w http.ResponseWriter, r *http.Request) {
 	t := q.Run(c)
 	for {
 		var u AppUser
-		_, err := t.Next(&u)
+		key, err := t.Next(&u)
 		if err == datastore.Done {
 			break
 		}
@@ -67,6 +94,7 @@ func routeAdminUsersGet(w http.ResponseWriter, r *http.Request) {
 			break
 		}
 
+		u.ID = key.IntID()
 		uList = append(uList, u)
 	}
 
@@ -139,4 +167,19 @@ func validateEmailUniqueness(c context.Context, email string) (bool, string) {
 		return false, "User with email already exists"
 	}
 	return true, ""
+}
+
+func routeAdminUsersDelete(w http.ResponseWriter, r *http.Request, userId int64) {
+	c := appengine.NewContext(r)
+
+	key := datastore.NewKey(c, userKind, "", userId, nil)
+	err := datastore.Delete(c, key)
+
+	if err != nil {
+		log.Errorf(c, "Error while removing user: %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent) // 204
 }

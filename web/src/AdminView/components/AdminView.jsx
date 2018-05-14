@@ -32,8 +32,7 @@ class AdminView extends React.Component {
           this.setState({ users: res.data });
         }
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
         this.setState({ message: 'Could not get users' });
       });
   }
@@ -47,8 +46,10 @@ class AdminView extends React.Component {
   }
 
   closeForm() {
-    this.closeUserDialog();
-    this.getUsers();
+    setTimeout(() => {
+      this.closeUserDialog();
+      this.getUsers();
+    }, 500);
   }
 
   render() {
@@ -64,9 +65,11 @@ class AdminView extends React.Component {
           ? <UserList users={this.state.users} />
           : <p>No users added</p>
         }
+
         <Dialog
           open={this.state.userDialogOpen}
           onClose={this.closeUserDialog}
+          disableBackdropClick
         >
           <DialogActions>
             <Button onClick={this.closeUserDialog}>

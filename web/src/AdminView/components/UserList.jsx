@@ -36,12 +36,16 @@ const UserList = props => (
 );
 
 UserList.propTypes = {
-  users: PropTypes.arrayOf({
+  users: PropTypes.arrayOf(PropTypes.shape({
     name: PropTypes.string.isRequired,
     email: PropTypes.string.isRequired,
     organization: PropTypes.string.isRequired,
     created_at: PropTypes.string.isRequired,
-  }).isRequired,
+  })),
+};
+
+UserList.defaultProps = {
+  users: [],
 };
 
 export default UserList;

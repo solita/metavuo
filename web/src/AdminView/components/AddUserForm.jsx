@@ -34,14 +34,17 @@ class AddUserForm extends React.Component {
       }),
     )
       .then((res) => {
-        console.log(`got response user_id: ${res.data}`);
         if (res.status === 200) {
           this.props.closeForm();
         }
       })
       .catch((err) => {
         if (err.response.status === 400) {
-          this.setState({ message: 'form is not valid' });
+          if (err.response.data.toString().length > 3) {
+            this.setState({ message: err.response.data });
+          } else {
+            this.setState({ message: 'form is not valid' });
+          }
         } else {
           this.setState({ message: 'something went wrong' });
         }
@@ -51,7 +54,7 @@ class AddUserForm extends React.Component {
   render() {
     return (
       <div>
-        <p>{this.state.message}</p>
+        <p className="message-errors">{this.state.message}</p>
         <ValidatorForm
           id="user-form"
           onSubmit={this.handleSubmit}
@@ -66,7 +69,7 @@ class AddUserForm extends React.Component {
             onChange={this.handleChange}
             margin="normal"
             validators={['required']}
-            errorMessages={['Name cannot be blank.']}
+            errorMessages={['Name is required.']}
           />
           <TextValidator
             className="form-item form-control"
@@ -76,8 +79,8 @@ class AddUserForm extends React.Component {
             value={this.state.email}
             onChange={this.handleChange}
             margin="normal"
-            validators={['required']}
-            errorMessages={['Email is mandatory.']}
+            validators={['required', 'isEmail']}
+            errorMessages={['Email address is required.', 'Email is not valid.']}
           />
           <TextValidator
             className="form-item form-control"
@@ -88,7 +91,7 @@ class AddUserForm extends React.Component {
             onChange={this.handleChange}
             margin="normal"
             validators={['required']}
-            errorMessages={['Organization is mandatory.']}
+            errorMessages={['Organization is required.']}
           />
           <div className="form-item">
             <Button type="submit" id="submit-user" variant="raised" color="primary">

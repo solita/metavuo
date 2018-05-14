@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"net/http"
+	"regexp"
 	"time"
 
 	"google.golang.org/appengine"
@@ -85,11 +86,21 @@ func routeAdminUsersCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isValid, errorMsg := validateEmailUniqueness(c, appUser.Email)
+	isValid, errorMsg := validateEmailAddress(appUser.Email)
 	if !isValid {
 		log.Errorf(c, errorMsg)
 		http.Error(w, errorMsg, http.StatusBadRequest)
 		return
+	}
+	isValid, errorMsg = validateEmailUniqueness(c, appUser.Email)
+	if !isValid {
+		log.Errorf(c, errorMsg)
+		http.Error(w, errorMsg, http.StatusBadRequest)
+		return
+	}
+
+	if appUser.Name == "" || appUser.Organization == "" {
+		http.Error(w, "", http.StatusBadRequest)
 	}
 
 	appUser.CreatedByID = user.Current(c).ID
@@ -106,13 +117,26 @@ func routeAdminUsersCreate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func validateEmailAddress(email string) (bool, string) {
+	emailRegex, err := regexp.Compile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+	if err != nil {
+		return false, "Email address is not valid"
+	}
+
+	if emailRegex.MatchString(email) == true {
+		return true, ""
+	} else {
+		return false, "Email address is not valid"
+	}
+}
+
 func validateEmailUniqueness(c context.Context, email string) (bool, string) {
 	q := datastore.NewQuery(userKind).KeysOnly().Filter("Email = ", email).Limit(1)
 	t := q.Run(c)
 	key, _ := t.Next(nil)
 
 	if key != nil {
-		return false, "User email name is not unique"
+		return false, "User with email already exists"
 	}
 	return true, ""
 }

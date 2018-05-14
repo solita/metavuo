@@ -24,32 +24,50 @@ const (
 type ProjectStatus int
 
 const (
-	Unknown ProjectStatus = iota
+	Unknown    ProjectStatus = iota
 	InProgress
 	Complete
 	Archived
 )
 
 type Project struct {
-	ID          int64         `datastore:"-"`
-	Name        string        `json:"project_name"`
-	ProjectID   string        `json:"project_id"`
-	Description string        `json:"project_description"`
-	CreatedBy   string        `json:"createdby_email"`
-	Status      ProjectStatus `json:"project_status"`
-	CreatedByID string
-	Created     time.Time
+	ID                int64         `datastore:"-"`
+	Name              string        `json:"project_name"`
+	ProjectID         string        `json:"project_id"`
+	Description       string        `json:"project_description"`
+	CreatedBy         string        `json:"createdby_email"`
+	Status            ProjectStatus `json:"project_status"`
+	CustomerOrg       string        `json:"customer_organization"`
+	InvoiceAddr       string        `json:"customer_invoice_address"`
+	CustomerName      string        `json:"customer_name"`
+	CustomerEmail     string        `json:"customer_email"`
+	CustomerPhone     string        `json:"customer_phone"`
+	CustomerReference string        `json:"customer_reference"`
+	InternalReference string        `json:"customer_internal_reference"`
+	SampleLocation    string        `json:"sample_location"`
+	AdditionalInfo    string        `json:"additional_information"`
+	CreatedByID       string
+	Created           time.Time
 }
 
 type ProjectDetailsDTO struct {
-	ID            int64
-	Name          string        `json:"project_name"`
-	ProjectID     string        `json:"project_id"`
-	Description   string        `json:"project_description"`
-	CreatedBy     string        `json:"createdby_email"`
-	Status        ProjectStatus `json:"project_status"`
-	Created       time.Time
-	SampleSummary *MetadataSummary `json:"sample_summary"`
+	ID                int64
+	Name              string           `json:"project_name"`
+	ProjectID         string           `json:"project_id"`
+	Description       string           `json:"project_description"`
+	CreatedBy         string           `json:"createdby_email"`
+	Status            ProjectStatus    `json:"project_status"`
+	CustomerOrg       string           `json:"customer_organization"`
+	InvoiceAddr       string           `json:"customer_invoice_address"`
+	CustomerName      string           `json:"customer_name"`
+	CustomerEmail     string           `json:"customer_email"`
+	CustomerPhone     string           `json:"customer_phone"`
+	CustomerReference string           `json:"customer_reference"`
+	InternalReference string           `json:"customer_internal_reference"`
+	SampleLocation    string           `json:"sample_location"`
+	AdditionalInfo    string           `json:"additional_information"`
+	Created           time.Time
+	SampleSummary     *MetadataSummary `json:"sample_summary"`
 }
 
 type ProjectList struct {
@@ -252,6 +270,15 @@ func routeProjectsGet(w http.ResponseWriter, r *http.Request, id int64) {
 		Status:        p.Status,
 		Created:       p.Created,
 		SampleSummary: summary,
+		CustomerOrg       : p.CustomerOrg,
+		InvoiceAddr       : p.InvoiceAddr,
+		CustomerName      : p.CustomerName,
+		CustomerEmail     : p.CustomerEmail,
+		CustomerPhone     : p.CustomerPhone,
+		CustomerReference : p.CustomerReference,
+		InternalReference : p.InternalReference,
+		SampleLocation    : p.SampleLocation,
+		AdditionalInfo    : p.AdditionalInfo,
 	}
 
 	w.Header().Set("Content-Type", "application/json")

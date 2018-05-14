@@ -15,6 +15,15 @@ export class ProjectForm extends React.Component {
       name: '',
       description: '',
       message: '',
+      organization: '',
+      invoiceAddress: '',
+      customerName: '',
+      customerEmail: '',
+      customerPhone: '',
+      customerReference: '',
+      internalReference: '',
+      sampleLocation: '',
+      info: '',
     };
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -33,6 +42,15 @@ export class ProjectForm extends React.Component {
       JSON.stringify({
         project_name: this.state.name,
         project_description: this.state.description,
+        customer_organization: this.state.organization,
+        customer_invoice_address: this.state.invoiceAddress,
+        customer_name: this.state.customerName,
+        customer_email: this.state.customerEmail,
+        customer_phone: this.state.customerPhone,
+        customer_reference: this.state.customerReference,
+        customer_internal_reference: this.state.internalReference,
+        sample_location: this.state.sampleLocation,
+        additional_information: this.state.info,
       }),
     )
       .then((res) => {
@@ -82,6 +100,83 @@ export class ProjectForm extends React.Component {
             margin="normal"
             validators={['required']}
             errorMessages={['Description is mandatory.']}
+          />
+          <h2>Customer details</h2>
+          <TextValidator
+            className="form-item form-control"
+            id="organization"
+            name="organization"
+            label="Customer organization"
+            value={this.state.organization}
+            validators={['required']}
+            errorMessages={['Organization cannot be blank.']}
+            onChange={this.handleChange}
+          />
+          <TextValidator
+            className="form-item form-control"
+            id="invoiceAddress"
+            name="invoiceAddress"
+            label="Customer invoice address"
+            value={this.state.invoiceAddress}
+            onChange={this.handleChange}
+          />
+          <TextValidator
+            className="form-item form-control"
+            id="customerName"
+            name="customerName"
+            label="Customer name"
+            value={this.state.customerName}
+            onChange={this.handleChange}
+          />
+          <TextValidator
+            className="form-item form-control"
+            id="customerEmail"
+            name="customerEmail"
+            label="Customer email"
+            value={this.state.customerEmail}
+            onChange={this.handleChange}
+            errorMessages={['Invalid email-address.']}
+            validators={['isEmail']}
+          />
+          <TextValidator
+            className="form-item form-control"
+            id="customerPhone"
+            name="customerPhone"
+            label="Customer phone number"
+            value={this.state.customerPhone}
+            onChange={this.handleChange}
+          />
+          <TextValidator
+            className="form-item form-control"
+            id="customerReference"
+            name="customerReference"
+            label="Customer reference number"
+            value={this.state.customerReference}
+            onChange={this.handleChange}
+          />
+          <TextValidator
+            className="form-item form-control"
+            id="internalReference"
+            name="internalReference"
+            label="Internal reference number"
+            value={this.state.internalReference}
+            onChange={this.handleChange}
+          />
+          <TextValidator
+            className="form-item form-control"
+            id="sampleLocation"
+            name="sampleLocation"
+            label="Sample location"
+            value={this.state.sampleLocation}
+            onChange={this.handleChange}
+          />
+          <TextValidator
+            className="form-item form-control"
+            id="info"
+            name="info"
+            label="Additional information"
+            value={this.state.info}
+            onChange={this.handleChange}
           />
           <div className="form-item">
             <Button type="submit" id="submit-project" variant="raised" color="primary">

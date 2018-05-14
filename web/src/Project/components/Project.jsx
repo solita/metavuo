@@ -29,6 +29,15 @@ class Project extends React.Component {
       dialogOpen: false,
       delDialogOpen: false,
       fileDialogOpen: false,
+      organization: '',
+      invoiceAddress: '',
+      customerName: '',
+      customerEmail: '',
+      customerPhone: '',
+      customerReference: '',
+      internalReference: '',
+      sampleLocation: '',
+      info: '',
 
     };
     this.openDialog = this.openDialog.bind(this);
@@ -53,6 +62,15 @@ class Project extends React.Component {
           createdAt: res.data.Created,
           createdbyEmail: res.data.createdby_email,
           status: res.data.project_status,
+          organization: project.customer_organization,
+          invoiceAddress: project.customer_invoice_address,
+          customerName: project.customer_name,
+          customerEmail: project.customer_email,
+          customerPhone: project.customer_phone,
+          customerReference: project.customer_reference,
+          internalReference: project.customer_internal_reference,
+          sampleLocation: project.sample_location,
+          info: project.additional_information,
           fetching: false,
         });
         if (res.data.sample_summary !== null) {
@@ -146,6 +164,16 @@ class Project extends React.Component {
               <p>Project started: {new Date(this.state.createdAt).toLocaleString()}</p>
               <p>Project creator: {this.state.createdbyEmail}</p>
               <p>Project status: {ConvertStatus(this.state.status)}</p>
+              <h2>Customer details</h2>
+              <p>Organization: {this.state.organization}</p>
+              <p>Invoice address: {this.state.invoiceAddress}</p>
+              <p>Name: {this.state.customerName}</p>
+              <p>Email: {this.state.customerEmail}</p>
+              <p>Phone number: {this.state.customerPhone}</p>
+              <p>Customer reference: {this.state.customerReference}</p>
+              <p>Internal reference: {this.state.internalReference}</p>
+              <p>Sample location: {this.state.sampleLocation}</p>
+              <p>Additional information: {this.state.info}</p>
 
               {this.state.showMetadata
                 ? <MetadataSummary

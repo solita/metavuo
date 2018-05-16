@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { withRouter } from 'react-router-dom';
 import Paper from 'material-ui/Paper';
 import Table from 'material-ui/Table';
 import TableBody from 'material-ui/Table/TableBody';
@@ -16,11 +16,9 @@ const ProjectListTable = props => (
         <ProjectListTableHead />
         <TableBody>
           {props.projects.map(project => (
-            <TableRow key={project.ID}>
+            <TableRow key={project.ID} hover onClick={() => props.history.push(`/projects/${project.ID}`)}>
               <TableCell>{project.project_id}</TableCell>
-              <TableCell>
-                <Link to={`/projects/${project.ID}`}>{project.project_name}</Link>
-              </TableCell>
+              <TableCell>{project.project_name}</TableCell>
               <TableCell>{new Date(Date.parse(project.Created)).toLocaleDateString()}
               </TableCell>
               <TableCell>{project.project_description} </TableCell>
@@ -34,8 +32,13 @@ const ProjectListTable = props => (
 );
 
 ProjectListTable.propTypes = {
-  projects: PropTypes.arrayOf(PropTypes.string).isRequired,
+  projects: PropTypes.arrayOf(PropTypes.shape({
+    project_id: PropTypes.string.isRequired,
+    project_name: PropTypes.string.isRequired,
+    Created: PropTypes.string.isRequired,
+    project_description: PropTypes.string.isRequired,
+    project_status: PropTypes.number.isRequired,
+  })).isRequired,
 };
 
-
-export default ProjectListTable;
+export default withRouter(ProjectListTable);

@@ -24,7 +24,7 @@ const (
 type ProjectStatus int
 
 const (
-	Unknown    ProjectStatus = iota
+	Unknown ProjectStatus = iota
 	InProgress
 	Complete
 	Archived
@@ -46,26 +46,28 @@ type Project struct {
 	InternalReference string        `json:"customer_internal_reference"`
 	SampleLocation    string        `json:"sample_location"`
 	AdditionalInfo    string        `json:"additional_information"`
+	Collaborators     []int64       `json:"-"`
 	CreatedByID       string
 	Created           time.Time
 }
 
 type ProjectDetailsDTO struct {
 	ID                int64
-	Name              string           `json:"project_name"`
-	ProjectID         string           `json:"project_id"`
-	Description       string           `json:"project_description"`
-	CreatedBy         string           `json:"createdby_email"`
-	Status            ProjectStatus    `json:"project_status"`
-	CustomerOrg       string           `json:"customer_organization"`
-	InvoiceAddr       string           `json:"customer_invoice_address"`
-	CustomerName      string           `json:"customer_name"`
-	CustomerEmail     string           `json:"customer_email"`
-	CustomerPhone     string           `json:"customer_phone"`
-	CustomerReference string           `json:"customer_reference"`
-	InternalReference string           `json:"customer_internal_reference"`
-	SampleLocation    string           `json:"sample_location"`
-	AdditionalInfo    string           `json:"additional_information"`
+	Name              string        `json:"project_name"`
+	ProjectID         string        `json:"project_id"`
+	Description       string        `json:"project_description"`
+	CreatedBy         string        `json:"createdby_email"`
+	Status            ProjectStatus `json:"project_status"`
+	CustomerOrg       string        `json:"customer_organization"`
+	InvoiceAddr       string        `json:"customer_invoice_address"`
+	CustomerName      string        `json:"customer_name"`
+	CustomerEmail     string        `json:"customer_email"`
+	CustomerPhone     string        `json:"customer_phone"`
+	CustomerReference string        `json:"customer_reference"`
+	InternalReference string        `json:"customer_internal_reference"`
+	SampleLocation    string        `json:"sample_location"`
+	AdditionalInfo    string        `json:"additional_information"`
+	Collaborators     []int64       `json:"collaborators"`
 	Created           time.Time
 	SampleSummary     *MetadataSummary `json:"sample_summary"`
 }
@@ -170,8 +172,20 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 
 		routeProjectFileGet(w, r, id, head)
 		return
-
 	}
+
+	if head == "users" {
+		switch r.Method {
+		case http.MethodPost:
+			routeProjectUsersAdd(w, r, id)
+			return
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+			return
+		}
+	}
+
+	head, r.URL.Path = shiftPath(r.URL.Path)
 
 	http.Error(w, "", http.StatusMethodNotAllowed)
 }
@@ -450,4 +464,39 @@ func validateName(c context.Context, project *Project) (bool, string) {
 		return false, "Project name is not unique"
 	}
 	return true, ""
+}
+
+func routeProjectUsersAdd(w http.ResponseWriter, r *http.Request, projectId int64) {
+	c := appengine.NewContext(r)
+
+	userId, err := strconv.ParseInt(r.FormValue("user_id"), 10, 64)
+	if err != nil {
+		log.Errorf(c, "Parsing user id failed", err)
+		http.Error(w, "", http.StatusBadRequest)
+	}
+
+	uKey := datastore.NewKey(c, userKind, "", userId, nil)
+
+	pKey := datastore.NewKey(c, projectKind, "", projectId, nil)
+
+	var p Project
+	err = datastore.Get(c, pKey, &p)
+	if err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			http.Error(w, "", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	p.Collaborators = append(p.Collaborators, uKey.IntID())
+
+	_, err = datastore.Put(c, pKey, &p)
+
+	if err != nil {
+		log.Errorf(c, "Adding user to project failed", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
 }

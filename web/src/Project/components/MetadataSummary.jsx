@@ -8,11 +8,23 @@ import '../css/MetadataSummary.scss';
 class MetadataSummary extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      buttonDisabled: false,
+    };
     this.discardMetadata = this.discardMetadata.bind(this);
+    this.disableButton = this.disableButton.bind(this);
   }
 
   discardMetadata() {
     this.props.discardMetadata();
+  }
+
+  disableButton() {
+    console.log('click');
+    this.setState({ buttonDisabled: true });
+    setTimeout(() => {
+      this.setState({ buttonDisabled: false });
+    }, 1000);
   }
 
   render() {
@@ -32,9 +44,13 @@ class MetadataSummary extends React.Component {
             <p>Added by: {this.props.uploadedby}</p>
           </Grid>
           <Grid item xs={2} className="buttons-container">
-            <a href={`/api/projects/${this.props.projectId}/metadata/download`} className="button-link">
+            <a
+              href={`/api/projects/${this.props.projectId}/metadata/download`}
+              onClick={this.disableButton}
+              className="button-link"
+            >
               <Tooltip title="Download" placement="right">
-                <Button variant="fab" onClick={this.downloadMetadata}>
+                <Button variant="fab" disabled={this.state.buttonDisabled}>
                   <i className="material-icons">file_download</i>
                 </Button>
               </Tooltip>
@@ -57,7 +73,7 @@ MetadataSummary.propTypes = {
   headers: PropTypes.arrayOf(PropTypes.string),
   uploadedat: PropTypes.string.isRequired,
   uploadedby: PropTypes.string.isRequired,
-  projectId: PropTypes.number.isRequired,
+  projectId: PropTypes.string.isRequired,
   discardMetadata: PropTypes.func.isRequired,
 };
 

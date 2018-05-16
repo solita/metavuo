@@ -14,9 +14,27 @@ type CurrentUser struct {
 	Role string `json:"role"`
 }
 
+type CollaboratorUser struct {
+	ID           int64  `json:"user_id"`
+	Name         string `json:"name"`
+	Email        string `json:"email"`
+	Organization string `json:"organization"`
+}
+
 func routeUsers(w http.ResponseWriter, r *http.Request) {
 	var head string
 	head, r.URL.Path = shiftPath(r.URL.Path)
+
+	if head == "" {
+		switch r.Method {
+		case http.MethodGet:
+			routeUsersList(w, r)
+			return
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+			return
+		}
+	}
 
 	if head == "me" {
 		switch r.Method {
@@ -68,4 +86,36 @@ func routeUsersGetMe(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(mustJSON(currentUser))
+}
+
+func routeUsersList(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+
+	q := datastore.NewQuery(userKind).Limit(500).Order("Name")
+
+	var uList []CollaboratorUser
+
+	t := q.Run(c)
+	for {
+		var u AppUser
+		key, err := t.Next(&u)
+		if err == datastore.Done {
+			break
+		}
+		if err != nil {
+			log.Errorf(c, "Could not fetch next user: %v", err)
+			break
+		}
+
+		var cu CollaboratorUser
+		cu.Name = u.Name
+		cu.Email = u.Email
+		cu.Organization = u.Organization
+		cu.ID = key.IntID()
+
+		uList = append(uList, cu)
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(mustJSON(uList))
 }

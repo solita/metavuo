@@ -151,7 +151,6 @@ class Project extends React.Component {
 
   closeFileDialog() {
     this.setState({ fileDialogOpen: false });
-    this.getProjectFiles();
   }
 
   render() {

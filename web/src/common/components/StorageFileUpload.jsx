@@ -37,7 +37,7 @@ class StorageFileUpload extends React.Component {
       }
     }).catch((err) => {
       this.setState({ message: err.response.data });
-    }).finally(this.closeDialog);
+    });
   }
 
   addFile(event) {

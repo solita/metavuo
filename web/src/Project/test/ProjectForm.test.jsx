@@ -24,9 +24,18 @@ describe('Project form', () => {
 
   it('has all fields', () => {
     expect(formComponent.find('.form-container').length).toBe(1);
-    expect(formComponent.find('.form-item').length).toBe(3);
+    expect(formComponent.find('.form-item').length).toBe(12);
     expect(formComponent.find('#name').length).toBe(1);
     expect(formComponent.find('#description').length).toBe(1);
+    expect(formComponent.find('#organization').length).toBe(1);
+    expect(formComponent.find('#invoiceAddress').length).toBe(1);
+    expect(formComponent.find('#customerName').length).toBe(1);
+    expect(formComponent.find('#customerEmail').length).toBe(1);
+    expect(formComponent.find('#customerPhone').length).toBe(1);
+    expect(formComponent.find('#customerReference').length).toBe(1);
+    expect(formComponent.find('#internalReference').length).toBe(1);
+    expect(formComponent.find('#sampleLocation').length).toBe(1);
+    expect(formComponent.find('#info').length).toBe(1);
     expect(formComponent.find('#submit-project').length).toBe(1);
   });
 

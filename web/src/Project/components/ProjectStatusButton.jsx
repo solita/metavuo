@@ -1,61 +1,77 @@
 import React from 'react';
-import { Button } from 'material-ui';
+import Button from 'material-ui/Button';
+import Menu from 'material-ui/Menu';
+import MenuItem from 'material-ui/Menu/MenuItem';
 import axios from 'axios';
 import PropTypes from 'prop-types';
+import '../css/ProjectStatusButton.scss';
+
+const options = [
+  'Change status:',
+  'In Progress',
+  'Complete',
+  'Archived',
+];
 
 class ProjectStatusButton extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      buttonText: '',
-      isEnabled: true,
+      anchorEl: null,
     };
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.handleClose = this.handleClose.bind(this);
+    this.handleClick = this.handleClick.bind(this);
   }
 
-  componentDidMount() {
-    this.setButtonText(this.props.projectStatus);
+  handleClick(event) {
+    this.setState({ anchorEl: event.currentTarget });
   }
 
-  setButtonText(id) {
-    switch (id) {
-      case 1:
-        this.setState({ isEnabled: true, buttonText: 'Complete Project' });
-        break;
-      case 2:
-        this.setState({ isEnabled: true, buttonText: 'Archive Project' });
-        break;
-      case 3:
-        this.setState({ isEnabled: false, buttonText: 'Archived' });
-        break;
-      default:
-        this.setState({ isEnabled: false, buttonText: 'Error' });
-    }
+  handleClose() {
+    this.setState({ anchorEl: null });
   }
 
-  handleSubmit(event) {
+  handleSubmit(event, index) {
     event.preventDefault();
-    const data = new FormData();
-    data.append('id', this.props.projectId);
-    axios.post('/api/projects/status', data)
-      .then((res) => {
-        this.setButtonText(Number.parseInt(res.data, 10));
-        this.props.setStatus(res.data);
-      });
+    if (index !== this.props.projectStatus) {
+      const data = new FormData();
+      data.append('id', this.props.projectId);
+      data.append('status', index);
+      axios.post('/api/projects/status', data)
+        .then((res) => {
+          this.props.setStatus(res.data);
+        });
+    }
+    this.setState({ anchorEl: null });
   }
   render() {
     return (
-      <Button
-        onClick={this.handleSubmit}
-        type="submit"
-        id="submit-status"
-        variant="raised"
-        color="primary"
-        disabled={!this.state.isEnabled}
-        style={{ margin: 12 }}
-      >
-        {this.state.buttonText}
-      </Button>
+      <div>
+        <Button
+          variant="raised"
+          color="primary"
+          style={{ margin: 12 }}
+          onClick={this.handleClick}
+        >
+          Change project status
+        </Button>
+        <Menu
+          anchorEl={this.state.anchorEl}
+          open={Boolean(this.state.anchorEl)}
+          onClose={this.handleClose}
+        >
+          {options.map((option, index) => (
+            <MenuItem
+              key={option}
+              disabled={index === 0}
+              onClick={event => this.handleSubmit(event, index)}
+            >
+              {this.props.projectStatus === index ? <span className="selected-item">{option}</span> : option}
+            </MenuItem>
+          ))}
+        </Menu>
+      </div>
     );
   }
 }

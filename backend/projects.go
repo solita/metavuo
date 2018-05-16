@@ -169,6 +169,17 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 func routeProjectStatusUpdate(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
+	statusCode, err := strconv.ParseInt(r.FormValue("status"), 10, 64)
+	if err != nil {
+		log.Errorf(c, "Parsing project id failed", err)
+		http.Error(w, "", http.StatusBadRequest)
+	}
+
+	if statusCode <= 0 || statusCode > 3 {
+		log.Errorf(c, "Wrong status code, got: %d", statusCode)
+		http.Error(w, "Unknown project status", http.StatusBadRequest)
+	}
+
 	projectId, err := strconv.ParseInt(r.FormValue("id"), 10, 64)
 	if err != nil {
 		log.Errorf(c, "Parsing project id failed", err)
@@ -190,14 +201,14 @@ func routeProjectStatusUpdate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if p.Status == Archived {
-		http.Error(w, "Project is archived, status can't be changed", http.StatusBadRequest)
+	p.Status = ProjectStatus(statusCode)
+
+	_, err = datastore.Put(c, key, &p)
+	if err != nil {
+		log.Errorf(c, "Error while saving status %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
-
-	p.Status = p.Status + 1
-
-	datastore.Put(c, key, &p)
 
 	w.Write(mustJSON(p.Status))
 }

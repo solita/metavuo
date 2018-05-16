@@ -12,6 +12,7 @@ import UploadDialog from '../../common/components/UploadDialog';
 import ConvertStatus from '../../common/util/ProjectStatusConverter';
 import ProjectUpdateDialog from './ProjectUpdateDialog';
 import ProjectFileList from './ProjectFileList';
+import CollaboratorList from './CollaboratorList';
 
 class Project extends React.Component {
   constructor(props) {
@@ -155,94 +156,120 @@ class Project extends React.Component {
   render() {
     return (
       <div>
-        <Grid container>
-          <Grid item xs={6}>
-            <h1>Project page</h1>
-          </Grid>
-          <Grid item xs={6}>
-            {!this.state.fetching && !this.state.errorMsg &&
-              <ProjectStatusButton
-                projectId={this.props.match.params.id}
-                projectStatus={this.state.status}
-                setStatus={this.setStatus}
-              />
-            }
-            {!this.state.fetching && !this.state.errorMsg &&
-            <ProjectUpdateDialog
-              url={`/api/projects/${this.props.match.params.id}/update`}
-              updateMainView={this.getProject}
-              parentState={this.state}
-            />}
-          </Grid>
-        </Grid>
-
-        {this.state.fetching ? <CircularProgress /> :
-        <div>
-          {this.state.errorMsg
-            ? <p>{this.state.errorMsg}</p>
-            :
+        {this.state.fetching
+          ?
             <div>
-              <p>Name: {this.state.name}</p>
-              <p>Id: {this.state.id}</p>
-              <p>Description: {this.state.description}</p>
-              <p>Project started: {new Date(this.state.createdAt).toLocaleString()}</p>
-              <p>Project creator: {this.state.createdbyEmail}</p>
-              <p>Project status: {ConvertStatus(this.state.status)}</p>
-              <h2>Customer details</h2>
-              <p>Organization: {this.state.organization}</p>
-              <p>Invoice address: {this.state.invoiceAddress}</p>
-              <p>Name: {this.state.customerName}</p>
-              <p>Email: {this.state.customerEmail}</p>
-              <p>Phone number: {this.state.customerPhone}</p>
-              <p>Customer reference: {this.state.customerReference}</p>
-              <p>Internal reference: {this.state.internalReference}</p>
-              <p>Sample location: {this.state.sampleLocation}</p>
-              <p>Additional information: {this.state.info}</p>
-
-              {this.state.showMetadata
-                ? <MetadataSummary
-                  rowCount={this.state.metadataProps.rowcount}
-                  headers={this.state.metadataProps.headers.slice(4)}
-                  uploadedat={this.state.metadataProps.uploadedat}
-                  uploadedby={this.state.metadataProps.uploadedby}
-                  metadataError={this.state.metadataError}
-                  projectId={this.props.match.params.id}
-                  discardMetadata={this.discardMetadataClick}
-                />
-                :
-                <Button variant="raised" color="primary" onClick={this.openDialog}>
-                  <i className="material-icons icon-left">add_circle</i>Add metadata file
-                </Button>
-              }
-              <Button variant="raised" color="primary" onClick={this.openFileDialog} style={{ margin: 12 }}>
-                <i className="material-icons icon-left">add_circle</i>Add file
-              </Button>
-
-              <StorageFileUpload
-                dialogOpen={this.state.fileDialogOpen}
-                closeDialog={this.closeFileDialog}
-                titleText="Upload file"
-                url={`/api/projects/${this.props.match.params.id}/files/generate-upload-url`}
-              />
-
-              <UploadDialog
-                dialogOpen={this.state.dialogOpen}
-                titleText="Metadata file upload"
-                url={`/api/projects/${this.props.match.params.id}/metadata`}
-                closeDialog={this.closeDialog}
-                passResponse={this.passResponse}
-              />
-              <ConfirmDialog
-                dialogOpen={this.state.delDialogOpen}
-                closeDialog={this.closeDelDialog}
-                titleText="Remove metadata"
-                contentText="Are you sure you want to remove metadata permanently?"
-                action={this.discardMetadata}
-                actionButtonText="Delete metadata"
-              />
+              <p>Getting project</p>
+              <CircularProgress />
             </div>
-          }
-        </div>
+          :
+            <div>
+              <Grid container>
+                <Grid item xs={6}>
+                  <div>
+                    <h1>Project: {this.state.name || 'not found'}</h1>
+                    {this.state.errorMsg
+                      ? <p>{this.state.errorMsg}</p>
+                      :
+                      <div>
+                        <p>Id: {this.state.id}</p>
+                        <p>Description: {this.state.description}</p>
+                        <p>Project started: {new Date(this.state.createdAt).toLocaleString()}</p>
+                        <p>Project creator: {this.state.createdbyEmail}</p>
+                        <p>Project status: {ConvertStatus(this.state.status)}</p>
+                        <h2>Customer details</h2>
+                        <p>Organization: {this.state.organization}</p>
+                        {this.state.invoiceAddress &&
+                          <p>Invoice address: {this.state.invoiceAddress}</p>
+                        }
+                        {this.state.customerName &&
+                          <p>Name: {this.state.customerName}</p>
+                        }
+                        {this.state.customerEmail &&
+                          <p>Email: {this.state.customerEmail}</p>
+                        }
+                        {this.state.customerPhone &&
+                          <p>Phone number: {this.state.customerPhone}</p>
+                        }
+                        {this.state.customerReference &&
+                          <p>Customer reference: {this.state.customerReference}</p>
+                        }
+                        {this.state.internalReference &&
+                          <p>Internal reference: {this.state.internalReference}</p>
+                        }
+                        {this.state.sampleLocation &&
+                          <p>Sample location: {this.state.sampleLocation}</p>
+                        }
+                        {this.state.info &&
+                          <p>Additional information: {this.state.info}</p>
+                        }
+                      </div>
+                    }
+                  </div>
+                  <CollaboratorList projectId={this.props.match.params.id} />
+                </Grid>
+                <Grid item xs={6}>
+                  {!this.state.errorMsg &&
+                  <div>
+                    <ProjectStatusButton
+                      projectId={this.props.match.params.id}
+                      projectStatus={this.state.status}
+                      setStatus={this.setStatus}
+                    />
+                    <ProjectUpdateDialog
+                      url={`/api/projects/${this.props.match.params.id}/update`}
+                      updateMainView={this.getProject}
+                      parentState={this.state}
+                    />
+                  </div>}
+                </Grid>
+              </Grid>
+              {!this.state.errorMsg &&
+                <div>
+                  {this.state.showMetadata ?
+                    <MetadataSummary
+                      rowCount={this.state.metadataProps.rowcount}
+                      headers={this.state.metadataProps.headers.slice(4)}
+                      uploadedat={this.state.metadataProps.uploadedat}
+                      uploadedby={this.state.metadataProps.uploadedby}
+                      metadataError={this.state.metadataError}
+                      projectId={this.props.match.params.id}
+                      discardMetadata={this.discardMetadataClick}
+                    />
+                    :
+                    <Button variant="raised" color="primary" onClick={this.openDialog}>
+                      <i className="material-icons icon-left">add_circle</i>Add metadata file
+                    </Button>
+                  }
+                  <Button variant="raised" color="primary" onClick={this.openFileDialog} style={{ margin: 12 }}>
+                    <i className="material-icons icon-left">add_circle</i>Add file
+                  </Button>
+
+                  <StorageFileUpload
+                    dialogOpen={this.state.fileDialogOpen}
+                    closeDialog={this.closeFileDialog}
+                    titleText="Upload file"
+                    url={`/api/projects/${this.props.match.params.id}/files/generate-upload-url`}
+                  />
+
+                  <UploadDialog
+                    dialogOpen={this.state.dialogOpen}
+                    titleText="Metadata file upload"
+                    url={`/api/projects/${this.props.match.params.id}/metadata`}
+                    closeDialog={this.closeDialog}
+                    passResponse={this.passResponse}
+                  />
+                  <ConfirmDialog
+                    dialogOpen={this.state.delDialogOpen}
+                    closeDialog={this.closeDelDialog}
+                    titleText="Remove metadata"
+                    contentText="Are you sure you want to remove metadata permanently?"
+                    action={this.discardMetadata}
+                    actionButtonText="Delete metadata"
+                  />
+                </div>
+              }
+            </div>
         }
         {!this.state.fetching && !this.state.errorMsg && this.state.storageFiles.length > 0 &&
         <ProjectFileList

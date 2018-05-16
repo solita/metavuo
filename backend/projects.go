@@ -155,24 +155,22 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 
 	if head == "files" {
 		head, r.URL.Path = shiftPath(r.URL.Path)
-
 		if head == "" {
 			routeProjectFileList(w, r, id)
 			return
 		}
 
+		if head == "generate-upload-url" {
+			switch r.Method {
+			case http.MethodPost:
+				routeProjectFile(w, r, id)
+				return
+			}
+		}
+
 		routeProjectFileGet(w, r, id, head)
 		return
-	}
 
-	head, r.URL.Path = shiftPath(r.URL.Path)
-
-	if head == "generate-upload-url" {
-		switch r.Method {
-		case http.MethodPost:
-			routeProjectFile(w, r, id)
-		}
-		return
 	}
 
 	http.Error(w, "", http.StatusMethodNotAllowed)

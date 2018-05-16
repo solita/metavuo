@@ -11,6 +11,7 @@ import ConfirmDialog from '../../common/components/ConfirmDialog';
 import UploadDialog from '../../common/components/UploadDialog';
 import ConvertStatus from '../../common/util/ProjectStatusConverter';
 import ProjectUpdateDialog from './ProjectUpdateDialog';
+import ProjectFileList from './ProjectFileList';
 
 class Project extends React.Component {
   constructor(props) {
@@ -39,6 +40,7 @@ class Project extends React.Component {
       internalReference: '',
       sampleLocation: '',
       info: '',
+      storageFiles: [],
 
     };
     this.openDialog = this.openDialog.bind(this);
@@ -51,10 +53,12 @@ class Project extends React.Component {
     this.discardMetadataClick = this.discardMetadataClick.bind(this);
     this.closeDelDialog = this.closeDelDialog.bind(this);
     this.getProject = this.getProject.bind(this);
+    this.getProjectFiles = this.getProjectFiles.bind(this);
   }
 
   componentDidMount() {
     this.getProject();
+    this.getProjectFiles();
   }
 
   getProject() {
@@ -93,6 +97,13 @@ class Project extends React.Component {
           this.setState({ errorMsg: 'unknown error', fetching: false });
         }
       });
+  }
+  getProjectFiles() {
+    axios.get(`/api/projects/${this.props.match.params.id}/files`).then((res) => {
+      this.setState({ storageFiles: res.data });
+    }).catch((err) => {
+      console.log(err);
+    });
   }
 
   setStatus(value) {
@@ -233,6 +244,11 @@ class Project extends React.Component {
           }
         </div>
         }
+        {!this.state.fetching && !this.state.errorMsg && this.state.storageFiles.length > 0 &&
+        <ProjectFileList
+          files={this.state.storageFiles}
+          url={this.props.match.params.id}
+        />}
       </div>
     );
   }

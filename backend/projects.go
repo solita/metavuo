@@ -24,7 +24,7 @@ const (
 type ProjectStatus int
 
 const (
-	Unknown ProjectStatus = iota
+	Unknown    ProjectStatus = iota
 	InProgress
 	Complete
 	Archived
@@ -52,20 +52,20 @@ type Project struct {
 
 type ProjectDetailsDTO struct {
 	ID                int64
-	Name              string        `json:"project_name"`
-	ProjectID         string        `json:"project_id"`
-	Description       string        `json:"project_description"`
-	CreatedBy         string        `json:"createdby_email"`
-	Status            ProjectStatus `json:"project_status"`
-	CustomerOrg       string        `json:"customer_organization"`
-	InvoiceAddr       string        `json:"customer_invoice_address"`
-	CustomerName      string        `json:"customer_name"`
-	CustomerEmail     string        `json:"customer_email"`
-	CustomerPhone     string        `json:"customer_phone"`
-	CustomerReference string        `json:"customer_reference"`
-	InternalReference string        `json:"customer_internal_reference"`
-	SampleLocation    string        `json:"sample_location"`
-	AdditionalInfo    string        `json:"additional_information"`
+	Name              string           `json:"project_name"`
+	ProjectID         string           `json:"project_id"`
+	Description       string           `json:"project_description"`
+	CreatedBy         string           `json:"createdby_email"`
+	Status            ProjectStatus    `json:"project_status"`
+	CustomerOrg       string           `json:"customer_organization"`
+	InvoiceAddr       string           `json:"customer_invoice_address"`
+	CustomerName      string           `json:"customer_name"`
+	CustomerEmail     string           `json:"customer_email"`
+	CustomerPhone     string           `json:"customer_phone"`
+	CustomerReference string           `json:"customer_reference"`
+	InternalReference string           `json:"customer_internal_reference"`
+	SampleLocation    string           `json:"sample_location"`
+	AdditionalInfo    string           `json:"additional_information"`
 	Created           time.Time
 	SampleSummary     *MetadataSummary `json:"sample_summary"`
 }
@@ -150,6 +150,18 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 
 	if head == "update" {
 		routeProjectUpdate(w, r, id)
+		return
+	}
+
+	if head == "files" {
+		head, r.URL.Path = shiftPath(r.URL.Path)
+
+		if head == "" {
+			routeProjectFileList(w, r, id)
+			return
+		}
+
+		routeProjectFileGet(w, r, id, head)
 		return
 	}
 

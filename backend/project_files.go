@@ -172,7 +172,6 @@ func routeProjectFileGet(w http.ResponseWriter, r *http.Request, id int64, fileN
 		Expires:        time.Now().Add(time.Hour * 8),
 		Method:         http.MethodGet,
 		GoogleAccessID: acc,
-		ContentType:    "text/plain",
 		SignBytes: func(b []byte) ([]byte, error) {
 			_, signedBytes, err := appengine.SignBytes(c, b)
 			return signedBytes, err

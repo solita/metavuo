@@ -1,4 +1,5 @@
 import React from 'react';
+import { List, ListItem } from 'material-ui';
 
 const getFileSize = (number) => {
   if (number < 1024) {
@@ -15,14 +16,17 @@ class ProjectFileList extends React.Component {
   render() {
     return (
       <div style={{ marginTop: 12 }}>
-        {this.props.files.map(file => (
-          <a
-            key={file.id}
-            href={`/api/projects/${this.props.url}/files/${file.fileName}`}
-          > Name: {file.fileName}, Size: {getFileSize(file.fileSize)},
-                    Created: {new Date(Date.parse(file.created)).toLocaleDateString()}
-          </a>
-            ))}
+        <List>
+          {this.props.files.map(file => (
+            <ListItem button key={file.id}>
+              <a
+                href={`/api/projects/${this.props.url}/files/${file.fileName}`}
+              > Name: {file.fileName}, Size: {getFileSize(file.fileSize)},
+            Created: {new Date(Date.parse(file.created)).toLocaleDateString()}
+              </a>
+            </ListItem>
+          ))}
+        </List>
       </div>
 
     );

@@ -70,6 +70,20 @@ type ProjectDetailsDTO struct {
 	SampleSummary     *MetadataSummary `json:"sample_summary"`
 }
 
+type ProjectUpdateRequest struct {
+	Name              string `json:"project_name"`
+	Description       string `json:"project_description"`
+	CustomerOrg       string `json:"customer_organization"`
+	InvoiceAddr       string `json:"customer_invoice_address"`
+	CustomerName      string `json:"customer_name"`
+	CustomerEmail     string `json:"customer_email"`
+	CustomerPhone     string `json:"customer_phone"`
+	CustomerReference string `json:"customer_reference"`
+	InternalReference string `json:"customer_internal_reference"`
+	SampleLocation    string `json:"sample_location"`
+	AdditionalInfo    string `json:"additional_information"`
+}
+
 type ProjectList struct {
 	Projects  []Project `json:"projects"`
 	NextBatch string    `json:"next"`
@@ -131,6 +145,11 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 
 	if head == "metadata" {
 		routeProjectMetadata(w, r, id)
+		return
+	}
+
+	if head == "update" {
+		routeProjectUpdate(w, r, id)
 		return
 	}
 
@@ -335,6 +354,63 @@ func routeProjectsList(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(mustJSON(pList))
+}
+
+func routeProjectUpdate(w http.ResponseWriter, r *http.Request, projectId int64) {
+	c := appengine.NewContext(r)
+
+	dec := json.NewDecoder(r.Body)
+	var updateReq ProjectUpdateRequest
+
+	if err := dec.Decode(&updateReq); err != nil {
+		log.Errorf(c, "Decoding JSON failed while updating project", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	key := datastore.NewKey(c, projectKind, "", projectId, nil)
+
+	var original Project
+	err := datastore.Get(c, key, &original)
+
+	if err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			http.Error(w, "", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if !validateUpdateRequest(updateReq) {
+		http.Error(w, "Invalid project update request", http.StatusBadRequest)
+		return
+	}
+
+	original.Name = updateReq.Name
+	original.Description = updateReq.Description
+	original.InvoiceAddr = updateReq.InvoiceAddr
+	original.CustomerOrg = updateReq.CustomerOrg
+	original.CustomerName = updateReq.CustomerName
+	original.CustomerEmail = updateReq.CustomerEmail
+	original.CustomerPhone = updateReq.CustomerPhone
+	original.CustomerReference = updateReq.CustomerReference
+	original.InternalReference = updateReq.InternalReference
+	original.SampleLocation = updateReq.SampleLocation
+	original.AdditionalInfo = updateReq.AdditionalInfo
+
+	_, err = datastore.Put(c, key, &original)
+
+	if err != nil {
+		log.Errorf(c, "Updating project failed", err)
+		http.Error(w, "Updating project failed", http.StatusInternalServerError)
+		return
+	}
+
+}
+func validateUpdateRequest(updateRequest ProjectUpdateRequest) bool {
+	return len(updateRequest.Name) > 0 && len(updateRequest.CustomerOrg) > 0 &&
+		len(updateRequest.Description) > 0
 }
 
 func validateName(c context.Context, project *Project) (bool, string) {

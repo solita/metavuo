@@ -10,6 +10,7 @@ import StorageFileUpload from '../../common/components/StorageFileUpload';
 import ConfirmDialog from '../../common/components/ConfirmDialog';
 import UploadDialog from '../../common/components/UploadDialog';
 import ConvertStatus from '../../common/util/ProjectStatusConverter';
+import ProjectUpdateDialog from './ProjectUpdateDialog';
 
 class Project extends React.Component {
   constructor(props) {
@@ -49,9 +50,14 @@ class Project extends React.Component {
     this.setStatus = this.setStatus.bind(this);
     this.discardMetadataClick = this.discardMetadataClick.bind(this);
     this.closeDelDialog = this.closeDelDialog.bind(this);
+    this.getProject = this.getProject.bind(this);
   }
 
   componentDidMount() {
+    this.getProject();
+  }
+
+  getProject() {
     axios.get(`/api/projects/${this.props.match.params.id}`)
       .then((res) => {
         const project = res.data;
@@ -148,7 +154,14 @@ class Project extends React.Component {
                 projectId={this.props.match.params.id}
                 projectStatus={this.state.status}
                 setStatus={this.setStatus}
-              />}
+              />
+            }
+            {!this.state.fetching && !this.state.errorMsg &&
+            <ProjectUpdateDialog
+              url={`/api/projects/${this.props.match.params.id}/update`}
+              updateMainView={this.getProject}
+              parentState={this.state}
+            />}
           </Grid>
         </Grid>
 

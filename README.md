@@ -1,5 +1,6 @@
-# Project Title
+# Metavuo
 
+Metavuo is a platform for managing metabolomics projects. Metavuo is developed by University of Eastern Finland in collaboration with Solita Ltd.
 
 ## Getting Started
 
@@ -51,3 +52,11 @@ For github issue tracker use `Resolves`, `Fixes` or `Closes` depending on the is
 - **Krista Väänänen** - Software Designer
 - **Esko Oramaa** - Architect
 - **Teo Ahonen** - Project Manager
+- **Jussi Paananen** - Product owner
+- **Antton Mattsson** - Researcher
+- **Kati Hanhineva** - Principal investigator
+
+## License
+
+Metavuo is open-source and licensed with the MIT License.
+

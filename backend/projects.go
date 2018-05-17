@@ -114,17 +114,6 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	if head == "status" {
-		switch r.Method {
-		case http.MethodPost:
-			routeProjectStatusUpdate(w, r)
-			return
-		default:
-			http.Error(w, "", http.StatusMethodNotAllowed)
-			return
-		}
-	}
-
 	// /api/projects/123
 	id, err := strconv.ParseInt(head, 10, 64)
 	if err != nil {
@@ -139,6 +128,20 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		case http.MethodGet:
 			routeProjectsGet(w, r, id)
 			return
+		case http.MethodPut:
+			routeProjectUpdate(w, r, id)
+			return
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+			return
+		}
+	}
+
+	if head == "status" {
+		switch r.Method {
+		case http.MethodPost:
+			routeProjectStatusUpdate(w, r, id)
+			return
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
 			return
@@ -150,31 +153,12 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if head == "update" {
-		routeProjectUpdate(w, r, id)
-		return
-	}
-
 	if head == "files" {
-		head, r.URL.Path = shiftPath(r.URL.Path)
-		if head == "" {
-			routeProjectFileList(w, r, id)
-			return
-		}
-
-		if head == "generate-upload-url" {
-			switch r.Method {
-			case http.MethodPost:
-				routeProjectFile(w, r, id)
-				return
-			}
-		}
-
-		routeProjectFileGet(w, r, id, head)
+		routeProjectFile(w, r, id)
 		return
 	}
 
-	if head == "users" {
+	if head == "collaborators" {
 		switch r.Method {
 		case http.MethodPost:
 			routeProjectUsersAdd(w, r, id)
@@ -185,12 +169,11 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	head, r.URL.Path = shiftPath(r.URL.Path)
-
 	http.Error(w, "", http.StatusMethodNotAllowed)
+	return
 }
 
-func routeProjectStatusUpdate(w http.ResponseWriter, r *http.Request) {
+func routeProjectStatusUpdate(w http.ResponseWriter, r *http.Request, projectId int64) {
 	c := appengine.NewContext(r)
 
 	statusCode, err := strconv.ParseInt(r.FormValue("status"), 10, 64)
@@ -202,12 +185,6 @@ func routeProjectStatusUpdate(w http.ResponseWriter, r *http.Request) {
 	if statusCode <= 0 || statusCode > 3 {
 		log.Errorf(c, "Wrong status code, got: %d", statusCode)
 		http.Error(w, "Unknown project status", http.StatusBadRequest)
-	}
-
-	projectId, err := strconv.ParseInt(r.FormValue("id"), 10, 64)
-	if err != nil {
-		log.Errorf(c, "Parsing project id failed", err)
-		http.Error(w, "", http.StatusBadRequest)
 	}
 
 	key := datastore.NewKey(c, projectKind, "", projectId, nil)

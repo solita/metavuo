@@ -36,9 +36,8 @@ class ProjectStatusButton extends React.Component {
     event.preventDefault();
     if (index !== this.props.projectStatus) {
       const data = new FormData();
-      data.append('id', this.props.projectId);
       data.append('status', index);
-      axios.post('/api/projects/status', data)
+      axios.post(`/api/projects/${this.props.projectId}/status`, data)
         .then((res) => {
           this.props.setStatus(res.data);
         });

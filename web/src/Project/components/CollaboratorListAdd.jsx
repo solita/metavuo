@@ -28,7 +28,9 @@ class CollaboratorListAdd extends React.Component {
     this.setState({ message: '' });
     axios.get('/api/users')
       .then((res) => {
-        this.setState({ users: res.data });
+        if (res.data !== null) {
+          this.setState({ users: res.data });
+        }
       })
       .catch(() => {
         this.setState({ message: 'Problem getting users' });
@@ -52,7 +54,7 @@ class CollaboratorListAdd extends React.Component {
     const data = new FormData();
     data.append('id', this.props.projectId);
     data.append('user_id', this.state.userId);
-    axios.post(`/api/projects/${this.props.projectId}/users`, data)
+    axios.post(`/api/projects/${this.props.projectId}/collaborators`, data)
       .then((res) => {
         console.log(res);
         this.setState({ isOpen: false });
@@ -91,11 +93,7 @@ class CollaboratorListAdd extends React.Component {
                 <MenuItem value="" />
                 {this.state.users.map(user => (
                   <MenuItem key={user.user_id} value={user.user_id}>
-                    <div className="user-container">
-                      <span className="user-detail">{user.name},</span>
-                      <span className="user-detail">{user.email},</span>
-                      <span className="user-detail">{user.organization}</span>
-                    </div>
+                    {user.name}, {user.email}, {user.organization}
                   </MenuItem>
                 ))
                 }

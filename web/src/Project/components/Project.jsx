@@ -217,7 +217,7 @@ class Project extends React.Component {
                       setStatus={this.setStatus}
                     />
                     <ProjectUpdateDialog
-                      url={`/api/projects/${this.props.match.params.id}/update`}
+                      url={`/api/projects/${this.props.match.params.id}`}
                       updateMainView={this.getProject}
                       parentState={this.state}
                     />

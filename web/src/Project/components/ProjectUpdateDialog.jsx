@@ -43,7 +43,7 @@ class ProjectUpdateDialog extends React.Component {
   handleSubmit(event) {
     event.preventDefault();
 
-    axios.post(
+    axios.put(
       this.props.url,
       JSON.stringify({
         project_name: this.state.name,

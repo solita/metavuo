@@ -1,45 +1,67 @@
 package main
 
 import (
-	"net/http"
 	"context"
+	"net/http"
+	"path/filepath"
+	"regexp"
 	"strconv"
 	"time"
-	"regexp"
-	"path/filepath"
 
-	"google.golang.org/appengine/log"
+	"cloud.google.com/go/storage"
+	"google.golang.org/api/iterator"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/file"
-	"google.golang.org/api/iterator"
-	"cloud.google.com/go/storage"
+	"google.golang.org/appengine/log"
 )
 
 var fileNamePattern = regexp.MustCompile(`^[\w_\-.]*$`)
 
 type ProjectFile struct {
-	GenerationID int64 `json:"id"`
-	FileName string    `json:"fileName"`
-	FileSize int64     `json:"fileSize"`
-	Created  time.Time `json:"created"`
+	GenerationID int64     `json:"id"`
+	FileName     string    `json:"fileName"`
+	FileSize     int64     `json:"fileSize"`
+	Created      time.Time `json:"created"`
 	//TODO Description string
 }
 
 func routeProjectFile(w http.ResponseWriter, r *http.Request, id int64) {
+	var head string
+	head, r.URL.Path = shiftPath(r.URL.Path)
 
+	if head == "" {
+		switch r.Method {
+		case http.MethodGet:
+			routeProjectFileList(w, r, id)
+			return
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+			return
+		}
+	}
+
+	if head == "generate-upload-url" {
+		switch r.Method {
+		case http.MethodPost:
+			routeProjectFileUrlRequest(w, r, id)
+			return
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+			return
+		}
+	}
+
+	// head = file name
 	switch r.Method {
-	case http.MethodPost:
-		routeProjectFileUrlRequest(w, r, id)
-		return
 	case http.MethodGet:
-		routeProjectFileList(w, r, id)
+		routeProjectFileGet(w, r, id, head)
 		return
 	default:
 		http.Error(w, "", http.StatusMethodNotAllowed)
 		return
 	}
-
 }
+
 func routeProjectFileUrlRequest(w http.ResponseWriter, r *http.Request, id int64) {
 	c := appengine.NewContext(r)
 	fileName := r.FormValue("filename")
@@ -57,6 +79,7 @@ func routeProjectFileUrlRequest(w http.ResponseWriter, r *http.Request, id int64
 	getStorageUrl(c, fileName, w, id)
 
 }
+
 func isFileNameAvailable(c context.Context, fileName string, id int64) bool {
 	client, err := storage.NewClient(c)
 	if err != nil {
@@ -85,6 +108,7 @@ func isFileNameAvailable(c context.Context, fileName string, id int64) bool {
 	return false
 
 }
+
 func getStorageUrl(c context.Context, fileName string, w http.ResponseWriter, id int64) {
 	acc, _ := appengine.ServiceAccount(c)
 

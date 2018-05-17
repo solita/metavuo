@@ -78,7 +78,13 @@ func routeProjectMetadata(w http.ResponseWriter, r *http.Request, projectId int6
 func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request, projectId int64) {
 	c := appengine.NewContext(r)
 
-	r.ParseMultipartForm(64 << 20)
+	err := r.ParseMultipartForm(64 << 20)
+	if err != nil {
+		log.Errorf(c, "Error parsing form: %s", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
 	file, _, err := r.FormFile("file")
 	// description := r.FormValue("description")
 

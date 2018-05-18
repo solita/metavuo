@@ -42,6 +42,8 @@ class Project extends React.Component {
       sampleLocation: '',
       info: '',
       storageFiles: [],
+      storageDelDialogOpen: false,
+      storageFileToDelete: '',
 
     };
     this.openDialog = this.openDialog.bind(this);
@@ -55,6 +57,9 @@ class Project extends React.Component {
     this.closeDelDialog = this.closeDelDialog.bind(this);
     this.getProject = this.getProject.bind(this);
     this.getProjectFiles = this.getProjectFiles.bind(this);
+    this.deleteFile = this.deleteFile.bind(this);
+    this.closeStorageDelDialog = this.closeStorageDelDialog.bind(this);
+    this.deleteStorageFileClick = this.deleteStorageFileClick.bind(this);
   }
 
   componentDidMount() {
@@ -151,6 +156,24 @@ class Project extends React.Component {
 
   closeFileDialog() {
     this.setState({ fileDialogOpen: false });
+  }
+
+  deleteFile() {
+    axios.delete(`/api/projects/${this.props.match.params.id}/files/${this.state.storageFileToDelete}`)
+      .then((res) => {
+        if (res.status === 204) {
+          this.getProjectFiles();
+        }
+      });
+    this.closeStorageDelDialog();
+  }
+
+  closeStorageDelDialog() {
+    this.setState({ storageDelDialogOpen: false });
+  }
+
+  deleteStorageFileClick(fileName) {
+    this.setState({ storageDelDialogOpen: true, storageFileToDelete: fileName });
   }
 
   render() {
@@ -267,6 +290,14 @@ class Project extends React.Component {
                     action={this.discardMetadata}
                     actionButtonText="Delete metadata"
                   />
+                  <ConfirmDialog
+                    dialogOpen={this.state.storageDelDialogOpen}
+                    closeDialog={this.closeStorageDelDialog}
+                    titleText="Remove file"
+                    contentText="Are you sure you want to remove this file permanently?"
+                    action={this.deleteFile}
+                    actionButtonText="Delete file"
+                  />
                 </div>
               }
             </div>
@@ -275,6 +306,7 @@ class Project extends React.Component {
         <ProjectFileList
           files={this.state.storageFiles}
           url={this.props.match.params.id}
+          deleteStorageFileClick={this.deleteStorageFileClick}
         />}
       </div>
     );

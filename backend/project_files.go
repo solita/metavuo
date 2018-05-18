@@ -56,6 +56,8 @@ func routeProjectFile(w http.ResponseWriter, r *http.Request, id int64) {
 	case http.MethodGet:
 		routeProjectFileGet(w, r, id, head)
 		return
+	case http.MethodDelete:
+		routeProjectFileDelete(w, r, id, head)
 	default:
 		http.Error(w, "", http.StatusMethodNotAllowed)
 		return
@@ -210,4 +212,32 @@ func routeProjectFileGet(w http.ResponseWriter, r *http.Request, id int64, fileN
 
 	http.Redirect(w, r, url, http.StatusSeeOther)
 
+}
+
+func routeProjectFileDelete(w http.ResponseWriter, r *http.Request, id int64, fileName string) {
+	c := appengine.NewContext(r)
+	client, err := storage.NewClient(c)
+	if err != nil {
+		log.Errorf(c, "Failed to create a Storage client", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	defer client.Close()
+
+	bucket, err := file.DefaultBucketName(c)
+
+	if err != nil {
+		log.Errorf(c, "Failed to get default bucket", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	err = client.Bucket(bucket).Object(strconv.Itoa(int(id)) + "/" + fileName).Delete(c)
+
+	if err != nil {
+		log.Errorf(c, "Failed to delete file from storage", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
 }

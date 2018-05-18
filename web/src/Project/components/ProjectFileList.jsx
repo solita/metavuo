@@ -1,5 +1,5 @@
 import React from 'react';
-import { List, ListItem } from 'material-ui';
+import { IconButton, List, ListItem, ListItemSecondaryAction } from 'material-ui';
 
 const getFileSize = (number) => {
   if (number < 1024) {
@@ -13,6 +13,13 @@ const getFileSize = (number) => {
 };
 
 class ProjectFileList extends React.Component {
+  constructor(props) {
+    super(props);
+    this.deleteStorageFileClick = this.deleteStorageFileClick.bind(this);
+  }
+  deleteStorageFileClick(fileName) {
+    this.props.deleteStorageFileClick(fileName);
+  }
   render() {
     return (
       <div style={{ marginTop: 12 }}>
@@ -24,11 +31,20 @@ class ProjectFileList extends React.Component {
               > Name: {file.fileName}, Size: {getFileSize(file.fileSize)},
             Created: {new Date(Date.parse(file.created)).toLocaleDateString()}
               </a>
+              <ListItemSecondaryAction>
+                <a href={`/api/projects/${this.props.url}/files/${file.fileName}`} >
+                  <IconButton aria-label="Download">
+                    <i className="material-icons">file_download</i>
+                  </IconButton>
+                </a>
+                <IconButton onClick={() => this.deleteStorageFileClick(file.fileName)} aria-label="Delete">
+                  <i className="material-icons">delete</i>
+                </IconButton>
+              </ListItemSecondaryAction>
             </ListItem>
           ))}
         </List>
       </div>
-
     );
   }
 }

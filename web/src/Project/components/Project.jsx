@@ -273,8 +273,8 @@ class Project extends React.Component {
                     closeDialog={this.closeFileDialog}
                     titleText="Upload file"
                     url={`/api/projects/${this.props.match.params.id}/files/generate-upload-url`}
+                    userEmail={this.props.userEmail}
                   />
-
                   <UploadDialog
                     dialogOpen={this.state.dialogOpen}
                     titleText="Metadata file upload"

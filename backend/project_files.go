@@ -13,6 +13,7 @@ import (
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/file"
 	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/user"
 )
 
 var fileNamePattern = regexp.MustCompile(`^[\w_\-.]*$`)
@@ -67,6 +68,7 @@ func routeProjectFile(w http.ResponseWriter, r *http.Request, id int64) {
 func routeProjectFileUrlRequest(w http.ResponseWriter, r *http.Request, id int64) {
 	c := appengine.NewContext(r)
 	fileName := r.FormValue("filename")
+	description := r.FormValue("description")
 
 	if !fileNamePattern.Match([]byte(fileName)) {
 		http.Error(w, "File name is invalid", http.StatusBadRequest)
@@ -78,7 +80,7 @@ func routeProjectFileUrlRequest(w http.ResponseWriter, r *http.Request, id int64
 		return
 	}
 
-	getStorageUrl(c, fileName, w, id)
+	getStorageUrl(c, fileName, w, id, description)
 
 }
 
@@ -111,8 +113,9 @@ func isFileNameAvailable(c context.Context, fileName string, id int64) bool {
 
 }
 
-func getStorageUrl(c context.Context, fileName string, w http.ResponseWriter, id int64) {
+func getStorageUrl(c context.Context, fileName string, w http.ResponseWriter, id int64, description string) {
 	acc, _ := appengine.ServiceAccount(c)
+	uploadedBy := user.Current(c).Email
 
 	bucket, err := file.DefaultBucketName(c)
 
@@ -125,6 +128,7 @@ func getStorageUrl(c context.Context, fileName string, w http.ResponseWriter, id
 		Method:         http.MethodPut,
 		GoogleAccessID: acc,
 		ContentType:    "text/plain",
+		Headers:        []string{"x-goog-meta-uploadedby:" + uploadedBy, "x-goog-meta-description:" + description},
 		SignBytes: func(b []byte) ([]byte, error) {
 			_, signedBytes, err := appengine.SignBytes(c, b)
 			return signedBytes, err

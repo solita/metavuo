@@ -18,7 +18,7 @@ class App extends React.Component {
     this.state = {
       isAuth: false,
       isAdmin: false,
-      usersName: '',
+      userEmail: '',
     };
   }
 
@@ -29,7 +29,7 @@ class App extends React.Component {
           const isAdmin = res.data.role === 'admin';
           this.setState({
             isAuth: true,
-            usersName: res.data.name,
+            userEmail: res.data.email,
             isAdmin,
           });
         }
@@ -44,7 +44,7 @@ class App extends React.Component {
     return (
       <div>
         <Header
-          usersName={this.state.usersName}
+          userEmail={this.state.userEmail}
           isAdmin={this.state.isAdmin}
         />
         <div className="content-container">
@@ -54,7 +54,7 @@ class App extends React.Component {
                 <Route exact path="/" component={ProjectList} />
                 <Route path="/projects/new" component={CreateProject} />
                 <Route exact path="/projects" component={ProjectList} />
-                <Route path="/projects/:id" component={Project} />
+                <Route path="/projects/:id" render={props => (<Project {...props} userEmail={this.state.userEmail} />)} />
                 <AdminRoute exact path="/admin" component={AdminView} isAdmin={this.state.isAdmin} />
                 <Route exact path="*" component={NotFound} />
               </Switch>

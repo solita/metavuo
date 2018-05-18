@@ -49,7 +49,7 @@ class Header extends React.Component {
                 <i className="material-icons">help_outline</i>
               </Button>
             </div>
-            <div>{this.props.usersName}</div>
+            <div>{this.props.userEmail}</div>
           </Toolbar>
         </AppBar>
         <InfoDialog dialogOpen={this.state.infoOpen} closeDialog={this.closeInfo} />
@@ -60,12 +60,12 @@ class Header extends React.Component {
 
 Header.propTypes = {
   isAdmin: PropTypes.bool,
-  usersName: PropTypes.string,
+  userEmail: PropTypes.string,
 };
 
 Header.defaultProps = {
   isAdmin: false,
-  usersName: '',
+  userEmail: '',
 };
 
 export default Header;

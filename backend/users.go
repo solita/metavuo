@@ -10,7 +10,7 @@ import (
 )
 
 type CurrentUser struct {
-	Name string `json:"name"`
+	Email string `json:"email"`
 	Role string `json:"role"`
 }
 
@@ -57,7 +57,7 @@ func routeUsersGetMe(w http.ResponseWriter, r *http.Request) {
 	var currentUser CurrentUser
 
 	if user.IsAdmin(c) {
-		currentUser.Name = user.Current(c).Email
+		currentUser.Email = user.Current(c).Email
 		currentUser.Role = "admin"
 	} else {
 
@@ -80,7 +80,7 @@ func routeUsersGetMe(w http.ResponseWriter, r *http.Request) {
 		var u AppUser
 		u = uList[0]
 
-		currentUser.Name = u.Name
+		currentUser.Email = u.Email
 		currentUser.Role = "user"
 	}
 

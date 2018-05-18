@@ -16,6 +16,7 @@ import (
 
 const (
 	userKind = "AppUser"
+	infoKind = "InfoText"
 )
 
 type AppUser struct {
@@ -28,9 +29,29 @@ type AppUser struct {
 	CreatedAt    time.Time `json:"created_at"`
 }
 
+type InfoText struct {
+	ID      int64  `datastore:"-" json:"-"`
+	Title   string `json:"title"`
+	Content string `datastore:",noindex" json:"content"`
+}
+
 func routeAdmin(w http.ResponseWriter, r *http.Request) {
 	var head string
 	head, r.URL.Path = shiftPath(r.URL.Path)
+
+	if head == "info" {
+		switch r.Method {
+		case http.MethodPost:
+			routeInfoCreate(w, r)
+			return
+		case http.MethodPut:
+			routeInfoUpdate(w, r)
+			return
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+			return
+		}
+	}
 
 	if head == "users" {
 		var head string
@@ -182,4 +203,85 @@ func routeAdminUsersDelete(w http.ResponseWriter, r *http.Request, userId int64)
 	}
 
 	w.WriteHeader(http.StatusNoContent) // 204
+}
+
+func routeInfoCreate(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+
+	var infoArray []InfoText
+	q := datastore.NewQuery(infoKind).Limit(1)
+	_, err := q.GetAll(c, &infoArray)
+	if err != nil {
+		log.Errorf(c, "Error while getting info text: %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+	if len(infoArray) > 0 {
+		log.Errorf(c, "Info text already exists")
+		http.Error(w, "Info text already exists", http.StatusBadRequest)
+		return
+	}
+
+	dec := json.NewDecoder(r.Body)
+	var i InfoText
+	if err := dec.Decode(&i); err != nil {
+		log.Errorf(c, "Decoding JSON failed while creating info text %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	key := datastore.NewIncompleteKey(c, infoKind, nil)
+	_, err = datastore.Put(c, key, &i)
+	if err != nil {
+		log.Errorf(c, "Adding info text failed %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(mustJSON(i))
+}
+
+func routeInfoUpdate(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+
+	dec := json.NewDecoder(r.Body)
+	var i InfoText
+	if err := dec.Decode(&i); err != nil {
+		log.Errorf(c, "Decoding JSON failed while updating info text %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	var infoArray []InfoText
+	var infoKeyArray []*datastore.Key
+	q := datastore.NewQuery(infoKind).Limit(1)
+	infoKeyArray, err := q.GetAll(c, &infoArray)
+
+	if err != nil {
+		log.Errorf(c, "Error while getting info text: %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if len(infoArray) <= 0 {
+		log.Errorf(c, "Updating info text failed, none exist")
+		http.Error(w, "Updating info text failed, none exist", http.StatusBadRequest)
+		return
+	}
+
+	key := infoKeyArray[0]
+	currInfo := infoArray[0]
+	currInfo.Title = i.Title
+	currInfo.Content = i.Content
+
+	_, err = datastore.Put(c, key, &currInfo)
+	if err != nil {
+		log.Errorf(c, "Updating info text failed %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(mustJSON(currInfo))
 }

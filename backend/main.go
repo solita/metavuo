@@ -27,14 +27,19 @@ func routeApi(w http.ResponseWriter, r *http.Request) {
 		routeProjects(w, r)
 		return
 
-	// /api/tasks/
-	case "tasks":
-		routeTasks(w, r)
-		return
-
 	// /api/users/
 	case "users":
 		routeUsers(w, r)
+		return
+
+		// /api/info
+	case "info":
+		routeInfo(w, r)
+		return
+
+	// /api/tasks
+	case "tasks":
+		routeTasks(w, r)
 		return
 	}
 

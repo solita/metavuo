@@ -1,8 +1,8 @@
 import React from 'react';
 import axios from 'axios';
-import PropTypes from 'prop-types';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import Button from 'material-ui/Button';
+import PropTypes from 'prop-types';
 
 class AddUserForm extends React.Component {
   constructor(props) {
@@ -64,7 +64,7 @@ class AddUserForm extends React.Component {
             className="form-item form-control"
             id="name"
             name="name"
-            label="Name"
+            label="Name *"
             value={this.state.name}
             onChange={this.handleChange}
             margin="normal"
@@ -75,7 +75,7 @@ class AddUserForm extends React.Component {
             className="form-item form-control"
             id="email"
             name="email"
-            label="Email"
+            label="Email *"
             value={this.state.email}
             onChange={this.handleChange}
             margin="normal"
@@ -86,7 +86,7 @@ class AddUserForm extends React.Component {
             className="form-item form-control"
             id="organization"
             name="organization"
-            label="Organization"
+            label="Organization *"
             value={this.state.organization}
             onChange={this.handleChange}
             margin="normal"

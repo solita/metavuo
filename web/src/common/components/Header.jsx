@@ -7,17 +7,36 @@ import Typography from 'material-ui/Typography';
 import Tooltip from 'material-ui/Tooltip';
 import PropTypes from 'prop-types';
 import '../css/Header.scss';
+import InfoDialog from './InfoDialog';
 
-const Header = props => (
-  <div className="header-root" >
-    <AppBar position="static">
-      <Toolbar>
-        <Typography variant="title" className="header-title">
-          <Link to="/" className="header-link">UEF Projektipankki</Link>
-        </Typography>
-        <div className="margin-right">
-          {props.isAdmin
-            ?
+class Header extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      infoOpen: false,
+    };
+    this.openInfo = this.openInfo.bind(this);
+    this.closeInfo = this.closeInfo.bind(this);
+  }
+
+  openInfo() {
+    this.setState({ infoOpen: true });
+  }
+
+  closeInfo() {
+    this.setState({ infoOpen: false });
+  }
+
+  render() {
+    return (
+      <div className="header-root">
+        <AppBar position="static">
+          <Toolbar>
+            <Typography variant="title" className="header-title">
+              <Link to="/" className="header-link">Metavuo</Link>
+            </Typography>
+            <div className="margin-right">
+              {this.props.isAdmin &&
               <Link to="/admin" className="header-button-link">
                 <Tooltip id="tooltip-fab" title="Admin panel" placement="bottom">
                   <Button variant="fab" mini>
@@ -25,13 +44,19 @@ const Header = props => (
                   </Button>
                 </Tooltip>
               </Link>
-            : ''}
-        </div>
-        <div>{props.usersName}</div>
-      </Toolbar>
-    </AppBar>
-  </div>
-);
+              }
+              <Button variant="fab" mini onClick={this.openInfo}>
+                <i className="material-icons">help_outline</i>
+              </Button>
+            </div>
+            <div>{this.props.usersName}</div>
+          </Toolbar>
+        </AppBar>
+        <InfoDialog dialogOpen={this.state.infoOpen} closeDialog={this.closeInfo} />
+      </div>
+    );
+  }
+}
 
 Header.propTypes = {
   isAdmin: PropTypes.bool,

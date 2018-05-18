@@ -1,13 +1,10 @@
 import React from 'react';
 import axios from 'axios';
 import Button from 'material-ui/Button';
-import Dialog from 'material-ui/Dialog';
-import DialogTitle from 'material-ui/Dialog/DialogTitle';
-import DialogContent from 'material-ui/Dialog/DialogContent';
-import DialogActions from 'material-ui/Dialog/DialogActions';
-import AddUserForm from './AddUserForm';
 import UserList from './UserList';
 import ConfirmDialog from '../../common/components/ConfirmDialog';
+import AdminAddUserDialog from './AdminAddUserDialog';
+import UpdateInfoDialog from './UpdateInfoDialog';
 
 class AdminView extends React.Component {
   constructor(props) {
@@ -20,6 +17,7 @@ class AdminView extends React.Component {
       removeUser: '',
       delDialogOpen: false,
       deleting: false,
+      infoDialogOpen: false,
     };
     this.openUserDialog = this.openUserDialog.bind(this);
     this.closeUserDialog = this.closeUserDialog.bind(this);
@@ -27,6 +25,8 @@ class AdminView extends React.Component {
     this.deleteUser = this.deleteUser.bind(this);
     this.deleteUserClick = this.deleteUserClick.bind(this);
     this.closeDelDialog = this.closeDelDialog.bind(this);
+    this.openInfoDialog = this.openInfoDialog.bind(this);
+    this.closeInfoDialog = this.closeInfoDialog.bind(this);
   }
 
   componentDidMount() {
@@ -50,7 +50,6 @@ class AdminView extends React.Component {
   }
 
   deleteUser(userId, userName) {
-    console.log(`deleting user ${userId} ${userName}`);
     this.setState({ delDialogOpen: false });
     axios.delete(`/api/admin/users/${userId}`)
       .then((res) => {
@@ -74,6 +73,14 @@ class AdminView extends React.Component {
     this.setState({ userDialogOpen: false });
   }
 
+  openInfoDialog() {
+    this.setState({ infoDialogOpen: true });
+  }
+
+  closeInfoDialog() {
+    this.setState({ infoDialogOpen: false });
+  }
+
   closeForm() {
     setTimeout(() => {
       this.closeUserDialog();
@@ -90,7 +97,7 @@ class AdminView extends React.Component {
       <div>
         <h2>Admin panel</h2>
         <p>{this.state.message}</p>
-        <Button variant="raised" color="primary" onClick={this.openUserDialog}>
+        <Button variant="raised" color="primary" style={{ margin: 12 }} onClick={this.openUserDialog}>
           <i className="material-icons icon-left">add</i>Add user
         </Button>
 
@@ -103,23 +110,15 @@ class AdminView extends React.Component {
           : <p>No users added</p>
         }
 
-        <Dialog
-          open={this.state.userDialogOpen}
-          onClose={this.closeUserDialog}
-          disableBackdropClick
-        >
-          <DialogActions>
-            <Button onClick={this.closeUserDialog}>
-              Close<i className="material-icons icon-right">close</i>
-            </Button>
-          </DialogActions>
-          <DialogTitle>Add user</DialogTitle>
-          <DialogContent>
-            <AddUserForm
-              closeForm={this.closeForm}
-            />
-          </DialogContent>
-        </Dialog>
+        <Button variant="raised" color="primary" style={{ margin: 12 }} onClick={this.openInfoDialog}>
+          <i className="material-icons icon-left">update</i>Update info text
+        </Button>
+
+        <AdminAddUserDialog
+          dialogOpen={this.state.userDialogOpen}
+          closeDialog={this.closeUserDialog}
+          closeForm={this.closeForm}
+        />
 
         <ConfirmDialog
           dialogOpen={this.state.delDialogOpen}
@@ -128,6 +127,11 @@ class AdminView extends React.Component {
           contentText={`Are you sure you want to remove user ${this.state.removeUser} permanently?`}
           action={() => this.deleteUser(this.state.removeUserId, this.state.removeUser)}
           actionButtonText="Delete user"
+        />
+
+        <UpdateInfoDialog
+          dialogOpen={this.state.infoDialogOpen}
+          closeDialog={this.closeInfoDialog}
         />
       </div>
     );

@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from 'material-ui';
 import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
-import axios from 'axios/index';
+import axios from 'axios';
 import PropTypes from 'prop-types';
 
 class ProjectUpdateDialog extends React.Component {

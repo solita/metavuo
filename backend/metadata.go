@@ -327,7 +327,7 @@ func routeProjectMetadataDownload(w http.ResponseWriter, r *http.Request, projec
 	summaryKeyArray, err := q.GetAll(c, &summaryArray)
 
 	if err != nil {
-		log.Errorf(c, "Error while getting metadat summary: %v", err)
+		log.Errorf(c, "Error while getting metadata summary: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}

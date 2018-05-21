@@ -101,6 +101,12 @@ type DelCollaborator struct {
 }
 
 func routeProjects(w http.ResponseWriter, r *http.Request) {
+	userId := getAppUserId(w, r)
+	if userId == 0 {
+		http.Error(w, "", http.StatusForbidden)
+		return
+	}
+
 	var head string
 	head, r.URL.Path = shiftPath(r.URL.Path)
 

@@ -45,9 +45,11 @@ class Header extends React.Component {
                 </Tooltip>
               </Link>
               }
-              <Button variant="fab" mini onClick={this.openInfo}>
-                <i className="material-icons">help_outline</i>
-              </Button>
+              {this.props.userEmail &&
+                <Button variant="fab" mini onClick={this.openInfo}>
+                  <i className="material-icons">help_outline</i>
+                </Button>
+              }
             </div>
             <div>{this.props.userEmail}</div>
           </Toolbar>

@@ -25,8 +25,14 @@ class InfoDialog extends React.Component {
           this.setState({ title: res.data.title || '', content: res.data.content || 'No info' });
         }
       })
-      .catch(() => {
-        this.setState({ message: 'Problem getting info' });
+      .catch((err) => {
+        if (err.response.status === 403) {
+          this.setState({ message: '' });
+        } else if (err.response.status === 404) {
+          this.setState({ message: 'No info' });
+        } else {
+          this.setState({message: 'Problem getting info'});
+        }
       });
   }
 

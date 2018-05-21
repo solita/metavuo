@@ -9,6 +9,12 @@ import (
 )
 
 func routeInfo(w http.ResponseWriter, r *http.Request) {
+	userId := getAppUserId(w, r)
+	if userId == 0 {
+		http.Error(w, "", http.StatusForbidden)
+		return
+	}
+
 	switch r.Method {
 	case http.MethodGet:
 		routeInfoGet(w, r)

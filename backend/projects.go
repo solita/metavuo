@@ -584,8 +584,6 @@ func routeProjectCollaboratorsDelete(w http.ResponseWriter, r *http.Request, pro
 		return
 	}
 
-	log.Debugf(c, "Deleting collaboratot with email %s", delC.Email)
-
 	if delC.Email == "" {
 		log.Errorf(c, "No email given")
 		http.Error(w, "", http.StatusBadRequest)

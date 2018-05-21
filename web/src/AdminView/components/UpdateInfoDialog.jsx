@@ -33,7 +33,6 @@ class UpdateInfoDialog extends React.Component {
         }
       })
       .catch((err) => {
-        console.log(err.response);
         if (err.response.status === 404) {
           this.setState({ message: 'No info text set yet. Create new one.', infoIsSet: false });
         } else {
@@ -64,8 +63,7 @@ class UpdateInfoDialog extends React.Component {
         }
         this.setState({ updating: false });
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
         this.setState({ message: 'Problem updating info', updating: false });
       });
   }

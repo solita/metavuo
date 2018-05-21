@@ -30,6 +30,8 @@ class CollaboratorList extends React.Component {
       .then((res) => {
         if (res.status === 200 && res.data !== null) {
           this.setState({ collaborators: res.data });
+        } else if (res.status === 204) {
+          this.setState({ collaborators: [] });
         } else {
           this.setState({ message: 'Could not get collaborators' });
         }

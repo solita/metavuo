@@ -23,7 +23,8 @@ type ProjectFile struct {
 	FileName     string    `json:"fileName"`
 	FileSize     int64     `json:"fileSize"`
 	Created      time.Time `json:"created"`
-	//TODO Description string
+	CreatedBy    string    `json:"createdBy"`
+	Description  string    `json:"description"`
 }
 
 func routeProjectFile(w http.ResponseWriter, r *http.Request, id int64) {
@@ -178,6 +179,8 @@ func routeProjectFileList(w http.ResponseWriter, r *http.Request, id int64) {
 			filepath.Base(item.Name),
 			item.Size,
 			item.Created,
+			item.Metadata["createdby"],
+			item.Metadata["description"],
 		})
 	}
 

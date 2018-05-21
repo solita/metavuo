@@ -1,5 +1,6 @@
 import React from 'react';
 import { IconButton, List, ListItem, ListItemSecondaryAction } from 'material-ui';
+import PropTypes from 'prop-types';
 
 const getFileSize = (number) => {
   if (number < 1024) {
@@ -29,7 +30,9 @@ class ProjectFileList extends React.Component {
               <a
                 href={`/api/projects/${this.props.url}/files/${file.fileName}`}
               > Name: {file.fileName}, Size: {getFileSize(file.fileSize)},
-            Created: {new Date(Date.parse(file.created)).toLocaleDateString()}
+            Created: {new Date(Date.parse(file.created)).toLocaleDateString()},
+                CreatedBy:  {file.createdBy},
+                Description: {file.description}
               </a>
               <ListItemSecondaryAction>
                 <a href={`/api/projects/${this.props.url}/files/${file.fileName}`} >
@@ -49,3 +52,14 @@ class ProjectFileList extends React.Component {
   }
 }
 export default ProjectFileList;
+ProjectFileList.propTypes = {
+  files: PropTypes.array,
+  deleteStorageFileClick: PropTypes.func,
+  url: PropTypes.string,
+};
+
+ProjectFileList.defaultProps = {
+  files: [],
+  deleteStorageFileClick: () => null,
+  url: '',
+};

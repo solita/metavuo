@@ -1,8 +1,9 @@
 import React from 'react';
 import { Button, Dialog, DialogActions, DialogContent, DialogTitle } from 'material-ui';
-import { TextValidator, ValidatorForm } from 'react-material-ui-form-validator';
+import { ValidatorForm } from 'react-material-ui-form-validator';
 import axios from 'axios';
 import PropTypes from 'prop-types';
+import ProjectFormFields from '../../NewProject/components/ProjectFormFields';
 
 class ProjectUpdateDialog extends React.Component {
   constructor(props) {
@@ -82,112 +83,25 @@ class ProjectUpdateDialog extends React.Component {
               autoComplete="off"
             >
               <h2>Project details</h2>
-              <TextValidator
-                className="form-item form-control"
-                id="name"
-                name="name"
-                label="Project name *"
-                value={this.state.name}
-                onChange={this.handleChange}
-                margin="normal"
-                validators={['required', 'matchRegexp:^[\\w_-]*$']}
-                errorMessages={['Name cannot be blank.', 'Only alphanumeric characters including dash and underscore allowed']}
-              />
-              <TextValidator
-                className="form-item form-control"
-                id="description"
-                name="description"
-                label="Description *"
-                multiline
-                rowsMax="8"
-                value={this.state.description}
-                onChange={this.handleChange}
-                margin="normal"
-                validators={['required']}
-                errorMessages={['Description is mandatory.']}
-              />
-              <TextValidator
-                className="form-item form-control"
-                id="internalReference"
-                name="internalReference"
-                label="Internal reference number"
-                value={this.state.internalReference}
-                onChange={this.handleChange}
-              />
-              <TextValidator
-                className="form-item form-control"
-                id="sampleLocation"
-                name="sampleLocation"
-                label="Sample location"
-                value={this.state.sampleLocation}
-                onChange={this.handleChange}
-              />
-              <TextValidator
-                className="form-item form-control"
-                id="info"
-                name="info"
-                label="Additional information"
-                value={this.state.info}
-                onChange={this.handleChange}
-              />
-              <h2>Customer details</h2>
-              <TextValidator
-                className="form-item form-control"
-                id="organization"
-                name="organization"
-                label="Customer organization *"
-                value={this.state.organization}
-                validators={['required']}
-                errorMessages={['Organization cannot be blank.']}
-                onChange={this.handleChange}
-              />
-              <TextValidator
-                className="form-item form-control"
-                id="invoiceAddress"
-                name="invoiceAddress"
-                label="Customer invoice address"
-                value={this.state.invoiceAddress}
-                onChange={this.handleChange}
-              />
-              <TextValidator
-                className="form-item form-control"
-                id="customerName"
-                name="customerName"
-                label="Customer name"
-                value={this.state.customerName}
-                onChange={this.handleChange}
-              />
-              <TextValidator
-                className="form-item form-control"
-                id="customerEmail"
-                name="customerEmail"
-                label="Customer email"
-                value={this.state.customerEmail}
-                onChange={this.handleChange}
-                errorMessages={['Invalid email-address.']}
-                validators={['isEmail']}
-              />
-              <TextValidator
-                className="form-item form-control"
-                id="customerPhone"
-                name="customerPhone"
-                label="Customer phone number"
-                value={this.state.customerPhone}
-                onChange={this.handleChange}
-              />
-              <TextValidator
-                className="form-item form-control"
-                id="customerReference"
-                name="customerReference"
-                label="Customer reference number"
-                value={this.state.customerReference}
-                onChange={this.handleChange}
+              <ProjectFormFields
+                name={this.state.name}
+                description={this.state.description}
+                internalReference={this.state.internalReference}
+                sampleLocation={this.state.sampleLocation}
+                info={this.state.info}
+                organization={this.state.organization}
+                invoiceAddress={this.state.invoiceAddress}
+                customerName={this.state.customerName}
+                customerEmail={this.state.customerEmail}
+                customerPhone={this.state.customerPhone}
+                customerReference={this.state.customerReference}
+                handleChange={this.handleChange}
               />
               <DialogActions>
-                <Button onClick={this.handleClose} variant="raised" color="primary">
+                <Button onClick={this.handleClose} variant="raised" color="primary" style={{ marginTop: 12 }}>
                 Cancel
                 </Button>
-                <Button type="submit" id="submit-update" variant="raised" color="primary">
+                <Button type="submit" id="submit-update" variant="raised" color="primary" style={{ marginTop: 12 }}>
                   <i className="material-icons margin-right">save</i> Save
                 </Button>
               </DialogActions>

@@ -31,7 +31,7 @@ class MetadataSummary extends React.Component {
       <div className="metadata-container">
         <Grid container>
           <Grid item xs={10}>
-            <h3>Metadata</h3>
+            <h3>Sample metadata</h3>
             <p className="message-errors">{this.props.metadataError}</p>
             <p>The metadata file has {this.props.rowCount || '?'} data rows.</p>
             <p>Custom fields: {this.props.headers.length > 0

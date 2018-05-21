@@ -229,7 +229,6 @@ class Project extends React.Component {
                       </div>
                     }
                   </div>
-                  <CollaboratorList projectId={this.props.match.params.id} />
                 </Grid>
                 <Grid item xs={6}>
                   {!this.state.errorMsg &&
@@ -243,6 +242,10 @@ class Project extends React.Component {
                       url={`/api/projects/${this.props.match.params.id}`}
                       updateMainView={this.getProject}
                       parentState={this.state}
+                    />
+                    <CollaboratorList
+                      projectId={this.props.match.params.id}
+                      projectCreatorEmail={this.state.createdbyEmail}
                     />
                   </div>}
                 </Grid>

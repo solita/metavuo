@@ -6,7 +6,6 @@ import DialogContent from 'material-ui/Dialog/DialogContent';
 import DialogActions from 'material-ui/Dialog/DialogActions';
 import { Button, FormControl, Select, MenuItem, InputLabel } from 'material-ui';
 import PropTypes from 'prop-types';
-import '../css/CollaboratorListAdd.scss';
 
 class CollaboratorListAdd extends React.Component {
   constructor(props) {
@@ -14,10 +13,10 @@ class CollaboratorListAdd extends React.Component {
     this.state = {
       users: [],
       isOpen: false,
-      userId: '',
+      userEmail: '',
       message: '',
     };
-    this.openCollaboratorDialog = this.openCollaboratorDialog.bind(this);
+    this.openAddCollaboratorDialog = this.openAddCollaboratorDialog.bind(this);
     this.handleClose = this.handleClose.bind(this);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -29,7 +28,10 @@ class CollaboratorListAdd extends React.Component {
     axios.get('/api/users')
       .then((res) => {
         if (res.data !== null) {
-          this.setState({ users: res.data });
+          let users = res.data;
+          users = users.filter(user => (
+            this.props.collaborators.every(u2 => user.email !== u2.email)));
+          this.setState({ users });
         }
       })
       .catch(() => {
@@ -37,7 +39,7 @@ class CollaboratorListAdd extends React.Component {
       });
   }
 
-  openCollaboratorDialog() {
+  openAddCollaboratorDialog() {
     this.setState({ isOpen: true });
   }
 
@@ -50,14 +52,14 @@ class CollaboratorListAdd extends React.Component {
   }
 
   handleSubmit(event) {
+    this.setState({ message: '' });
     event.preventDefault();
     const data = new FormData();
-    data.append('id', this.props.projectId);
-    data.append('user_id', this.state.userId);
+    data.append('email', this.state.userEmail);
     axios.post(`/api/projects/${this.props.projectId}/collaborators`, data)
-      .then((res) => {
-        console.log(res);
+      .then(() => {
         this.setState({ isOpen: false });
+        this.props.collaboratorAddSuccess();
       })
       .catch(() => {
         this.setState({ message: 'Problem adding collaborator' });
@@ -68,12 +70,10 @@ class CollaboratorListAdd extends React.Component {
     return (
       <div>
         {this.state.message && <p>{this.state.message}</p>}
-        <Button
-          variant="fab"
-          onClick={this.openCollaboratorDialog}
-        >
-          <i className="material-icons">add</i>
+        <Button variant="raised" color="primary" onClick={this.openAddCollaboratorDialog}>
+          Add collaborator
         </Button>
+        <p className="message-errors">{this.props.message}</p>
         <Dialog
           open={this.state.isOpen}
           onClose={this.handleClose}
@@ -84,15 +84,15 @@ class CollaboratorListAdd extends React.Component {
             <FormControl>
               <InputLabel htmlFor="user-select">User</InputLabel>
               <Select
-                value={this.state.userId}
+                value={this.state.userEmail}
                 onChange={this.handleChange}
-                name="userId"
+                name="userEmail"
                 id="user-select"
-                displayEmpty
+                autoWidth
               >
-                <MenuItem value="" />
+                <MenuItem value="" disabled />
                 {this.state.users.map(user => (
-                  <MenuItem key={user.user_id} value={user.user_id}>
+                  <MenuItem key={user.email} value={user.email}>
                     {user.name}, {user.email}, {user.organization}
                   </MenuItem>
                 ))
@@ -101,6 +101,7 @@ class CollaboratorListAdd extends React.Component {
             </FormControl>
           </DialogContent>
           <DialogActions>
+            <Button onClick={this.handleClose}>Cancel</Button>
             <Button type="submit" id="submit-project" variant="raised" color="primary" onClick={this.handleSubmit}>
               Add
             </Button>
@@ -113,6 +114,18 @@ class CollaboratorListAdd extends React.Component {
 
 CollaboratorListAdd.propTypes = {
   projectId: PropTypes.string.isRequired,
+  collaborators: PropTypes.arrayOf(PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    email: PropTypes.string.isRequired,
+    organization: PropTypes.string.isRequired,
+  })),
+  collaboratorAddSuccess: PropTypes.func.isRequired,
+  message: PropTypes.string,
+};
+
+CollaboratorListAdd.defaultProps = {
+  collaborators: [],
+  message: '',
 };
 
 export default CollaboratorListAdd;

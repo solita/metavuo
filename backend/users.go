@@ -11,11 +11,10 @@ import (
 
 type CurrentUser struct {
 	Email string `json:"email"`
-	Role string `json:"role"`
+	Role  string `json:"role"`
 }
 
 type CollaboratorUser struct {
-	ID           int64  `json:"user_id"`
 	Name         string `json:"name"`
 	Email        string `json:"email"`
 	Organization string `json:"organization"`
@@ -98,7 +97,7 @@ func routeUsersList(w http.ResponseWriter, r *http.Request) {
 	t := q.Run(c)
 	for {
 		var u AppUser
-		key, err := t.Next(&u)
+		_, err := t.Next(&u)
 		if err == datastore.Done {
 			break
 		}
@@ -111,7 +110,6 @@ func routeUsersList(w http.ResponseWriter, r *http.Request) {
 		cu.Name = u.Name
 		cu.Email = u.Email
 		cu.Organization = u.Organization
-		cu.ID = key.IntID()
 
 		uList = append(uList, cu)
 	}

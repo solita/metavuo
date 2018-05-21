@@ -28,8 +28,7 @@ class ProjectList extends React.Component {
           this.setState({ message: 'No projects found.', fetching: false });
         }
       })
-      .catch((err) => {
-        console.log(err);
+      .catch(() => {
         this.setState({ message: 'Something went wrong.', fetching: false });
       });
   }

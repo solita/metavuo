@@ -1,5 +1,5 @@
 import React from 'react';
-import { ProjectForm } from '../components/ProjectForm';
+import { ProjectForm } from '../../NewProject/components/ProjectForm';
 import { shallow } from 'enzyme';
 import renderer from 'react-test-renderer';
 import { configure } from 'enzyme';

@@ -20,7 +20,6 @@ class MetadataSummary extends React.Component {
   }
 
   disableButton() {
-    console.log('click');
     this.setState({ buttonDisabled: true });
     setTimeout(() => {
       this.setState({ buttonDisabled: false });

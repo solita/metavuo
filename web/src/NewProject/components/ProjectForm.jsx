@@ -81,7 +81,7 @@ export class ProjectForm extends React.Component {
             className="form-item form-control"
             id="name"
             name="name"
-            label="Project name"
+            label="Project name *"
             value={this.state.name}
             onChange={this.handleChange}
             margin="normal"
@@ -92,7 +92,7 @@ export class ProjectForm extends React.Component {
             className="form-item form-control"
             id="description"
             name="description"
-            label="Description"
+            label="Description *"
             multiline
             rowsMax="8"
             value={this.state.description}
@@ -101,12 +101,36 @@ export class ProjectForm extends React.Component {
             validators={['required']}
             errorMessages={['Description is mandatory.']}
           />
+          <TextValidator
+            className="form-item form-control"
+            id="internalReference"
+            name="internalReference"
+            label="Internal reference number"
+            value={this.state.internalReference}
+            onChange={this.handleChange}
+          />
+          <TextValidator
+            className="form-item form-control"
+            id="sampleLocation"
+            name="sampleLocation"
+            label="Sample location"
+            value={this.state.sampleLocation}
+            onChange={this.handleChange}
+          />
+          <TextValidator
+            className="form-item form-control"
+            id="info"
+            name="info"
+            label="Additional information"
+            value={this.state.info}
+            onChange={this.handleChange}
+          />
           <h2>Customer details</h2>
           <TextValidator
             className="form-item form-control"
             id="organization"
             name="organization"
-            label="Customer organization"
+            label="Customer organization *"
             value={this.state.organization}
             validators={['required']}
             errorMessages={['Organization cannot be blank.']}
@@ -152,30 +176,6 @@ export class ProjectForm extends React.Component {
             name="customerReference"
             label="Customer reference number"
             value={this.state.customerReference}
-            onChange={this.handleChange}
-          />
-          <TextValidator
-            className="form-item form-control"
-            id="internalReference"
-            name="internalReference"
-            label="Internal reference number"
-            value={this.state.internalReference}
-            onChange={this.handleChange}
-          />
-          <TextValidator
-            className="form-item form-control"
-            id="sampleLocation"
-            name="sampleLocation"
-            label="Sample location"
-            value={this.state.sampleLocation}
-            onChange={this.handleChange}
-          />
-          <TextValidator
-            className="form-item form-control"
-            id="info"
-            name="info"
-            label="Additional information"
-            value={this.state.info}
             onChange={this.handleChange}
           />
           <div className="form-item">

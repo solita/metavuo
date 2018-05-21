@@ -82,8 +82,8 @@ class AdminView extends React.Component {
   }
 
   closeForm() {
+    this.closeUserDialog();
     setTimeout(() => {
-      this.closeUserDialog();
       this.getUsers();
     }, 500);
   }

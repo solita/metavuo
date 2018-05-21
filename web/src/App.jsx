@@ -4,7 +4,7 @@ import axios from 'axios';
 import Header from './common/components/Header';
 import ProjectList from './ProjectList/components/ProjectList';
 import Project from './Project/components/Project';
-import CreateProject from './Project/components/CreateProject';
+import CreateProject from './NewProject/components/CreateProject';
 import AdminView from './AdminView/components/AdminView';
 import NotFound from './common/components/NotFound';
 import NoAccess from './common/components/NoAccess';

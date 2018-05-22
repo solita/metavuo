@@ -45,7 +45,7 @@ class Header extends React.Component {
                 </Tooltip>
               </Link>
               }
-              {this.props.userEmail &&
+              {this.props.isUser &&
                 <Button variant="fab" mini onClick={this.openInfo}>
                   <i className="material-icons">help_outline</i>
                 </Button>
@@ -62,11 +62,13 @@ class Header extends React.Component {
 
 Header.propTypes = {
   isAdmin: PropTypes.bool,
+  isUser: PropTypes.bool,
   userEmail: PropTypes.string,
 };
 
 Header.defaultProps = {
   isAdmin: false,
+  isUser: false,
   userEmail: '',
 };
 

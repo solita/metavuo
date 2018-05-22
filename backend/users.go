@@ -10,8 +10,8 @@ import (
 )
 
 type CurrentUser struct {
-	Email string `json:"email"`
-	Role  string `json:"role"`
+	Email string   `json:"email"`
+	Roles []string `json:"roles"`
 }
 
 type CollaboratorUser struct {
@@ -59,35 +59,32 @@ func routeUsers(w http.ResponseWriter, r *http.Request) {
 func routeUsersGetMe(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
-	var currentUser CurrentUser
+	var roles []string
 
 	if user.IsAdmin(c) {
-		currentUser.Email = user.Current(c).Email
-		currentUser.Role = "admin"
-	} else {
-
-		q := datastore.NewQuery(userKind).Filter("Email = ", user.Current(c).Email).Limit(1)
-
-		var uList []AppUser
-		_, err := q.GetAll(c, &uList)
-		if err != nil {
-			log.Errorf(c, "Error while getting user: %v", err)
-			http.Error(w, "", http.StatusUnauthorized)
-			return
-		}
-
-		if len(uList) == 0 {
-			log.Errorf(c, "No user found")
-			http.Error(w, "", http.StatusUnauthorized)
-			return
-		}
-
-		var u AppUser
-		u = uList[0]
-
-		currentUser.Email = u.Email
-		currentUser.Role = "user"
+		roles = append(roles, "admin")
 	}
+
+	q := datastore.NewQuery(userKind).Filter("Email = ", user.Current(c).Email).Limit(1)
+
+	var uList []AppUser
+	_, err := q.GetAll(c, &uList)
+	if err != nil {
+		log.Errorf(c, "Error while getting user: %v", err)
+	} else {
+		if len(uList) > 0 {
+			roles = append(roles, "user")
+		}
+	}
+
+	if len(roles) == 0 {
+		http.Error(w, "", http.StatusUnauthorized)
+		return
+	}
+
+	var currentUser CurrentUser
+	currentUser.Email = user.Current(c).Email
+	currentUser.Roles = roles
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(mustJSON(currentUser))

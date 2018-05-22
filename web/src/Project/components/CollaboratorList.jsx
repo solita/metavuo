@@ -1,4 +1,5 @@
 import React from 'react';
+import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import CollaboratorListAdd from './CollaboratorListAdd';
@@ -63,6 +64,9 @@ class CollaboratorList extends React.Component {
       JSON.stringify({ email: this.state.delEmail }),
     )
       .then(() => {
+        if (this.state.delEmail === this.props.userEmail) {
+          this.props.history.push('/projects');
+        }
         this.setState({ delEmail: '', delName: '' });
         this.updateCollaborators();
       })
@@ -116,6 +120,7 @@ class CollaboratorList extends React.Component {
 CollaboratorList.propTypes = {
   projectId: PropTypes.string.isRequired,
   projectCreatorEmail: PropTypes.string.isRequired,
+  userEmail: PropTypes.string.isRequired,
 };
 
-export default CollaboratorList;
+export default withRouter(CollaboratorList);

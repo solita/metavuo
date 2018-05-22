@@ -249,6 +249,7 @@ class Project extends React.Component {
                     <CollaboratorList
                       projectId={this.props.match.params.id}
                       projectCreatorEmail={this.state.createdbyEmail}
+                      userEmail={this.props.userEmail}
                     />
                   </div>}
                 </Grid>

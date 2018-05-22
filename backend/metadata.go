@@ -42,14 +42,14 @@ type MetadataSummary struct {
 	UploadedByID string    `json:"-"`
 }
 
-func routeProjectMetadata(w http.ResponseWriter, r *http.Request, projectId int64, p Project) {
+func routeProjectMetadata(w http.ResponseWriter, r *http.Request, projectId int64, p Project, userId int64) {
 	var head string
 	head, r.URL.Path = shiftPath(r.URL.Path)
 
 	if head == "" {
 		switch r.Method {
 		case http.MethodPost:
-			routeProjectMetadataUpload(w, r, projectId)
+			routeProjectMetadataUpload(w, r, projectId, userId)
 			return
 		case http.MethodDelete:
 			routeProjectMetadataDelete(w, r, projectId)
@@ -75,7 +75,7 @@ func routeProjectMetadata(w http.ResponseWriter, r *http.Request, projectId int6
 	return
 }
 
-func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request, projectId int64) {
+func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request, projectId int64, userId int64) {
 	c := appengine.NewContext(r)
 
 	err := r.ParseMultipartForm(64 << 20)
@@ -170,7 +170,7 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request, projectI
 		return
 	}
 
-	summary, err := saveMetadata(metadata, c, headers, projectId)
+	summary, err := saveMetadata(metadata, c, headers, projectId, userId)
 
 	if err != nil {
 		log.Errorf(c, "Saving metadata failed: %v", err)
@@ -181,14 +181,14 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request, projectI
 	w.Write(mustJSON(summary))
 }
 
-func saveMetadata(a []sampleMetaData, c context.Context, headers []string, id int64) (*MetadataSummary, error) {
+func saveMetadata(a []sampleMetaData, c context.Context, headers []string, id int64, userId int64) (*MetadataSummary, error) {
 
 	metadataSummary := MetadataSummary{
 		ProjectID:    id,
 		Headers:      headers,
 		RowCount:     int64(len(a)),
 		UploadedAt:   time.Now().UTC(),
-		UploadedByID: user.Current(c).ID,
+		UploadedByID: strconv.FormatInt(userId, 10),
 		UploadedBy:   user.Current(c).Email,
 	}
 

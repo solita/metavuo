@@ -27,3 +27,18 @@ func getAppUserId(w http.ResponseWriter, r *http.Request) int64 {
 
 	return cuKeyArray[0].IntID()
 }
+
+func isUserCollaborator(w http.ResponseWriter, r *http.Request, userId int64, p Project) bool {
+	c := appengine.NewContext(r)
+
+	if user.IsAdmin(c) {
+		return true
+	}
+
+	for _, cId := range p.Collaborators {
+		if cId == userId {
+			return true
+		}
+	}
+	return false
+}

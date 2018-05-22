@@ -113,7 +113,7 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 	if head == "" {
 		switch r.Method {
 		case http.MethodPost:
-			routeProjectsCreate(w, r)
+			routeProjectsCreate(w, r, userId)
 			return
 		case http.MethodGet:
 			routeProjectsList(w, r, userId)
@@ -141,13 +141,7 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isCollaborator := false
-	for _, cId := range p.Collaborators {
-		if cId == userId {
-			isCollaborator = true
-			break
-		}
-	}
+	isCollaborator := isUserCollaborator(w, r, userId, p)
 	if isCollaborator == false {
 		http.Error(w, "", http.StatusForbidden)
 		return
@@ -180,7 +174,7 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "metadata":
-		routeProjectMetadata(w, r, id, p)
+		routeProjectMetadata(w, r, id, p, userId)
 		return
 
 	case "files":
@@ -200,7 +194,7 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-func routeProjectsCreate(w http.ResponseWriter, r *http.Request) {
+func routeProjectsCreate(w http.ResponseWriter, r *http.Request, userId int64) {
 	c := appengine.NewContext(r)
 	dec := json.NewDecoder(r.Body)
 	var project Project
@@ -218,26 +212,18 @@ func routeProjectsCreate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	q := datastore.NewQuery(userKind).Filter("Email = ", user.Current(c).Email).Limit(1).KeysOnly()
-	uKeyArray, err := q.GetAll(c, nil)
-	if len(uKeyArray) <= 0 {
-		log.Errorf(c, "Project creating user not in user list")
-		http.Error(w, "Project creating user not in user list", http.StatusBadRequest)
-		return
-	}
-
 	key := datastore.NewIncompleteKey(c, projectKind, nil)
 	project.ProjectID = createProjectId(c)
 	project.Created = time.Now().UTC()
 	project.Status = InProgress
 	project.CreatedBy = user.Current(c).Email
-	project.CreatedByID = strconv.FormatInt(uKeyArray[0].IntID(), 10)
+	project.CreatedByID = strconv.FormatInt(userId, 10)
 
 	var cList []int64
-	cList = append(cList, uKeyArray[0].IntID())
+	cList = append(cList, userId)
 	project.Collaborators = cList
 
-	key, err = datastore.Put(c, key, &project)
+	key, err := datastore.Put(c, key, &project)
 
 	if err != nil && key != nil {
 		log.Errorf(c, "Adding project failed: %v", err)
@@ -262,10 +248,17 @@ func createProjectId(c context.Context) string {
 
 func routeProjectsList(w http.ResponseWriter, r *http.Request, userId int64) {
 	c := appengine.NewContext(r)
+
 	q := datastore.NewQuery(projectKind).
 		Filter("Collaborators = ", userId).
 		Limit(listPageSize).
 		Order("Created")
+
+	if user.IsAdmin(c) {
+		q = datastore.NewQuery(projectKind).
+			Limit(listPageSize).
+			Order("Created")
+	}
 
 	cursorStr := r.URL.Query().Get("cursor")
 	if cursorStr != "" {

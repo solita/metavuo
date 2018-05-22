@@ -12,8 +12,6 @@ import (
 func getAppUserId(w http.ResponseWriter, r *http.Request) int64 {
 	c := appengine.NewContext(r)
 
-	log.Debugf(c, "current user email %s", user.Current(c).Email)
-
 	q := datastore.NewQuery(userKind).Filter("Email = ", user.Current(c).Email).Limit(1).KeysOnly()
 
 	cuKeyArray, err := q.GetAll(c, nil)

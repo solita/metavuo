@@ -42,7 +42,7 @@ type MetadataSummary struct {
 	UploadedByID string    `json:"-"`
 }
 
-func routeProjectMetadata(w http.ResponseWriter, r *http.Request, projectId int64) {
+func routeProjectMetadata(w http.ResponseWriter, r *http.Request, projectId int64, p Project) {
 	var head string
 	head, r.URL.Path = shiftPath(r.URL.Path)
 
@@ -63,7 +63,7 @@ func routeProjectMetadata(w http.ResponseWriter, r *http.Request, projectId int6
 	if head == "download" {
 		switch r.Method {
 		case http.MethodGet:
-			routeProjectMetadataDownload(w, r, projectId)
+			routeProjectMetadataDownload(w, r, projectId, p)
 			return
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
@@ -80,7 +80,7 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request, projectI
 
 	err := r.ParseMultipartForm(64 << 20)
 	if err != nil {
-		log.Errorf(c, "Error parsing form: %s", err)
+		log.Errorf(c, "Error parsing form: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -89,21 +89,21 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request, projectI
 	// description := r.FormValue("description")
 
 	if err != nil {
-		log.Errorf(c, "Error getting file: %s", err)
+		log.Errorf(c, "Error getting file: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 
 	bytes, err := ioutil.ReadAll(file)
 	if err != nil {
-		log.Errorf(c, "Error reading file: %s", err)
+		log.Errorf(c, "Error reading file: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 
 	xlFile, err := xlsx.OpenBinary(bytes)
 	if err != nil {
-		log.Errorf(c, "Error opening xlsx-file %s", err)
+		log.Errorf(c, "Error opening xlsx-file %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -115,6 +115,7 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request, projectI
 			Error:  "The file can only contain one sheet",
 			Detail: "",
 		}
+		log.Errorf(c, "Validation error: %v", valError)
 		errList = append(errList, valError)
 	}
 
@@ -123,6 +124,7 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request, projectI
 			Error:  "The file contained no data rows",
 			Detail: "",
 		}
+		log.Errorf(c, "Validation error: %v", valError)
 		errList = append(errList, valError)
 	}
 
@@ -135,7 +137,7 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request, projectI
 
 		headers = append(headers, text)
 	}
-	validateHeaders(headers[:4], &errList)
+	validateHeaders(c, headers[:4], &errList)
 
 	for j, row := range sheet.Rows[1:] {
 		var metadataCell sampleMetaData
@@ -153,6 +155,7 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request, projectI
 					Error:  "The file has an empty row in a mandatory cell",
 					Detail: "Row: " + strconv.Itoa(j+1) + " Cell: " + strconv.Itoa(k+1),
 				}
+				log.Errorf(c, "Validation error: %v", valError)
 				errList = append(errList, valError)
 			}
 		}
@@ -167,26 +170,12 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request, projectI
 		return
 	}
 
-	var p Project
-	key := datastore.NewKey(c, projectKind, "", projectId, nil)
-	err = datastore.Get(c, key, &p)
-
-	if err != nil {
-		if err == datastore.ErrNoSuchEntity {
-			http.Error(w, "Project not found", http.StatusNotFound)
-			log.Errorf(c, "", err)
-			return
-		}
-		http.Error(w, "Internal server error", http.StatusInternalServerError)
-		log.Errorf(c, "", err)
-		return
-	}
-
 	summary, err := saveMetadata(metadata, c, headers, projectId)
 
 	if err != nil {
+		log.Errorf(c, "Saving metadata failed: %v", err)
 		http.Error(w, "Saving metadata failed", http.StatusInternalServerError)
-		log.Errorf(c, "Saving metadata failed", err)
+		return
 	}
 
 	w.Write(mustJSON(summary))
@@ -205,22 +194,22 @@ func saveMetadata(a []sampleMetaData, c context.Context, headers []string, id in
 
 	summaryKey := datastore.NewIncompleteKey(c, summaryKind, nil)
 
-	err := datastore.RunInTransaction(c, func(ctx context.Context) error {
-		summaryKey, err := datastore.Put(ctx, summaryKey, &metadataSummary)
+	err := datastore.RunInTransaction(c, func(c context.Context) error {
+		summaryKey, err := datastore.Put(c, summaryKey, &metadataSummary)
 
 		if err != nil {
-			log.Errorf(ctx, "Failed to save metadata summary")
+			log.Errorf(c, "Failed to save metadata summary")
 			return err
 		}
 
 		keys := make([]*datastore.Key, 0, len(a))
 
 		for range a {
-			key := datastore.NewIncompleteKey(ctx, metaDataKind, summaryKey)
+			key := datastore.NewIncompleteKey(c, metaDataKind, summaryKey)
 			keys = append(keys, key)
 		}
 
-		_, err = datastore.PutMulti(ctx, keys, a)
+		_, err = datastore.PutMulti(c, keys, a)
 
 		return err
 	}, nil)
@@ -254,7 +243,7 @@ func isMandatoryColumn(k int) bool {
 	return k < 4
 }
 
-func validateHeaders(a []string, errList *[]validationErrors) {
+func validateHeaders(c context.Context, a []string, errList *[]validationErrors) {
 
 	for i := 0; i < len(a); i++ {
 		if len(a) != len(validHeaders) || strings.Compare(a[i], validHeaders[i]) != 0 {
@@ -263,6 +252,7 @@ func validateHeaders(a []string, errList *[]validationErrors) {
 				Detail: "The first four headers are mandatory and must be in the following order: " +
 					strings.Join(validHeaders, ","),
 			}
+			log.Errorf(c, "Validation error: %v", valError)
 			*errList = append(*errList, valError)
 			break
 		}
@@ -306,7 +296,7 @@ func routeProjectMetadataDelete(w http.ResponseWriter, r *http.Request, projectI
 
 		if err != nil {
 			log.Errorf(c, "Transaction error: %v", err)
-			http.Error(w, "Internal Server Error", 500)
+			http.Error(w, "", http.StatusInternalServerError)
 			return
 		}
 	} else {
@@ -318,7 +308,7 @@ func routeProjectMetadataDelete(w http.ResponseWriter, r *http.Request, projectI
 	w.WriteHeader(http.StatusNoContent) // 204
 }
 
-func routeProjectMetadataDownload(w http.ResponseWriter, r *http.Request, projectId int64) {
+func routeProjectMetadataDownload(w http.ResponseWriter, r *http.Request, projectId int64, p Project) {
 	c := appengine.NewContext(r)
 
 	var summaryArray []MetadataSummary
@@ -366,7 +356,7 @@ func routeProjectMetadataDownload(w http.ResponseWriter, r *http.Request, projec
 				cursor, err := t.Cursor()
 				if err != nil {
 					log.Errorf(c, "Could not get cursor: %v", err)
-					http.Error(w, "Internal Server Error", 500)
+					http.Error(w, "", http.StatusInternalServerError)
 					return
 				}
 
@@ -407,7 +397,7 @@ func routeProjectMetadataDownload(w http.ResponseWriter, r *http.Request, projec
 		sheet, err = file.AddSheet("Sheet1")
 		if err != nil {
 			log.Errorf(c, "Could not add sheet to xlsx: %v", err)
-			http.Error(w, "Internal Server Error", 500)
+			http.Error(w, "", http.StatusInternalServerError)
 			return
 		}
 
@@ -455,7 +445,7 @@ func routeProjectMetadataDownload(w http.ResponseWriter, r *http.Request, projec
 			}
 		}
 
-		headerString := fmt.Sprintf("attachment; filename=metadata-%d.xlsx", summary.ProjectID)
+		headerString := fmt.Sprintf("attachment; filename=metadata-%d.xlsx", p.ProjectID)
 		w.Header().Set("Content-Disposition", headerString)
 		w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 

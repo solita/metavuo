@@ -22,12 +22,12 @@ class InfoDialog extends React.Component {
     axios.get('/api/info')
       .then((res) => {
         if (res.data !== null) {
-          this.setState({ title: res.data.title || '', content: res.data.content || 'No info' });
+          this.setState({ title: res.data.title || '', content: res.data.content || '' });
         }
       })
       .catch((err) => {
         if (err.response.status === 403) {
-          this.setState({ message: '' });
+          this.setState({ message: 'No access' });
         } else if (err.response.status === 404) {
           this.setState({ message: 'No info' });
         } else {
@@ -52,7 +52,7 @@ class InfoDialog extends React.Component {
         </DialogActions>
         <DialogTitle>{this.state.title}</DialogTitle>
         <DialogContent>
-          {this.state.message && <p>{this.state.message}</p>}
+          {this.state.message && <p className="message-errors">{this.state.message}</p>}
           <div className="show-newlines">
             {this.state.content.split('/n').map(row => <p key={row}>{row}</p>)}
           </div>

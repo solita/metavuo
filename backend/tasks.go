@@ -36,8 +36,9 @@ func routeTasksRemoveSampleMetadata(w http.ResponseWriter, r *http.Request) {
 	metadataKeyString := r.FormValue("metadataKey")
 
 	if metadataKeyString == "" {
-		log.Criticalf(c, "No metadata key given in request")
+		log.Errorf(c, "No metadata key given in request")
 		http.Error(w, "Bad Request: No key", 400)
+		return
 	}
 
 	err := datastore.RunInTransaction(c, func(c context.Context) error {
@@ -104,7 +105,7 @@ func routeTasksRemoveSampleMetadata(w http.ResponseWriter, r *http.Request) {
 
 	if err != nil {
 		log.Errorf(c, "Transaction error %v", err)
-		http.Error(w, "Internal Server Error", 500)
+		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 

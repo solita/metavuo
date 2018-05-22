@@ -116,7 +116,7 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 			routeProjectsCreate(w, r)
 			return
 		case http.MethodGet:
-			routeProjectsList(w, r)
+			routeProjectsList(w, r, userId)
 			return
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
@@ -131,16 +131,38 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	p, key, err := getProject(w, r, id)
+	if err != nil {
+		if err == datastore.ErrNoSuchEntity {
+			http.Error(w, "", http.StatusNotFound)
+			return
+		}
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	isCollaborator := false
+	for _, cId := range p.Collaborators {
+		if cId == userId {
+			isCollaborator = true
+			break
+		}
+	}
+	if isCollaborator == false {
+		http.Error(w, "", http.StatusForbidden)
+		return
+	}
+
 	head, r.URL.Path = shiftPath(r.URL.Path)
 
 	switch head {
 	case "":
 		switch r.Method {
 		case http.MethodGet:
-			routeProjectsGet(w, r, id)
+			routeProjectsGet(w, r, p, id)
 			return
 		case http.MethodPut:
-			routeProjectUpdate(w, r, id)
+			routeProjectUpdate(w, r, p, key)
 			return
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
@@ -150,7 +172,7 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 	case "status":
 		switch r.Method {
 		case http.MethodPost:
-			routeProjectStatusUpdate(w, r, id)
+			routeProjectStatusUpdate(w, r, p, key)
 			return
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
@@ -158,7 +180,7 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		}
 
 	case "metadata":
-		routeProjectMetadata(w, r, id)
+		routeProjectMetadata(w, r, id, p)
 		return
 
 	case "files":
@@ -166,65 +188,16 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		return
 
 	case "collaborators":
-		switch r.Method {
-		case http.MethodPost:
-			routeProjectCollaboratorsAdd(w, r, id)
-			return
-		case http.MethodGet:
-			routeProjectCollaboratorsList(w, r, id)
-			return
-		case http.MethodPut:
-			routeProjectCollaboratorsDelete(w, r, id)
-			return
-		default:
-			http.Error(w, "", http.StatusMethodNotAllowed)
-			return
-		}
+		routeProjectCollaborators(w, r, p, key)
+		return
+
+	default:
+		http.Error(w, "", http.StatusMethodNotAllowed)
+		return
 	}
 
 	http.Error(w, "", http.StatusMethodNotAllowed)
 	return
-}
-
-func routeProjectStatusUpdate(w http.ResponseWriter, r *http.Request, projectId int64) {
-	c := appengine.NewContext(r)
-
-	statusCode, err := strconv.ParseInt(r.FormValue("status"), 10, 64)
-	if err != nil {
-		log.Errorf(c, "Parsing project id failed", err)
-		http.Error(w, "", http.StatusBadRequest)
-	}
-
-	if statusCode <= 0 || statusCode > 3 {
-		log.Errorf(c, "Wrong status code, got: %d", statusCode)
-		http.Error(w, "Unknown project status", http.StatusBadRequest)
-	}
-
-	key := datastore.NewKey(c, projectKind, "", projectId, nil)
-
-	var p Project
-	err = datastore.Get(c, key, &p)
-	if err != nil {
-		if err == datastore.ErrNoSuchEntity {
-			log.Errorf(c, "Entity not found", err)
-			http.Error(w, "", http.StatusNotFound)
-			return
-		}
-		log.Errorf(c, "Error while getting entity", err)
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	p.Status = ProjectStatus(statusCode)
-
-	_, err = datastore.Put(c, key, &p)
-	if err != nil {
-		log.Errorf(c, "Error while saving status %v", err)
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	w.Write(mustJSON(p.Status))
 }
 
 func routeProjectsCreate(w http.ResponseWriter, r *http.Request) {
@@ -233,13 +206,14 @@ func routeProjectsCreate(w http.ResponseWriter, r *http.Request) {
 	var project Project
 
 	if err := dec.Decode(&project); err != nil {
-		log.Errorf(c, "Decoding JSON failed while creating project", err)
+		log.Errorf(c, "Decoding JSON failed while creating project: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 
 	isValid, errorMsg := validateName(c, &project)
 	if !isValid {
+		log.Errorf(c, "Project name is not valid")
 		http.Error(w, errorMsg, http.StatusBadRequest)
 		return
 	}
@@ -256,7 +230,6 @@ func routeProjectsCreate(w http.ResponseWriter, r *http.Request) {
 	project.ProjectID = createProjectId(c)
 	project.Created = time.Now().UTC()
 	project.Status = InProgress
-	// TODO change to internal id
 	project.CreatedBy = user.Current(c).Email
 	project.CreatedByID = strconv.FormatInt(uKeyArray[0].IntID(), 10)
 
@@ -267,7 +240,7 @@ func routeProjectsCreate(w http.ResponseWriter, r *http.Request) {
 	key, err = datastore.Put(c, key, &project)
 
 	if err != nil && key != nil {
-		log.Errorf(c, "Adding project failed", err)
+		log.Errorf(c, "Adding project failed: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -287,63 +260,10 @@ func createProjectId(c context.Context) string {
 	return letter + strconv.Itoa(number)
 }
 
-func routeProjectsGet(w http.ResponseWriter, r *http.Request, id int64) {
-	c := appengine.NewContext(r)
-
-	var p Project
-	key := datastore.NewKey(c, projectKind, "", id, nil)
-	err := datastore.Get(c, key, &p)
-	if err != nil {
-		if err == datastore.ErrNoSuchEntity {
-			http.Error(w, "", http.StatusNotFound)
-			return
-		}
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	var summaryArray []MetadataSummary
-	q := datastore.NewQuery(summaryKind).Filter("ProjectID = ", id).Limit(1)
-	_, err = q.GetAll(c, &summaryArray)
-
-	var summary *MetadataSummary
-
-	if err != nil {
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	if len(summaryArray) > 0 {
-		summary = &summaryArray[0]
-	}
-
-	details := ProjectDetailsDTO{
-		ProjectID:         p.ProjectID,
-		ID:                id,
-		Name:              p.Name,
-		Description:       p.Description,
-		CreatedBy:         p.CreatedBy,
-		Status:            p.Status,
-		Created:           p.Created,
-		SampleSummary:     summary,
-		CustomerOrg:       p.CustomerOrg,
-		InvoiceAddr:       p.InvoiceAddr,
-		CustomerName:      p.CustomerName,
-		CustomerEmail:     p.CustomerEmail,
-		CustomerPhone:     p.CustomerPhone,
-		CustomerReference: p.CustomerReference,
-		InternalReference: p.InternalReference,
-		SampleLocation:    p.SampleLocation,
-		AdditionalInfo:    p.AdditionalInfo,
-	}
-
-	w.Header().Set("Content-Type", "application/json")
-	w.Write(mustJSON(details))
-}
-
-func routeProjectsList(w http.ResponseWriter, r *http.Request) {
+func routeProjectsList(w http.ResponseWriter, r *http.Request, userId int64) {
 	c := appengine.NewContext(r)
 	q := datastore.NewQuery(projectKind).
+		Filter("Collaborators = ", userId).
 		Limit(listPageSize).
 		Order("Created")
 
@@ -380,6 +300,7 @@ func routeProjectsList(w http.ResponseWriter, r *http.Request) {
 	if len(pList.Projects) == listPageSize {
 		cursor, err := t.Cursor()
 		if err != nil {
+			log.Errorf(c, "Could not get cursor: %v", err)
 			http.Error(w, "", http.StatusInternalServerError)
 			return
 		}
@@ -392,53 +313,97 @@ func routeProjectsList(w http.ResponseWriter, r *http.Request) {
 	w.Write(mustJSON(pList))
 }
 
-func routeProjectUpdate(w http.ResponseWriter, r *http.Request, projectId int64) {
+func getProject(w http.ResponseWriter, r *http.Request, id int64) (Project, *datastore.Key, error) {
+	c := appengine.NewContext(r)
+
+	var p Project
+	key := datastore.NewKey(c, projectKind, "", id, nil)
+	err := datastore.Get(c, key, &p)
+	if err != nil {
+		return p, key, err
+	}
+
+	return p, key, nil
+
+}
+
+func routeProjectsGet(w http.ResponseWriter, r *http.Request, p Project, id int64) {
+	c := appengine.NewContext(r)
+
+	var summaryArray []MetadataSummary
+	q := datastore.NewQuery(summaryKind).Filter("ProjectID = ", id).Limit(1)
+	_, err := q.GetAll(c, &summaryArray)
+
+	var summary *MetadataSummary
+
+	if err != nil {
+		log.Errorf(c, "Error getting metadata: %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	if len(summaryArray) > 0 {
+		summary = &summaryArray[0]
+	}
+
+	details := ProjectDetailsDTO{
+		ProjectID:         p.ProjectID,
+		ID:                id,
+		Name:              p.Name,
+		Description:       p.Description,
+		CreatedBy:         p.CreatedBy,
+		Status:            p.Status,
+		Created:           p.Created,
+		SampleSummary:     summary,
+		CustomerOrg:       p.CustomerOrg,
+		InvoiceAddr:       p.InvoiceAddr,
+		CustomerName:      p.CustomerName,
+		CustomerEmail:     p.CustomerEmail,
+		CustomerPhone:     p.CustomerPhone,
+		CustomerReference: p.CustomerReference,
+		InternalReference: p.InternalReference,
+		SampleLocation:    p.SampleLocation,
+		AdditionalInfo:    p.AdditionalInfo,
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	w.Write(mustJSON(details))
+}
+
+func routeProjectUpdate(w http.ResponseWriter, r *http.Request, p Project, key *datastore.Key) {
 	c := appengine.NewContext(r)
 
 	dec := json.NewDecoder(r.Body)
 	var updateReq ProjectUpdateRequest
 
 	if err := dec.Decode(&updateReq); err != nil {
-		log.Errorf(c, "Decoding JSON failed while updating project", err)
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	key := datastore.NewKey(c, projectKind, "", projectId, nil)
-
-	var original Project
-	err := datastore.Get(c, key, &original)
-
-	if err != nil {
-		if err == datastore.ErrNoSuchEntity {
-			http.Error(w, "", http.StatusNotFound)
-			return
-		}
+		log.Errorf(c, "Decoding JSON failed while updating project: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 
 	if !validateUpdateRequest(updateReq) {
+		log.Errorf(c, "Project update validation failed")
 		http.Error(w, "Invalid project update request", http.StatusBadRequest)
 		return
 	}
 
-	original.Name = updateReq.Name
-	original.Description = updateReq.Description
-	original.InvoiceAddr = updateReq.InvoiceAddr
-	original.CustomerOrg = updateReq.CustomerOrg
-	original.CustomerName = updateReq.CustomerName
-	original.CustomerEmail = updateReq.CustomerEmail
-	original.CustomerPhone = updateReq.CustomerPhone
-	original.CustomerReference = updateReq.CustomerReference
-	original.InternalReference = updateReq.InternalReference
-	original.SampleLocation = updateReq.SampleLocation
-	original.AdditionalInfo = updateReq.AdditionalInfo
+	p.Name = updateReq.Name
+	p.Description = updateReq.Description
+	p.InvoiceAddr = updateReq.InvoiceAddr
+	p.CustomerOrg = updateReq.CustomerOrg
+	p.CustomerName = updateReq.CustomerName
+	p.CustomerEmail = updateReq.CustomerEmail
+	p.CustomerPhone = updateReq.CustomerPhone
+	p.CustomerReference = updateReq.CustomerReference
+	p.InternalReference = updateReq.InternalReference
+	p.SampleLocation = updateReq.SampleLocation
+	p.AdditionalInfo = updateReq.AdditionalInfo
 
-	_, err = datastore.Put(c, key, &original)
+	_, err := datastore.Put(c, key, &p)
 
 	if err != nil {
-		log.Errorf(c, "Updating project failed", err)
+		log.Errorf(c, "Updating project failed: %v", err)
 		http.Error(w, "Updating project failed", http.StatusInternalServerError)
 		return
 	}
@@ -465,185 +430,30 @@ func validateName(c context.Context, project *Project) (bool, string) {
 	return true, ""
 }
 
-func routeProjectCollaboratorsAdd(w http.ResponseWriter, r *http.Request, projectId int64) {
+func routeProjectStatusUpdate(w http.ResponseWriter, r *http.Request, p Project, key *datastore.Key) {
 	c := appengine.NewContext(r)
 
-	email := r.FormValue("email")
-	if email == "" {
-		log.Errorf(c, "No email given")
-		http.Error(w, "", http.StatusBadRequest)
-	}
-
-	q := datastore.NewQuery(userKind).Filter("Email = ", email).Limit(1).KeysOnly()
-	cuKeyArray, err := q.GetAll(c, nil)
+	statusCode, err := strconv.ParseInt(r.FormValue("status"), 10, 64)
 	if err != nil {
-		log.Errorf(c, "Error while getting collaborator to add: %v", err)
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	if len(cuKeyArray) <= 0 {
-		log.Errorf(c, "No collaborators found to add")
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	uKey := cuKeyArray[0]
-
-	pKey := datastore.NewKey(c, projectKind, "", projectId, nil)
-
-	var p Project
-	err = datastore.Get(c, pKey, &p)
-	if err != nil {
-		if err == datastore.ErrNoSuchEntity {
-			http.Error(w, "", http.StatusNotFound)
-			return
-		}
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	isValid, errorMsg := validateCollaboratorUniqueness(c, &p, uKey.IntID())
-	if !isValid {
-		http.Error(w, errorMsg, http.StatusBadRequest)
-		return
-	}
-
-	p.Collaborators = append(p.Collaborators, uKey.IntID())
-
-	_, err = datastore.Put(c, pKey, &p)
-
-	if err != nil {
-		log.Errorf(c, "Adding collaborator to project failed", err)
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-}
-
-func validateCollaboratorUniqueness(c context.Context, p *Project, userId int64) (bool, string) {
-	for _, cId := range p.Collaborators {
-		if cId == userId {
-			return false, "Collaborator is already in project"
-		}
-	}
-	return true, ""
-}
-
-func routeProjectCollaboratorsList(w http.ResponseWriter, r *http.Request, projectId int64) {
-	c := appengine.NewContext(r)
-
-	pKey := datastore.NewKey(c, projectKind, "", projectId, nil)
-
-	var p Project
-	err := datastore.Get(c, pKey, &p)
-	if err != nil {
-		if err == datastore.ErrNoSuchEntity {
-			log.Errorf(c, "Collaborator project not found")
-			http.Error(w, "", http.StatusNotFound)
-			return
-		}
-		log.Errorf(c, "Error getting collaborator project")
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	if len(p.Collaborators) <= 0 {
-		log.Debugf(c, "No collaborators found")
-		w.WriteHeader(http.StatusNoContent) // 204
-		return
-	}
-
-	var keys []*datastore.Key
-	for _, collab := range p.Collaborators {
-		key := datastore.NewKey(c, userKind, "", collab, nil)
-		keys = append(keys, key)
-	}
-
-	var uArray = make([]AppUser, len(keys))
-	err = datastore.GetMulti(c, keys, uArray)
-	if err != nil {
-		log.Errorf(c, "Error while getting collaborators: %v", err)
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	var cuArray []CollaboratorUser
-	for _, u := range uArray {
-		var cu CollaboratorUser
-		cu.Name = u.Name
-		cu.Email = u.Email
-		cu.Organization = u.Organization
-		cuArray = append(cuArray, cu)
-	}
-
-	w.Write(mustJSON(cuArray))
-}
-
-func routeProjectCollaboratorsDelete(w http.ResponseWriter, r *http.Request, projectId int64) {
-	c := appengine.NewContext(r)
-
-	dec := json.NewDecoder(r.Body)
-	var delC DelCollaborator
-	if err := dec.Decode(&delC); err != nil {
-		log.Errorf(c, "Decoding JSON failed while deleting collaborator %v", err)
+		log.Errorf(c, "Parsing project id failed: %v", err)
 		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
 
-	if delC.Email == "" {
-		log.Errorf(c, "No email given")
-		http.Error(w, "", http.StatusBadRequest)
+	if statusCode <= 0 || statusCode > 3 {
+		log.Errorf(c, "Wrong status code, got: %d", statusCode)
+		http.Error(w, "Unknown project status", http.StatusBadRequest)
 		return
 	}
 
-	q := datastore.NewQuery(userKind).Filter("Email = ", delC.Email).Limit(1).KeysOnly()
-	cuKeyArray, err := q.GetAll(c, nil)
+	p.Status = ProjectStatus(statusCode)
+
+	_, err = datastore.Put(c, key, &p)
 	if err != nil {
-		log.Errorf(c, "Error while getting collaborator to remove: %v", err)
+		log.Errorf(c, "Error while saving status %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 
-	if len(cuKeyArray) <= 0 {
-		log.Errorf(c, "No collaborators found to remove")
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	pKey := datastore.NewKey(c, projectKind, "", projectId, nil)
-
-	var p Project
-	err = datastore.Get(c, pKey, &p)
-	if err != nil {
-		if err == datastore.ErrNoSuchEntity {
-			log.Errorf(c, "Project not found")
-			http.Error(w, "", http.StatusNotFound)
-			return
-		}
-		log.Errorf(c, "Error getting project collaborators")
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	if strconv.FormatInt(cuKeyArray[0].IntID(), 10) == p.CreatedByID {
-		log.Errorf(c, "Cannot remove project creator")
-		http.Error(w, "Cannot remove project creator", http.StatusBadRequest)
-		return
-	}
-
-	for i, v := range p.Collaborators {
-		if v == cuKeyArray[0].IntID() {
-			p.Collaborators = append(p.Collaborators[:i], p.Collaborators[i+1:]...)
-			break
-		}
-	}
-
-	_, err = datastore.Put(c, pKey, &p)
-
-	if err != nil {
-		log.Errorf(c, "Removing collaborator from project failed", err)
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
+	w.Write(mustJSON(p.Status))
 }

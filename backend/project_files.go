@@ -90,7 +90,7 @@ func routeProjectFileUrlRequest(w http.ResponseWriter, r *http.Request, id int64
 func isFileNameAvailable(c context.Context, fileName string, id int64) bool {
 	client, err := storage.NewClient(c)
 	if err != nil {
-		log.Errorf(c, "Failed to create a Storage client", err)
+		log.Errorf(c, "Failed to create a Storage client: %v", err)
 		return false
 	}
 
@@ -99,13 +99,13 @@ func isFileNameAvailable(c context.Context, fileName string, id int64) bool {
 	bucketName, err := file.DefaultBucketName(c)
 
 	if err != nil {
-		log.Errorf(c, "Getting default bucket name failed", err)
+		log.Errorf(c, "Getting default bucket name failed: %v", err)
 	}
 
 	_, err = client.Bucket(bucketName).Object(strconv.Itoa(int(id)) + "/" + fileName).Attrs(c)
 
 	if err != nil && err != storage.ErrObjectNotExist {
-		log.Errorf(c, "File name availability check failed", err)
+		log.Errorf(c, "File name availability check failed: %v", err)
 	}
 
 	if err == storage.ErrObjectNotExist {
@@ -140,7 +140,7 @@ func getStorageUrl(c context.Context, fileName string, w http.ResponseWriter, id
 	})
 
 	if err != nil {
-		log.Errorf(c, "Failed to generate signed upload-url", err)
+		log.Errorf(c, "Failed to generate signed upload-url: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -153,7 +153,7 @@ func routeProjectFileList(w http.ResponseWriter, r *http.Request, id int64) {
 	c := appengine.NewContext(r)
 	client, err := storage.NewClient(c)
 	if err != nil {
-		log.Errorf(c, "Failed to create a Storage client", err)
+		log.Errorf(c, "Failed to create a Storage client: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -173,7 +173,7 @@ func routeProjectFileList(w http.ResponseWriter, r *http.Request, id int64) {
 			break
 		}
 		if err != nil {
-			log.Errorf(c, "Failed to create a Storage client", err)
+			log.Errorf(c, "Failed to create a Storage client: %v", err)
 			http.Error(w, "", http.StatusInternalServerError)
 			return
 		}
@@ -216,7 +216,7 @@ func routeProjectFileGet(w http.ResponseWriter, r *http.Request, id int64, fileN
 	})
 
 	if err != nil {
-		log.Errorf(c, "Failed to generate signed download-url", err)
+		log.Errorf(c, "Failed to generate signed download-url: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -229,7 +229,7 @@ func routeProjectFileDelete(w http.ResponseWriter, r *http.Request, id int64, fi
 	c := appengine.NewContext(r)
 	client, err := storage.NewClient(c)
 	if err != nil {
-		log.Errorf(c, "Failed to create a Storage client", err)
+		log.Errorf(c, "Failed to create a Storage client: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -239,7 +239,7 @@ func routeProjectFileDelete(w http.ResponseWriter, r *http.Request, id int64, fi
 	bucket, err := file.DefaultBucketName(c)
 
 	if err != nil {
-		log.Errorf(c, "Failed to get default bucket", err)
+		log.Errorf(c, "Failed to get default bucket: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -247,7 +247,7 @@ func routeProjectFileDelete(w http.ResponseWriter, r *http.Request, id int64, fi
 	err = client.Bucket(bucket).Object(strconv.Itoa(int(id)) + "/" + fileName).Delete(c)
 
 	if err != nil {
-		log.Errorf(c, "Failed to delete file from storage", err)
+		log.Errorf(c, "Failed to delete file from storage: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}

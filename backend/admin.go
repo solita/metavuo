@@ -137,13 +137,13 @@ func routeAdminUsersCreate(w http.ResponseWriter, r *http.Request) {
 
 	isValid, errorMsg := validateEmailAddress(appUser.Email)
 	if !isValid {
-		log.Errorf(c, errorMsg)
+		log.Errorf(c, "%s", errorMsg)
 		http.Error(w, errorMsg, http.StatusBadRequest)
 		return
 	}
 	isValid, errorMsg = validateEmailUniqueness(c, appUser.Email)
 	if !isValid {
-		log.Errorf(c, errorMsg)
+		log.Errorf(c, "%s", errorMsg)
 		http.Error(w, errorMsg, http.StatusBadRequest)
 		return
 	}
@@ -160,7 +160,7 @@ func routeAdminUsersCreate(w http.ResponseWriter, r *http.Request) {
 	key, err := datastore.Put(c, key, &appUser)
 
 	if err != nil {
-		log.Errorf(c, "Adding user failed", err)
+		log.Errorf(c, "Adding user failed %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}

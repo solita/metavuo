@@ -57,8 +57,10 @@ export class ProjectForm extends React.Component {
         this.props.history.push(`/projects/${id}`);
       })
       .catch((err) => {
-        if (err.response.status === 400) {
-          this.setState({ message: 'form is not valid' });
+        if (err.response.status === 403) {
+          this.setState({ message: 'Creating project not allowed' });
+        } else if (err.response.status === 400) {
+          this.setState({ message: `Form is not valid: ${err.response.data}` });
         } else {
           this.setState({ message: 'something went wrong' });
         }
@@ -68,7 +70,7 @@ export class ProjectForm extends React.Component {
   render() {
     return (
       <div>
-        {this.state.message}
+        <p className="message-errors">{this.state.message}</p>
         <ValidatorForm
           id="form-object"
           onSubmit={this.handleSubmit}

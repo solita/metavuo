@@ -13,6 +13,7 @@ class ProjectList extends React.Component {
       projects: [],
       fetching: true,
       message: '',
+      hideContent: false,
     };
   }
 
@@ -28,8 +29,12 @@ class ProjectList extends React.Component {
           this.setState({ message: 'No projects found.', fetching: false });
         }
       })
-      .catch(() => {
-        this.setState({ message: 'Something went wrong.', fetching: false });
+      .catch((err) => {
+        if (err.response.status === 403) {
+          this.setState({ message: 'Access denied', fetching: false, hideContent: true });
+        } else {
+          this.setState({ message: 'Something went wrong.', fetching: false });
+        }
       });
   }
 
@@ -38,11 +43,13 @@ class ProjectList extends React.Component {
       <div>
         <div className="flex-row">
           <h2>Projects</h2>
-          <Link to="/projects/new" className="project-button-link">
-            <Button variant="fab" mini>
-              <i className="material-icons">add</i>
-            </Button>
-          </Link>
+          {!this.state.hideContent &&
+            <Link to="/projects/new" className="project-button-link">
+              <Button variant="fab" mini>
+                <i className="material-icons">add</i>
+              </Button>
+            </Link>
+          }
         </div>
         {this.state.fetching
           ? <CircularProgress />

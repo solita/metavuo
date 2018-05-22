@@ -88,6 +88,7 @@ class Project extends React.Component {
           sampleLocation: project.sample_location,
           info: project.additional_information,
           fetching: false,
+          hideContent: false,
         });
         if (res.data.sample_summary !== null) {
           this.setState({
@@ -97,7 +98,9 @@ class Project extends React.Component {
         }
       })
       .catch((err) => {
-        if (err.response.status === 404) {
+        if (err.response.status === 403) {
+          this.setState({ errorMsg: 'No access', fetching: false, hideContent: true });
+        } else if (err.response.status === 404) {
           this.setState({ errorMsg: 'no such project', fetching: false });
         } else {
           this.setState({ errorMsg: 'unknown error', fetching: false });
@@ -190,7 +193,7 @@ class Project extends React.Component {
               <Grid container>
                 <Grid item xs={6}>
                   <div>
-                    <h1>Project: {this.state.name || 'not found'}</h1>
+                    {!this.state.hideContent && <h1>Project: {this.state.name || 'not found'}</h1>}
                     {this.state.errorMsg
                       ? <p>{this.state.errorMsg}</p>
                       :
@@ -322,6 +325,7 @@ Project.propTypes = {
       id: PropTypes.node,
     }).isRequired,
   }).isRequired,
+  userEmail: PropTypes.string.isRequired,
 };
 
 export default Project;

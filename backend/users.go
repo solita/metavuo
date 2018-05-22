@@ -21,16 +21,15 @@ type CollaboratorUser struct {
 }
 
 func routeUsers(w http.ResponseWriter, r *http.Request) {
-	userId := getAppUserId(w, r)
-	if userId == 0 {
-		http.Error(w, "", http.StatusForbidden)
-		return
-	}
-
 	var head string
 	head, r.URL.Path = shiftPath(r.URL.Path)
 
 	if head == "" {
+		userId := getAppUserId(w, r)
+		if userId == 0 {
+			http.Error(w, "", http.StatusForbidden)
+			return
+		}
 
 		switch r.Method {
 		case http.MethodGet:
@@ -78,7 +77,7 @@ func routeUsersGetMe(w http.ResponseWriter, r *http.Request) {
 		}
 
 		if len(uList) == 0 {
-			log.Errorf(c, "Error while getting user: %v", err)
+			log.Errorf(c, "No user found")
 			http.Error(w, "", http.StatusUnauthorized)
 			return
 		}

@@ -182,7 +182,7 @@ func routeProjectFileList(w http.ResponseWriter, r *http.Request, id int64) {
 			filepath.Base(item.Name),
 			item.Size,
 			item.Created,
-			item.Metadata["createdby"],
+			item.Metadata["uploadedby"],
 			item.Metadata["description"],
 			item.Metadata["filetype"],
 		})

@@ -31,7 +31,7 @@ class InfoDialog extends React.Component {
         } else if (err.response.status === 404) {
           this.setState({ message: 'No info' });
         } else {
-          this.setState({message: 'Problem getting info'});
+          this.setState({ message: 'Problem getting info' });
         }
       });
   }

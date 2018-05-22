@@ -31,7 +31,7 @@ class ProjectFileList extends React.Component {
                 href={`/api/projects/${this.props.url}/files/${file.fileName}`}
               > Name: {file.fileName}, Size: {getFileSize(file.fileSize)},
             Created: {new Date(Date.parse(file.created)).toLocaleDateString()},
-                CreatedBy:  {file.createdBy},
+                CreatedBy:  {file.uploadedby},
                 Description: {file.description}
               </a>
               <ListItemSecondaryAction>

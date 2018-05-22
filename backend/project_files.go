@@ -25,6 +25,7 @@ type ProjectFile struct {
 	Created      time.Time `json:"created"`
 	CreatedBy    string    `json:"createdBy"`
 	Description  string    `json:"description"`
+	FileType     string    `json:"filetype"`
 }
 
 func routeProjectFile(w http.ResponseWriter, r *http.Request, id int64) {
@@ -70,6 +71,7 @@ func routeProjectFileUrlRequest(w http.ResponseWriter, r *http.Request, id int64
 	c := appengine.NewContext(r)
 	fileName := r.FormValue("filename")
 	description := r.FormValue("description")
+	fileType := r.FormValue("fileType")
 
 	if !fileNamePattern.Match([]byte(fileName)) {
 		http.Error(w, "File name is invalid", http.StatusBadRequest)
@@ -81,7 +83,7 @@ func routeProjectFileUrlRequest(w http.ResponseWriter, r *http.Request, id int64
 		return
 	}
 
-	getStorageUrl(c, fileName, w, id, description)
+	getStorageUrl(c, fileName, w, id, description, fileType)
 
 }
 
@@ -114,7 +116,7 @@ func isFileNameAvailable(c context.Context, fileName string, id int64) bool {
 
 }
 
-func getStorageUrl(c context.Context, fileName string, w http.ResponseWriter, id int64, description string) {
+func getStorageUrl(c context.Context, fileName string, w http.ResponseWriter, id int64, description string, fileType string) {
 	acc, _ := appengine.ServiceAccount(c)
 	uploadedBy := user.Current(c).Email
 
@@ -129,7 +131,8 @@ func getStorageUrl(c context.Context, fileName string, w http.ResponseWriter, id
 		Method:         http.MethodPut,
 		GoogleAccessID: acc,
 		ContentType:    "text/plain",
-		Headers:        []string{"x-goog-meta-uploadedby:" + uploadedBy, "x-goog-meta-description:" + description},
+		Headers: []string{"x-goog-meta-uploadedby:" + uploadedBy,
+			"x-goog-meta-description:" + description, "x-goog-meta-filetype:" + fileType},
 		SignBytes: func(b []byte) ([]byte, error) {
 			_, signedBytes, err := appengine.SignBytes(c, b)
 			return signedBytes, err
@@ -181,6 +184,7 @@ func routeProjectFileList(w http.ResponseWriter, r *http.Request, id int64) {
 			item.Created,
 			item.Metadata["createdby"],
 			item.Metadata["description"],
+			item.Metadata["filetype"],
 		})
 	}
 

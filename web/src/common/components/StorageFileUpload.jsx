@@ -6,7 +6,7 @@ import DialogContent from 'material-ui/Dialog/DialogContent';
 import DialogActions from 'material-ui/Dialog/DialogActions';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-import { TextField } from 'material-ui';
+import { Checkbox, FormControlLabel, TextField } from 'material-ui';
 
 const pattern = /^[\w_\-.]*$/;
 
@@ -20,11 +20,13 @@ class StorageFileUpload extends React.Component {
     this.addFile = this.addFile.bind(this);
     this.closeDialog = this.closeDialog.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.state = {
       file: null,
       hasFile: false,
       message: '',
       description: '',
+      isChecked: false,
     };
   }
 
@@ -33,11 +35,19 @@ class StorageFileUpload extends React.Component {
     const data = new FormData();
     data.append('filename', this.state.file.name);
     data.append('description', this.state.description);
+    data.append('fileType', this.state.isChecked ? 'result' : 'default');
     axios.post(this.props.url, data).then((res) => {
       if (res.status === 200) {
         axios.put(
           res.data, this.state.file,
-          { headers: { 'Content-Type': 'text/plain', 'x-goog-meta-description': this.state.description, 'x-goog-meta-uploadedby': this.props.userEmail } },
+          {
+            headers: {
+              'Content-Type': 'text/plain',
+              'x-goog-meta-description': this.state.description,
+              'x-goog-meta-uploadedby': this.props.userEmail,
+              'x-goog-meta-filetype': this.state.isChecked ? 'result' : 'default',
+            },
+          },
         ).catch((err) => {
           console.log(err);
         });
@@ -61,7 +71,12 @@ class StorageFileUpload extends React.Component {
   }
 
   handleChange(event) {
-    this.setState({ description: event.target.value });
+    this.setState({ [event.target.name]: event.target.value });
+  }
+
+  toggleCheckBox(event) {
+    const value = event.target.checked;
+    this.setState({ isChecked: value });
   }
 
   render() {
@@ -90,6 +105,16 @@ class StorageFileUpload extends React.Component {
               margin="normal"
               onChange={this.handleChange}
               inputProps={{ maxLength: 200 }}
+            />
+            <FormControlLabel
+              control={
+                <Checkbox
+                  checked={this.state.isChecked}
+                  onChange={this.toggleCheckBox}
+                  color="primary"
+                />
+            }
+              label="Save as a result?"
             />
             <input type="file" name="file" className="form-item" onChange={this.addFile} />
             <Button type="submit" id="submit-project" variant="raised" color="primary" disabled={!this.state.hasFile}>

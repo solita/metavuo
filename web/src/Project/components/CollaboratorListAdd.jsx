@@ -70,8 +70,8 @@ class CollaboratorListAdd extends React.Component {
     return (
       <div>
         {this.state.message && <p>{this.state.message}</p>}
-        <Button variant="raised" color="primary" onClick={this.openAddCollaboratorDialog}>
-          Add collaborator
+        <Button variant="raised" className="primary-button text-button" onClick={this.openAddCollaboratorDialog}>
+          <i className="material-icons text-button-icon">add_circle_outline</i>Add collaborator
         </Button>
         <p className="message-errors">{this.props.message}</p>
         <Dialog

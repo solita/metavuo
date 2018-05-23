@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import Card from 'material-ui/Card';
 import Button from 'material-ui/Button';
 import { CircularProgress } from 'material-ui/Progress';
 import ProjectListTable from './ProjectListTable';
-import '../css/ProjectList.scss';
 
 class ProjectList extends React.Component {
   constructor(props) {
@@ -41,24 +41,30 @@ class ProjectList extends React.Component {
   render() {
     return (
       <div>
-        <div className="flex-row">
-          <h2>Projects</h2>
-          {!this.state.hideContent &&
-            <Link to="/projects/new" className="project-button-link">
-              <Button variant="fab" mini>
-                <i className="material-icons">add</i>
-              </Button>
-            </Link>
-          }
-        </div>
-        {this.state.fetching
-          ? <CircularProgress />
-          :
-          <div>
-            <p>{this.state.message}</p>
-            {this.state.projects.length > 0 ? <ProjectListTable projects={this.state.projects} /> : '' }
+        <Card className="table-card">
+          <div className="table-card-head">
+            <h2>Projects</h2>
+            {!this.state.hideContent &&
+            <div>
+              <Link to="/projects/new" className="button-link">
+                <Button variant="raised" className="primary-button text-button">
+                  <i className="material-icons text-button-icon">add_circle_outline</i>Add project
+                </Button>
+              </Link>
+            </div>
+            }
           </div>
-        }
+          <div className="table-card-body">
+            {this.state.fetching
+              ? <CircularProgress />
+              :
+              <div>
+                <p>{this.state.message}</p>
+                {this.state.projects.length > 0 ? <ProjectListTable projects={this.state.projects} /> : '' }
+              </div>
+            }
+          </div>
+        </Card>
       </div>
     );
   }

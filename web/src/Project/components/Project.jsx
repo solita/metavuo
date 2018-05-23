@@ -1,8 +1,9 @@
 import React from 'react';
 import axios from 'axios';
 import Grid from 'material-ui/Grid';
+import Card from 'material-ui/Card';
 import Button from 'material-ui/Button';
-import { CircularProgress } from 'material-ui/Progress';
+import CircularProgress from 'material-ui/Progress/CircularProgress';
 import PropTypes from 'prop-types';
 import ProjectStatusButton from './ProjectStatusButton';
 import MetadataSummary from './MetadataSummary';
@@ -191,61 +192,71 @@ class Project extends React.Component {
           :
             <div>
               <Grid container>
-                <Grid item xs={6}>
-                  <div>
-                    {!this.state.hideContent && <h1>Project: {this.state.name || 'not found'}</h1>}
-                    {this.state.errorMsg
-                      ? <p>{this.state.errorMsg}</p>
-                      :
+                <Grid item xs={7}>
+                  <Card className="table-card">
+                    <div className="table-card-head">
+                      {!this.state.hideContent &&
                       <div>
-                        <p>Id: {this.state.id}</p>
-                        <p>Description: {this.state.description}</p>
-                        <p>Project started: {new Date(this.state.createdAt).toLocaleString()}</p>
-                        <p>Project creator: {this.state.createdbyEmail}</p>
-                        <p>Project status: {ConvertStatus(this.state.status)}</p>
-                        <h2>Customer details</h2>
-                        <p>Organization: {this.state.organization}</p>
-                        {this.state.invoiceAddress &&
-                          <p>Invoice address: {this.state.invoiceAddress}</p>
-                        }
-                        {this.state.customerName &&
-                          <p>Name: {this.state.customerName}</p>
-                        }
-                        {this.state.customerEmail &&
-                          <p>Email: {this.state.customerEmail}</p>
-                        }
-                        {this.state.customerPhone &&
-                          <p>Phone number: {this.state.customerPhone}</p>
-                        }
-                        {this.state.customerReference &&
-                          <p>Customer reference: {this.state.customerReference}</p>
-                        }
-                        {this.state.internalReference &&
-                          <p>Internal reference: {this.state.internalReference}</p>
-                        }
-                        {this.state.sampleLocation &&
-                          <p>Sample location: {this.state.sampleLocation}</p>
-                        }
-                        {this.state.info &&
-                          <p>Additional information: {this.state.info}</p>
-                        }
+                        <h1>{this.state.name || 'not found'}</h1>
+                        <p>ID: <span className="bold-text">{this.state.id}</span></p>
                       </div>
-                    }
-                  </div>
+                      }
+                    </div>
+                    <div className="table-card-body">
+                      {this.state.errorMsg
+                        ? <p>{this.state.errorMsg}</p>
+                        :
+                        <div>
+                          <p>Description: {this.state.description}</p>
+                          <p>Project started: {new Date(this.state.createdAt).toLocaleString()}</p>
+                          <p>Project creator: {this.state.createdbyEmail}</p>
+                          <p>Project status: {ConvertStatus(this.state.status)}</p>
+                          <h2>Customer details</h2>
+                          <p>Organization: {this.state.organization}</p>
+                          {this.state.invoiceAddress &&
+                            <p>Invoice address: {this.state.invoiceAddress}</p>
+                          }
+                          {this.state.customerName &&
+                            <p>Name: {this.state.customerName}</p>
+                          }
+                          {this.state.customerEmail &&
+                            <p>Email: {this.state.customerEmail}</p>
+                          }
+                          {this.state.customerPhone &&
+                            <p>Phone number: {this.state.customerPhone}</p>
+                          }
+                          {this.state.customerReference &&
+                            <p>Customer reference: {this.state.customerReference}</p>
+                          }
+                          {this.state.internalReference &&
+                            <p>Internal reference: {this.state.internalReference}</p>
+                          }
+                          {this.state.sampleLocation &&
+                            <p>Sample location: {this.state.sampleLocation}</p>
+                          }
+                          {this.state.info &&
+                            <p>Additional information: {this.state.info}</p>
+                          }
+                          <div className="flex-row">
+                            <ProjectStatusButton
+                              projectId={this.props.match.params.id}
+                              projectStatus={this.state.status}
+                              setStatus={this.setStatus}
+                            />
+                            <ProjectUpdateDialog
+                              url={`/api/projects/${this.props.match.params.id}`}
+                              updateMainView={this.getProject}
+                              parentState={this.state}
+                            />
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  </Card>
                 </Grid>
-                <Grid item xs={6}>
+                <Grid item xs={5}>
                   {!this.state.errorMsg &&
-                  <div>
-                    <ProjectStatusButton
-                      projectId={this.props.match.params.id}
-                      projectStatus={this.state.status}
-                      setStatus={this.setStatus}
-                    />
-                    <ProjectUpdateDialog
-                      url={`/api/projects/${this.props.match.params.id}`}
-                      updateMainView={this.getProject}
-                      parentState={this.state}
-                    />
+                  <div className="secondary-card">
                     <CollaboratorList
                       projectId={this.props.match.params.id}
                       projectCreatorEmail={this.state.createdbyEmail}
@@ -255,22 +266,39 @@ class Project extends React.Component {
                 </Grid>
               </Grid>
               {!this.state.errorMsg &&
-                <div>
-                  {this.state.showMetadata ?
-                    <MetadataSummary
-                      rowCount={this.state.metadataProps.rowcount}
-                      headers={this.state.metadataProps.headers.slice(4)}
-                      uploadedat={this.state.metadataProps.uploadedat}
-                      uploadedby={this.state.metadataProps.uploadedby}
-                      metadataError={this.state.metadataError}
-                      projectId={this.props.match.params.id}
-                      discardMetadata={this.discardMetadataClick}
-                    />
-                    :
-                    <Button variant="raised" color="primary" onClick={this.openDialog}>
-                      <i className="material-icons icon-left">add_circle</i>Add metadata file
-                    </Button>
-                  }
+                <Grid container>
+                  <Grid xs={7}>
+                    <Card className="table-card">
+                      <div className="table-card-head">
+                        <h2>Result files</h2>
+                        <Button variant="raised" className="primary-button text-button">
+                          <i className="material-icons text-button-icon">add_circle_outline</i>Add file
+                        </Button>
+                      </div>
+                      <div className="table-card-body">
+                        <p>Here be result files</p>
+                      </div>
+                    </Card>
+                  </Grid>
+                  <Grid xs={5}>
+                    {this.state.showMetadata ?
+                      <div className="secondary-card">
+                        <MetadataSummary
+                          rowCount={this.state.metadataProps.rowcount}
+                          headers={this.state.metadataProps.headers.slice(4)}
+                          uploadedat={this.state.metadataProps.uploadedat}
+                          uploadedby={this.state.metadataProps.uploadedby}
+                          metadataError={this.state.metadataError}
+                          projectId={this.props.match.params.id}
+                          discardMetadata={this.discardMetadataClick}
+                        />
+                      </div>
+                      :
+                      <Button variant="raised" color="primary" onClick={this.openDialog}>
+                        <i className="material-icons icon-left">add_circle</i>Add metadata file
+                      </Button>
+                    }
+                  </Grid>
                   <Button variant="raised" color="primary" onClick={this.openFileDialog} style={{ margin: 12 }}>
                     <i className="material-icons icon-left">add_circle</i>Add file
                   </Button>
@@ -305,7 +333,7 @@ class Project extends React.Component {
                     action={this.deleteFile}
                     actionButtonText="Delete file"
                   />
-                </div>
+                </Grid>
               }
             </div>
         }

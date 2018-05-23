@@ -70,7 +70,9 @@ class ProjectUpdateDialog extends React.Component {
   render() {
     return (
       <div>
-        <Button onClick={this.handleClickOpen} variant="raised" color="primary" style={{ margin: 12 }}>Edit project</Button>
+        <Button onClick={this.handleClickOpen} variant="raised" className="primary-button text-button">
+          Edit project
+        </Button>
         <Dialog
           open={this.state.isOpen}
           onClose={this.handleClose}

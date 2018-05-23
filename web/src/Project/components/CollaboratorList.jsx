@@ -1,10 +1,10 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
+import Button from 'material-ui/Button';
 import PropTypes from 'prop-types';
 import CollaboratorListAdd from './CollaboratorListAdd';
 import ConfirmDialog from '../../common/components/ConfirmDialog';
-import '../css/CollaboratorList.scss';
 
 class CollaboratorList extends React.Component {
   constructor(props) {
@@ -80,8 +80,29 @@ class CollaboratorList extends React.Component {
 
   render() {
     return (
-      <div className="collaborator-container">
+      <div>
         <h2>Collaborators</h2>
+        <div className="secondary-card-body">
+          {this.state.collaborators.map(collaborator => (
+            <div key={collaborator.email} className="secondary-card-items">
+              <div>
+                <p className="bold-text">{collaborator.name}</p>
+                <p className="light-text">{collaborator.email}</p>
+                <p className="light-text">{collaborator.organization}</p>
+              </div>
+              {this.props.projectCreatorEmail !== collaborator.email && (
+                <Button
+                  variant="fab"
+                  className="transparent-button round-button"
+                  onClick={e => this.openDelDialog(e, collaborator.email, collaborator.name)}
+                >
+                  <i className="material-icons">delete_outline</i>
+                </Button>
+              )}
+            </div>
+          ))}
+        </div>
+
         <CollaboratorListAdd
           {...this.props}
           collaborators={this.state.collaborators}
@@ -89,20 +110,6 @@ class CollaboratorList extends React.Component {
           collaboratorAddSuccess={this.collaboratorAddSuccess}
           message={this.state.message}
         />
-
-        {this.state.collaborators.map(collaborator => (
-          <p key={collaborator.email}>
-            {collaborator.name}, {collaborator.email}, {collaborator.organization}
-            {this.props.projectCreatorEmail !== collaborator.email && (
-              <button
-                className="user-delete-button"
-                onClick={e => this.openDelDialog(e, collaborator.email, collaborator.name)}
-              >
-                <i className="material-icons">delete</i>
-              </button>
-            )}
-          </p>
-        ))}
 
         <ConfirmDialog
           titleText="Remove collaborator"

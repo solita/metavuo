@@ -3,13 +3,19 @@
 body {
   font-family: 'Source Sans Pro', sans-serif;
   font-weight: 400;
-  background-color: $light-gray;
   color: $dark-gray;
+  background-color: $light-gray;
 }
 
 .content-container {
-  padding: 20px;
+  padding: $container-padding;
 }
+
+.button-link {
+  text-decoration: none;
+}
+
+
 
 .icon-right, .margin-left {
   margin-left: 10px;
@@ -36,8 +42,6 @@ body {
 .primary-button {
   background-color: $orange !important;
   color: $dark-gray !important;
-  width: 48px !important;
-  height: 48px !important;
 
   &:hover {
     background-color: $light-orange !important;
@@ -47,22 +51,132 @@ body {
 .secondary-button {
   background-color: $blue !important;
   color: $light-gray !important;
-  width: 48px !important;
-  height: 48px !important;
 
   &:hover {
     background-color: $hover-blue !important;
   }
 }
 
-.inverted-button {
+.black-button {
   background-color: $dark-gray !important;
   color: $orange !important;
   box-shadow: 0 0 0 0 #000 !important;
-  width: 48px !important;
-  height: 48px !important;
 }
 
-.button-icon {
-  font-size: 30px;
+.transparent-button {
+  background-color: $light-gray !important;
+  color: $middle-gray !important;
+  box-shadow: 0 0 0 0 #000 !important;
+}
+
+.round-button {
+  width: $button-dimension;
+  height: $button-dimension;
+
+  .button-icon {
+    font-size: 30px;
+  }
+}
+
+.text-button {
+  border-radius: 20px !important;
+  font-family: 'Source Sans Pro', sans-serif !important;
+  font-weight: 400 !important;
+  letter-spacing: 0.8px !important;
+  text-transform: lowercase !important;
+  font-size: 16px !important;
+  margin-right: 8px !important;
+
+  .text-button-icon {
+    margin-right: 8px;
+  }
+}
+
+h1 {
+   font-family: 'Source Sans Pro', sans-serif;
+   font-weight: 600;
+   letter-spacing: 1px;
+   font-size: 32px;
+   color: $dark-gray;
+   text-transform: uppercase;
+   margin: 0;
+ }
+
+h2 {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 24px;
+  color: $dark-gray;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+p {
+  margin: 8px 0;
+  letter-spacing: 0.4px;
+}
+
+.bold-text {
+  font-weight: 600;
+}
+
+.light-text {
+  font-weight: 300;
+  color: $middle-gray;
+}
+
+.table-card {
+  box-shadow: 3px 3px 8px 2px rgba(0, 0, 0, 0.2) !important;
+
+  .table-card-head {
+    background-color: $light-blue;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $card-padding;
+  }
+
+  .table-card-body {
+    padding: $card-padding;
+  }
+}
+
+.secondary-card {
+  padding: $card-padding;
+}
+
+.secondary-card-body {
+  margin-bottom: 12px;
+
+  .secondary-card-items {
+    margin: 12px 0;
+    border-bottom: 1px solid $middle-gray;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: space-between;
+    font-size: 14px;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  .secondary-card-rows {
+    padding: 6px 0;
+    border-bottom: 1px solid $middle-gray;
+    font-size: 14px;
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  .secondary-card-body-buttons {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+  }
 }

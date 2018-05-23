@@ -7,8 +7,13 @@ $light-blue:    #E9F5F8;
 $light-orange:  #FAEFD5;
 $light-gray:    #F3F3F3;
 $hover-blue:    #67AEC1;
+$middle-gray:   #A0A0A0;
 
 // Margins
-$margin:            3%;
-$margin-vertical:   0 12px;
-$margin-horizontal: 12px 0;
+$margin:              3%;
+$padding:             3%;
+$container-padding:   24px calc(3% + 24px);
+$card-padding:        30px calc(3% + 36px);
+
+$button-dimension: 48px !important;
+

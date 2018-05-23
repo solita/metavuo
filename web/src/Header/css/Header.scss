@@ -9,10 +9,6 @@
       padding: 1% 0;
     }
 
-    .header-link {
-        text-decoration: none;
-    }
-
     .header-title {
         margin-left: $margin;
         flex: 1;
@@ -37,16 +33,11 @@
 
         .header-button-margin {
             margin: 0 12px;
-
-            .header-button-link {
-                text-decoration: none;
-            }
         }
 
         .header-user {
             color: $white;
         }
-
     }
 }
 

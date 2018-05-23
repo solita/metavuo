@@ -49,8 +49,7 @@ class ProjectStatusButton extends React.Component {
       <div>
         <Button
           variant="raised"
-          color="primary"
-          style={{ margin: 12 }}
+          className="primary-button text-button"
           onClick={this.handleClick}
         >
           Change project status

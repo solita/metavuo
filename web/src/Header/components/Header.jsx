@@ -3,7 +3,6 @@ import { Link } from 'react-router-dom';
 import AppBar from 'material-ui/AppBar';
 import Button from 'material-ui/Button';
 import Toolbar from 'material-ui/Toolbar';
-import Typography from 'material-ui/Typography';
 import Tooltip from 'material-ui/Tooltip';
 import PropTypes from 'prop-types';
 import '../css/Header.scss';
@@ -30,28 +29,40 @@ class Header extends React.Component {
   render() {
     return (
       <div className="header-root">
-        <AppBar position="static">
+        <AppBar position="static" className="header-style">
           <Toolbar>
-            <Typography variant="title" className="header-title">
-              <Link to="/" className="header-link">Metavuo</Link>
-            </Typography>
-            <div className="margin-right">
-              {this.props.isAdmin &&
-              <Link to="/admin" className="header-button-link">
-                <Tooltip id="tooltip-fab" title="Admin panel" placement="bottom">
-                  <Button variant="fab" mini>
-                    <i className="material-icons">settings</i>
-                  </Button>
-                </Tooltip>
+            <div className="header-title">
+              <Link to="/" className="header-link">
+                <span className="title-meta">meta</span><span className="title-vuo">vuo</span>
               </Link>
+            </div>
+            <div className="header-actions">
+              {this.props.isAdmin &&
+              <div className="header-button-margin">
+                <Link to="/admin" className="header-button-link">
+                  <Tooltip id="tooltip-fab" title="Admin panel" placement="bottom">
+                    <Button variant="fab" className="secondary-button">
+                      <i className="material-icons button-icon">settings_</i>
+                    </Button>
+                  </Tooltip>
+                </Link>
+              </div>
               }
               {this.props.isUser &&
-                <Button variant="fab" mini onClick={this.openInfo}>
-                  <i className="material-icons">help_outline</i>
+              <div className="header-button-margin">
+                <Button variant="fab" className="primary-button" onClick={this.openInfo}>
+                  <i className="material-icons button-icon">help_outline</i>
                 </Button>
+              </div>
               }
+              <div className="header-button-margin" />
+              <div className="header-user">
+                <Button variant="fab" className="inverted-button">
+                  <i className="material-icons button-icon">perm_identity</i>
+                </Button>
+                {this.props.userEmail}
+              </div>
             </div>
-            <div>{this.props.userEmail}</div>
           </Toolbar>
         </AppBar>
         <InfoDialog dialogOpen={this.state.infoOpen} closeDialog={this.closeInfo} />

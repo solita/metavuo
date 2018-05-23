@@ -50,10 +50,6 @@ module.exports = {
             options: { minimize: true }
           }
           ]
-      },
-      {
-        test: /\.(ttf|woff|woff2|eot|svg)$/,
-        loader: 'file-loader?name=fonts/[name].[ext]'
       }
     ]
   },

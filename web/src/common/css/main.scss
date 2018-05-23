@@ -1,7 +1,10 @@
+@import '../../common/css/variables';
+
 body {
-  font-family: 'Roboto', sans-serif;
-  font-style: normal;
+  font-family: 'Source Sans Pro', sans-serif;
   font-weight: 400;
+  background-color: $light-gray;
+  color: $dark-gray;
 }
 
 .content-container {
@@ -28,4 +31,38 @@ body {
 .flex-row {
   display: flex;
   flex-direction: row;
+}
+
+.primary-button {
+  background-color: $orange !important;
+  color: $dark-gray !important;
+  width: 48px !important;
+  height: 48px !important;
+
+  &:hover {
+    background-color: $light-orange !important;
+  }
+}
+
+.secondary-button {
+  background-color: $blue !important;
+  color: $light-gray !important;
+  width: 48px !important;
+  height: 48px !important;
+
+  &:hover {
+    background-color: $hover-blue !important;
+  }
+}
+
+.inverted-button {
+  background-color: $dark-gray !important;
+  color: $orange !important;
+  box-shadow: 0 0 0 0 #000 !important;
+  width: 48px !important;
+  height: 48px !important;
+}
+
+.button-icon {
+  font-size: 30px;
 }

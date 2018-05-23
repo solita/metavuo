@@ -1,18 +1,52 @@
+@import '../../common/css/variables';
+
 .header-root {
     flex-grow: 1;
 
-    .header-title {
-        flex: 1;
-    }
-
-    .header-button-link {
-        text-decoration: none;
-        margin: 0 10px;
+    .header-style {
+      background-color: $dark-gray;
+      letter-spacing: 2px;
+      padding: 1% 0;
     }
 
     .header-link {
-        color: white;
         text-decoration: none;
+    }
+
+    .header-title {
+        margin-left: $margin;
+        flex: 1;
+
+        .title-meta {
+            font-size: 32px;
+            font-weight: 600;
+            color: $blue;
+        }
+
+        .title-vuo {
+            font-size: 32px;
+            font-weight: 300;
+            color: $orange;
+        }
+    }
+
+    .header-actions {
+        margin-right: $margin;
+        display: flex;
+        align-items: center;
+
+        .header-button-margin {
+            margin: 0 12px;
+
+            .header-button-link {
+                text-decoration: none;
+            }
+        }
+
+        .header-user {
+            color: $white;
+        }
+
     }
 }
 

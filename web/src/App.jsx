@@ -9,7 +9,6 @@ import AdminView from './AdminView/components/AdminView';
 import NotFound from './common/components/NotFound';
 import NoAccess from './common/components/NoAccess';
 import AdminRoute from './common/util/AdminRoute';
-import '../dist/fonts/fonts.css';
 import './common/css/main.scss';
 
 class App extends React.Component {

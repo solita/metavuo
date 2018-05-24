@@ -173,7 +173,7 @@ func routeProjectFileList(w http.ResponseWriter, r *http.Request, id int64) {
 			break
 		}
 		if err != nil {
-			log.Errorf(c, "Failed to create a Storage client: %v", err)
+			log.Errorf(c, "Failed to get storage file list: %v", err)
 			http.Error(w, "", http.StatusInternalServerError)
 			return
 		}

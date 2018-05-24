@@ -4,11 +4,15 @@ import (
 	"context"
 	"net/http"
 	"net/url"
+	"strconv"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/taskqueue"
+	"google.golang.org/appengine/file"
+	"google.golang.org/api/iterator"
+	"cloud.google.com/go/storage"
 )
 
 func routeTasks(w http.ResponseWriter, r *http.Request) {
@@ -19,6 +23,17 @@ func routeTasks(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
 			routeTasksRemoveSampleMetadata(w, r)
+			return
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+			return
+		}
+	}
+
+	if head == "remove-storage-files" {
+		switch r.Method {
+		case http.MethodPost:
+			routeTasksRemoveStorageFiles(w, r)
 			return
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
@@ -110,4 +125,52 @@ func routeTasksRemoveSampleMetadata(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusNoContent) // 204
+}
+
+func routeTasksRemoveStorageFiles(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+	id, err := strconv.Atoi(r.FormValue("id"))
+
+	if err != nil {
+		log.Errorf(c, "Failed to parse project id from request: %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
+	}
+
+	client, err := storage.NewClient(c)
+
+	if err != nil {
+		log.Errorf(c, "Failed to create a Storage client: %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	defer client.Close()
+
+	bucket, err := file.DefaultBucketName(c)
+	query := &storage.Query{Prefix: strconv.Itoa(int(id))}
+	it := client.Bucket(bucket).Objects(c, query)
+
+	for {
+		item, err := it.Next()
+
+		if err == iterator.Done {
+			break
+		}
+
+		if err != nil {
+			log.Errorf(c, "Failed to iterate storage files while deleting: %v", err)
+			http.Error(w, "", http.StatusInternalServerError)
+			return
+		}
+
+		err = client.Bucket(bucket).Object(item.Name).Delete(c)
+
+		if err != nil {
+			log.Errorf(c, "Failed to delete storage item: %v", err)
+			http.Error(w, "", http.StatusInternalServerError)
+			return
+		}
+
+	}
+
 }

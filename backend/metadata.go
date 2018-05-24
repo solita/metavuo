@@ -285,10 +285,10 @@ func routeProjectMetadataDelete(w http.ResponseWriter, r *http.Request, projectI
 				return err
 			}
 
-			// Delete metadata
+			// Delete metadata summary
 			err = datastore.Delete(c, metaDataKey)
 			if err != nil {
-				log.Errorf(c, "Error while removing metatada summayr: %v", err)
+				log.Errorf(c, "Error while removing metatada summary: %v", err)
 				return err
 			}
 			return nil

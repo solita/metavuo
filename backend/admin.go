@@ -7,11 +7,13 @@ import (
 	"regexp"
 	"strconv"
 	"time"
+	"net/url"
 
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/user"
+	"google.golang.org/appengine/taskqueue"
 )
 
 const (
@@ -91,6 +93,23 @@ func routeAdmin(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
+	}
+
+	if head == "project" {
+		head, r.URL.Path = shiftPath(r.URL.Path)
+		id, err := strconv.ParseInt(head, 10, 64)
+		if err != nil {
+			http.Error(w, "", http.StatusNotFound)
+			return
+		}
+		switch r.Method {
+		case http.MethodDelete:
+			routeAdminProjectDelete(w, r, id)
+			return
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+			return
+		}
 	}
 
 	http.Error(w, "", http.StatusMethodNotAllowed)
@@ -284,4 +303,73 @@ func routeInfoUpdate(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(mustJSON(currInfo))
+}
+
+func routeAdminProjectDelete(w http.ResponseWriter, r *http.Request, id int64) {
+	c := appengine.NewContext(r)
+	var p Project
+	projectKey := datastore.NewKey(c, projectKind, "", id, nil)
+	err := datastore.Get(c, projectKey, &p)
+
+	if err != nil {
+		log.Errorf(c, "Getting project for deletion failed", err)
+		return
+	}
+	var summaryArray []MetadataSummary
+	var summaryKeyArray []*datastore.Key
+	q := datastore.NewQuery(summaryKind).Filter("ProjectID = ", id).Limit(1)
+	summaryKeyArray, err = q.GetAll(c, &summaryArray)
+
+	if err != nil {
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
+	err = datastore.RunInTransaction(c, func(c context.Context) error {
+		if len(summaryKeyArray) > 0 {
+			metaDataKey := &*summaryKeyArray[0]
+			encodedMetaDataKey := metaDataKey.Encode()
+			// Delete samples
+			t := taskqueue.NewPOSTTask("/api/tasks/remove-sample-metadata",
+				url.Values{"cursor": {""}, "metadataKey": {encodedMetaDataKey}})
+			_, err := taskqueue.Add(c, t, "")
+			if err != nil {
+				log.Criticalf(c, "Could not add task to queue: %v", err)
+				return err
+			}
+			// Delete metadata summary
+			err = datastore.Delete(c, metaDataKey)
+			if err != nil {
+				log.Errorf(c, "Error while removing metatada summary: %v", err)
+				return err
+			}
+		}
+
+		// Delete project
+		err = datastore.Delete(c, projectKey)
+		if err != nil {
+			log.Errorf(c, "Error while removing project: %v", err)
+			return err
+		}
+
+		// Delete storage-files
+		t := taskqueue.NewPOSTTask("/api/tasks/remove-storage-files",
+			url.Values{"id": {strconv.Itoa(int(id))}})
+		_, err := taskqueue.Add(c, t, "")
+
+		if err != nil {
+			log.Errorf(c, "Could not add task to queue: %v", err)
+			return err
+		}
+
+		return nil
+	}, &datastore.TransactionOptions{XG: true})
+
+	if err != nil {
+		log.Errorf(c, "Transaction error: %v", err)
+		http.Error(w, "Deleting project failed, please try again", http.StatusInternalServerError)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent) // 204
 }

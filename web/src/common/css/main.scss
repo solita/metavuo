@@ -16,22 +16,13 @@ body {
 }
 
 
-
-.icon-right, .margin-left {
-  margin-left: 10px;
-}
-
-.icon-left, .margin-right {
-  margin-right: 10px;
-}
-
 .button-container {
   display: flex;
   align-items: center;
 }
 
 .message-errors {
-  color: red;
+  color: $blue;
 }
 
 .flex-row {
@@ -45,6 +36,11 @@ body {
 
   &:hover {
     background-color: $light-orange !important;
+  }
+
+  &:disabled {
+    background-color: $light-gray !important;
+    color: $middle-gray !important;
   }
 }
 
@@ -64,14 +60,19 @@ body {
 }
 
 .transparent-button {
-  background-color: $light-gray !important;
+  background-color: inherit !important;
   color: $middle-gray !important;
   box-shadow: 0 0 0 0 #000 !important;
+  border: 0;
+
+  &:hover {
+    background-color: $light-gray !important;
+  }
 }
 
 .round-button {
-  width: $button-dimension;
-  height: $button-dimension;
+  width: $round-button-dimension !important;
+  height: $round-button-dimension !important;
 
   .button-icon {
     font-size: 30px;
@@ -86,6 +87,7 @@ body {
   text-transform: lowercase !important;
   font-size: 16px !important;
   margin-right: 8px !important;
+  height: $text-button-dimension !important;
 
   .text-button-icon {
     margin-right: 8px;
@@ -104,7 +106,17 @@ h1 {
 
 h2 {
   font-family: 'Source Sans Pro', sans-serif;
-  font-weight: 700;
+  font-weight: 600;
+  letter-spacing: 1px;
+  font-size: 24px;
+  color: $dark-gray;
+  text-transform: uppercase;
+  margin: 0;
+}
+
+h3 {
+  font-family: 'Source Sans Pro', sans-serif;
+  font-weight: 400;
   letter-spacing: 1px;
   font-size: 24px;
   color: $dark-gray;
@@ -124,6 +136,19 @@ p {
 .light-text {
   font-weight: 300;
   color: $middle-gray;
+}
+
+.page-divider {
+  padding: 24px 0;
+}
+
+.divider-section {
+  border-bottom: 1px solid $light-gray;
+  padding: 12px 0;
+
+  &:last-child {
+    border-bottom: 0;
+  }
 }
 
 .table-card {

@@ -2,6 +2,7 @@ import React from 'react';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import Button from 'material-ui/Button';
+import Tooltip from 'material-ui/Tooltip';
 import PropTypes from 'prop-types';
 import CollaboratorListAdd from './CollaboratorListAdd';
 import ConfirmDialog from '../../common/components/ConfirmDialog';
@@ -91,13 +92,15 @@ class CollaboratorList extends React.Component {
                 <p className="light-text">{collaborator.organization}</p>
               </div>
               {this.props.projectCreatorEmail !== collaborator.email && (
-                <Button
-                  variant="fab"
-                  className="transparent-button round-button"
-                  onClick={e => this.openDelDialog(e, collaborator.email, collaborator.name)}
-                >
-                  <i className="material-icons">delete_outline</i>
-                </Button>
+                <Tooltip title="Delete" placement="bottom">
+                  <Button
+                    variant="fab"
+                    className="transparent-button round-button"
+                    onClick={e => this.openDelDialog(e, collaborator.email, collaborator.name)}
+                  >
+                    <i className="material-icons">delete_outline</i>
+                  </Button>
+                </Tooltip>
               )}
             </div>
           ))}
@@ -128,6 +131,7 @@ CollaboratorList.propTypes = {
   projectId: PropTypes.string.isRequired,
   projectCreatorEmail: PropTypes.string.isRequired,
   userEmail: PropTypes.string.isRequired,
+  history: PropTypes.any.isRequired,
 };
 
 export default withRouter(CollaboratorList);

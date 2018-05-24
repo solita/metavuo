@@ -53,7 +53,7 @@ class ProjectFileList extends React.Component {
 }
 export default ProjectFileList;
 ProjectFileList.propTypes = {
-  files: PropTypes.array,
+  files: PropTypes.arrayOf(PropTypes.instanceOf(File)),
   deleteStorageFileClick: PropTypes.func,
   url: PropTypes.string,
 };

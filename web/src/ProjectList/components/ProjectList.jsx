@@ -41,30 +41,31 @@ class ProjectList extends React.Component {
   render() {
     return (
       <div>
-        <Card className="table-card">
-          <div className="table-card-head">
-            <h2>Projects</h2>
-            {!this.state.hideContent &&
-            <div>
-              <Link to="/projects/new" className="button-link">
-                <Button variant="raised" className="primary-button text-button">
-                  <i className="material-icons text-button-icon">add_circle_outline</i>Add project
-                </Button>
-              </Link>
-            </div>
-            }
-          </div>
-          <div className="table-card-body">
-            {this.state.fetching
-              ? <CircularProgress />
-              :
+        {!this.state.hideContent ?
+          <Card className="table-card">
+            <div className="table-card-head">
+              <h2>Projects</h2>
               <div>
-                <p>{this.state.message}</p>
-                {this.state.projects.length > 0 ? <ProjectListTable projects={this.state.projects} /> : '' }
+                <Link to="/projects/new" className="button-link">
+                  <Button variant="raised" className="primary-button text-button">
+                    <i className="material-icons text-button-icon">add_circle_outline</i>Add project
+                  </Button>
+                </Link>
               </div>
-            }
-          </div>
-        </Card>
+            </div>
+            <div className="table-card-body">
+              {this.state.fetching
+                ? <CircularProgress />
+                :
+                <div>
+                  <p>{this.state.message}</p>
+                  {this.state.projects.length > 0 ? <ProjectListTable projects={this.state.projects} /> : '' }
+                </div>
+              }
+            </div>
+          </Card>
+          : <p>Access denied</p>
+        }
       </div>
     );
   }

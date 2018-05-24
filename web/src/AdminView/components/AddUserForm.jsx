@@ -1,6 +1,7 @@
 import React from 'react';
 import axios from 'axios';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
+import DialogActions from 'material-ui/Dialog/DialogActions';
 import Button from 'material-ui/Button';
 import PropTypes from 'prop-types';
 
@@ -61,43 +62,49 @@ class AddUserForm extends React.Component {
           autoComplete="off"
         >
           <TextValidator
-            className="form-item form-control"
+            className="form-control"
             id="name"
             name="name"
             label="Name *"
             value={this.state.name}
             onChange={this.handleChange}
             margin="normal"
+            fullWidth
             validators={['required']}
             errorMessages={['Name is required.']}
           />
           <TextValidator
-            className="form-item form-control"
+            className="form-control"
             id="email"
             name="email"
             label="Email *"
             value={this.state.email}
             onChange={this.handleChange}
             margin="normal"
+            fullWidth
             validators={['required', 'isEmail']}
             errorMessages={['Email address is required.', 'Email is not valid.']}
           />
           <TextValidator
-            className="form-item form-control"
+            className="form-control"
             id="organization"
             name="organization"
             label="Organization *"
             value={this.state.organization}
             onChange={this.handleChange}
             margin="normal"
+            fullWidth
             validators={['required']}
             errorMessages={['Organization is required.']}
           />
-          <div className="form-item">
-            <Button type="submit" id="submit-user" variant="raised" color="primary">
-              <i className="material-icons icon-left">save</i>Add
+          <DialogActions>
+            <Button variant="raised" className="secondary-button text-button" onClick={this.props.closeForm}>
+              <i className="material-icons text-button-icon">close</i>Cancel
             </Button>
-          </div>
+            <Button type="submit" id="submit-user" variant="raised" className="primary-button text-button">
+              <i className="material-icons text-button-icon">save</i>Save
+            </Button>
+          </DialogActions>
         </ValidatorForm>
       </div>
     );

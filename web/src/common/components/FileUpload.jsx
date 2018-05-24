@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import TextField from 'material-ui/TextField';
 import Button from 'material-ui/Button';
+import DialogActions from 'material-ui/Dialog/DialogActions';
 import CircularProgress from 'material-ui/Progress/CircularProgress';
 import PropTypes from 'prop-types';
 import '../css/FileUpload.scss';
@@ -60,33 +61,37 @@ class FileUpload extends React.Component {
         <form
           id="form-object"
           autoComplete="off"
-          onSubmit={this.handleSubmit}
         >
-          <input type="file" name="file" className="form-item" onChange={this.addFile} />
+          <input type="file" name="file" onChange={this.addFile} />
 
           {this.props.askDescription
           ?
             <TextField
               name="description"
               label="Description"
-              className="form-item"
               value={this.state.description}
               margin="normal"
               onChange={this.handleChange}
+              fullWidth
             />
             : ''
           }
           {this.state.buttonDisabled ? <CircularProgress /> : ''}
+        </form>
+        <DialogActions>
+          <Button className="secondary-button text-button" onClick={this.props.closeDialog}>
+            <i className="material-icons text-button-icon">close</i>Cancel
+          </Button>
           <Button
             type="submit"
-            id="submit-project"
             variant="raised"
-            color="primary"
+            onClick={this.handleSubmit}
+            className="primary-button text-button"
             disabled={!this.state.hasFile || this.state.buttonDisabled}
           >
-            Upload<i className="material-icons icon-right">file_upload</i>
+            <i className="material-icons text-button-icon">file_upload</i>Upload
           </Button>
-        </form>
+        </DialogActions>
       </div>
     );
   }
@@ -96,6 +101,7 @@ FileUpload.propTypes = {
   url: PropTypes.string.isRequired,
   askDescription: PropTypes.bool,
   passResponse: PropTypes.func.isRequired,
+  closeDialog: PropTypes.func.isRequired,
 };
 
 FileUpload.defaultProps = {

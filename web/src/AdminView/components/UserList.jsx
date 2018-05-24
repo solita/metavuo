@@ -46,13 +46,11 @@ class UserList extends React.Component {
       });
   }
 
-  deleteUserClick(e, userId, userName) {
-    e.preventDefault();
+  deleteUserClick(userId, userName) {
     this.setState({ delDialogOpen: true, removeUserId: userId, removeUser: userName });
   }
 
-  deleteUser(e, userId, userName) {
-    e.preventDefault();
+  deleteUser(userId, userName) {
     this.setState({ delDialogOpen: false });
     axios.delete(`/api/admin/users/${userId}`)
       .then((res) => {
@@ -124,7 +122,7 @@ class UserList extends React.Component {
                             variant="fab"
                             mini
                             className="white-button round-button"
-                            onClick={e => this.deleteUserClick(e, user.user_id, user.name)}
+                            onClick={() => this.deleteUserClick(user.user_id, user.name)}
                             disabled={this.state.deleting}
                           >
                             <i className="material-icons">delete</i>

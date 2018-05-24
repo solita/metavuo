@@ -13,20 +13,22 @@ const ConfirmDialog = props => (
     onClose={props.closeDialog}
     disableBackdropClick
   >
-    <DialogTitle>{props.titleText}</DialogTitle>
+    <DialogTitle className="dialog-header">
+      <i className="material-icons text-button-icon">error</i>{props.titleText}
+    </DialogTitle>
     <DialogContent>
       <DialogContentText>
         {props.contentText}
       </DialogContentText>
+      <DialogActions>
+        <Button onClick={props.closeDialog} className="secondary-button text-button" autoFocus>
+          <i className="material-icons text-button-icon">close</i>Cancel
+        </Button>
+        <Button onClick={props.action} className="primary-button text-button">
+          <i className="material-icons text-button-icon">done</i>{props.actionButtonText}
+        </Button>
+      </DialogActions>
     </DialogContent>
-    <DialogActions>
-      <Button onClick={props.closeDialog} className="secondary-button text-button" autoFocus>
-        Cancel
-      </Button>
-      <Button onClick={props.action} className="primary-button text-button">
-        {props.actionButtonText}
-      </Button>
-    </DialogActions>
   </Dialog>
 );
 

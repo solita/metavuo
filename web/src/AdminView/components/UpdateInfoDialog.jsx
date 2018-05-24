@@ -78,7 +78,7 @@ class UpdateInfoDialog extends React.Component {
         maxWidth="md"
         disableBackdropClick
       >
-        <DialogTitle>Update info text</DialogTitle>
+        <DialogTitle className="dialog-header">Update info text</DialogTitle>
         <DialogContent>
           <p>{this.state.message}</p>
           <DialogContentText>

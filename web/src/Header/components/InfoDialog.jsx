@@ -45,7 +45,7 @@ class InfoDialog extends React.Component {
         fullWidth
         maxWidth="md"
       >
-        <DialogTitle>
+        <DialogTitle className="dialog-header">
           <DialogActions>
             <Button onClick={this.props.closeDialog} className="secondary-button text-button">
               <i className="material-icons text-button-icon">close</i>Close

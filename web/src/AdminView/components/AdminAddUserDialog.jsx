@@ -11,7 +11,7 @@ const AdminAddUserDialog = props => (
     onClose={props.closeDialog}
     disableBackdropClick
   >
-    <DialogTitle>Add user</DialogTitle>
+    <DialogTitle className="dialog-header">Add user</DialogTitle>
     <DialogContent>
       <AddUserForm closeForm={props.closeForm} />
     </DialogContent>

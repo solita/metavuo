@@ -83,7 +83,7 @@ class ProjectUpdateDialog extends React.Component {
           disableBackdropClick
           disableEscapeKeyDown
         >
-          <DialogTitle id="form-dialog-title">Edit project</DialogTitle>
+          <DialogTitle className="dialog-header">Edit project</DialogTitle>
           <DialogContent>
             <ValidatorForm
               id="form-object"

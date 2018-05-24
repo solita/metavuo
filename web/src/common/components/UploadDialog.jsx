@@ -11,7 +11,7 @@ const UploadDialog = props => (
     onClose={props.closeDialog}
     disableBackdropClick
   >
-    <DialogTitle>{props.titleText}</DialogTitle>
+    <DialogTitle className="dialog-header">{props.titleText}</DialogTitle>
     <DialogContent>
       <FileUpload
         url={props.url}

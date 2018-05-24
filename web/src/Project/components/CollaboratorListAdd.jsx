@@ -80,7 +80,7 @@ class CollaboratorListAdd extends React.Component {
           onEnter={this.getUsers}
           disableBackdropClick
         >
-          <DialogTitle>Add collaborator</DialogTitle>
+          <DialogTitle className="dialog-header">Add collaborator</DialogTitle>
           <DialogContent>
             <FormControl>
               <InputLabel htmlFor="user-select">User</InputLabel>

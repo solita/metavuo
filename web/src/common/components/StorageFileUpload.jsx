@@ -82,10 +82,11 @@ class StorageFileUpload extends React.Component {
   render() {
     return (
       <Dialog
+
         open={this.props.dialogOpen}
         onClose={this.closeDialog}
       >
-        <DialogTitle>{this.props.titleText}</DialogTitle>
+        <DialogTitle className="dialog-header">{this.props.titleText}</DialogTitle>
         <DialogContent>
           <p className="form-errors">{this.state.message}</p>
           <form>

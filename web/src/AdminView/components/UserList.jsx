@@ -46,7 +46,8 @@ class UserList extends React.Component {
       });
   }
 
-  deleteUserClick(userId, userName) {
+  deleteUserClick(e, userId, userName) {
+    e.preventDefault();
     this.setState({ delDialogOpen: true, removeUserId: userId, removeUser: userName });
   }
 
@@ -117,11 +118,13 @@ class UserList extends React.Component {
                       <TableCell>{user.email}</TableCell>
                       <TableCell>{user.organization}</TableCell>
                       <TableCell>{new Date(user.created_at).toLocaleString()}</TableCell>
-                      <TableCell>
-                        <Tooltip title="Delete" placement="right">
+                      <TableCell numeric>
+                        <Tooltip title="Delete" placement="left">
                           <Button
-                            className="transparent-button"
-                            onClick={e => this.deleteUser(e, user.user_id, user.name)}
+                            variant="fab"
+                            mini
+                            className="white-button round-button"
+                            onClick={e => this.deleteUserClick(e, user.user_id, user.name)}
                             disabled={this.state.deleting}
                           >
                             <i className="material-icons">delete</i>

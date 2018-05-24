@@ -15,7 +15,6 @@ body {
   text-decoration: none;
 }
 
-
 .button-container {
   display: flex;
   align-items: center;
@@ -56,14 +55,23 @@ body {
 .black-button {
   background-color: $dark-gray !important;
   color: $orange !important;
-  box-shadow: 0 0 0 0 #000 !important;
+  box-shadow: 0 0 0 0 $dark-gray !important;
 }
 
-.transparent-button {
-  background-color: inherit !important;
-  color: $middle-gray !important;
-  box-shadow: 0 0 0 0 #000 !important;
-  border: 0;
+.gray-button {
+  background-color: $light-gray !important;
+  color: $dark-gray !important;
+  box-shadow: 0 0 0 0 $light-gray !important;
+
+  &:hover {
+    background-color: $middle-gray !important;
+  }
+}
+
+.white-button {
+  background-color: $white !important;
+  color: $dark-gray !important;
+  box-shadow: 0 0 0 0 $white !important;
 
   &:hover {
     background-color: $light-gray !important;
@@ -88,10 +96,10 @@ body {
   font-size: 16px !important;
   margin-right: 8px !important;
   height: $text-button-dimension !important;
+}
 
-  .text-button-icon {
-    margin-right: 8px;
-  }
+.text-button-icon {
+  margin-right: 8px;
 }
 
 h1 {
@@ -135,7 +143,6 @@ p {
 
 .light-text {
   font-weight: 300;
-  color: $middle-gray;
 }
 
 .page-divider {
@@ -143,11 +150,38 @@ p {
 }
 
 .divider-section {
-  border-bottom: 1px solid $light-gray;
+  border-bottom: 2px solid $light-gray;
   padding: 12px 0;
 
   &:last-child {
     border-bottom: 0;
+  }
+}
+
+th {
+  text-transform: uppercase !important;
+  font-weight: 600 !important;
+  font-size: 14px !important;
+
+  &:first-child {
+    padding-left: 0 !important;
+  }
+
+  &:last-child {
+    padding-right: 0 !important;
+  }
+}
+
+td {
+  color: $dark-gray !important;
+  font-size: 15px !important;
+
+  &:first-child {
+    padding-left: 0 !important;
+  }
+
+  &:last-child {
+    padding-right: 0 !important;
   }
 }
 
@@ -176,12 +210,11 @@ p {
 
   .secondary-card-items {
     margin: 12px 0;
-    border-bottom: 1px solid $middle-gray;
+    border-bottom: 2px solid $middle-gray;
     display: flex;
     align-items: center;
     flex-direction: row;
     justify-content: space-between;
-    font-size: 14px;
 
     &:last-child {
       border-bottom: 0;
@@ -190,8 +223,7 @@ p {
 
   .secondary-card-rows {
     padding: 6px 0;
-    border-bottom: 1px solid $middle-gray;
-    font-size: 14px;
+    border-bottom: 2px solid $middle-gray;
 
     &:last-child {
       border-bottom: 0;
@@ -204,4 +236,12 @@ p {
     align-items: center;
     justify-content: flex-end;
   }
+}
+
+.dialog-header {
+  background-color: $light-blue;
+  margin: 0 0 12px 0 !important;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }

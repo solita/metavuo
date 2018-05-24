@@ -95,7 +95,7 @@ class CollaboratorList extends React.Component {
                 <Tooltip title="Delete" placement="bottom">
                   <Button
                     variant="fab"
-                    className="transparent-button round-button"
+                    className="gray-button round-button"
                     onClick={e => this.openDelDialog(e, collaborator.email, collaborator.name)}
                   >
                     <i className="material-icons">delete_outline</i>
@@ -116,7 +116,7 @@ class CollaboratorList extends React.Component {
 
         <ConfirmDialog
           titleText="Remove collaborator"
-          contentText={`Are you sure you want to remove collaborator ${this.state.delName}`}
+          contentText={`Are you sure you want to remove collaborator ${this.state.delName}?`}
           actionButtonText="Remove"
           dialogOpen={this.state.delDialogOpen}
           closeDialog={this.closeDelDialog}

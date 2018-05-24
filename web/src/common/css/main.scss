@@ -153,9 +153,34 @@ p {
   border-bottom: 2px solid $light-gray;
   padding: 12px 0;
 
+  .right-divider {
+    min-width: 180px;
+  }
+
+  .left-divider {
+    width: calc(100% - 180px);
+  }
+
   &:last-child {
     border-bottom: 0;
   }
+}
+
+.sub-divider-section {
+  margin: 0 0 -20px 0;
+
+  .right-divider {
+    min-width: 180px;
+  }
+
+  .left-divider {
+    width: calc(100% - 180px);
+  }
+}
+
+.description-color {
+  background-color: $light-orange;
+  padding: 3px;
 }
 
 th {
@@ -198,6 +223,13 @@ td {
 
   .table-card-body {
     padding: $card-padding;
+  }
+
+  .status-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
   }
 }
 

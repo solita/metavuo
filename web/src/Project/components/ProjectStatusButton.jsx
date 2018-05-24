@@ -52,7 +52,7 @@ class ProjectStatusButton extends React.Component {
           className="primary-button text-button"
           onClick={this.handleClick}
         >
-          <i className="material-icons text-button-icon">repeat</i>Change project status
+          <i className="material-icons text-button-icon">update</i>Change
         </Button>
         <Menu
           anchorEl={this.state.anchorEl}

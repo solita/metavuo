@@ -169,31 +169,44 @@ class Project extends React.Component {
                         :
                         <div>
                           <div>
-                            <Grid container className="divider-section">
-                              <Grid item xs={4}>
+                            <div className="divider-section flex-row">
+                              <div className="right-divider">
                                 <p className="bold-text">Description:</p>
                                 <p className="bold-text">Project started:</p>
                                 <p className="bold-text">Project creator:</p>
-                                <p className="bold-text">Project status:</p>
-                              </Grid>
-                              <Grid item xs={8}>
+                              </div>
+                              <div className="left-divider">
                                 <p>{this.state.description}</p>
                                 <p>{new Date(this.state.createdAt).toLocaleString()}</p>
                                 <p>{this.state.createdbyEmail}</p>
-                                <p>{ConvertStatus(this.state.status)}</p>
-                              </Grid>
-                            </Grid>
+                              </div>
+                            </div>
+                            <div className="divider-section flex-row">
+                              <div className="right-divider button-container">
+                                <p className="bold-text">Project status:</p>
+                              </div>
+                              <div className="left-divider">
+                                <div className="status-row">
+                                  <p>{ConvertStatus(this.state.status)}</p>
+                                  <ProjectStatusButton
+                                    projectId={this.props.match.params.id}
+                                    projectStatus={this.state.status}
+                                    setStatus={this.setStatus}
+                                  />
+                                </div>
+                              </div>
+                            </div>
                             <p className="bold-text">Customer details</p>
-                            <Grid container className="divider-section">
-                              <Grid item xs={4}>
+                            <div className="divider-section flex-row">
+                              <div className="right-divider">
                                 <p className="bold-text">Organization:</p>
                                 {this.state.invoiceAddress && <p className="bold-text">Invoice address:</p>}
                                 {this.state.customerName && <p className="bold-text">Name:</p>}
                                 {this.state.customerEmail && <p className="bold-text">Email:</p>}
                                 {this.state.customerPhone && <p className="bold-text">Phone number:</p>}
                                 {this.state.customerReference && <p className="bold-text">Customer reference:</p>}
-                              </Grid>
-                              <Grid item xs={8}>
+                              </div>
+                              <div className="left-divider">
                                 <p>{this.state.organization}</p>
                                 {this.state.invoiceAddress && <p>{this.state.invoiceAddress}</p>}
                                 {this.state.customerName && <p>{this.state.customerName}</p>}
@@ -202,35 +215,28 @@ class Project extends React.Component {
                                 {this.state.customerReference &&
                                   <p>{this.state.customerReference}</p>
                                 }
-                              </Grid>
-                            </Grid>
-                            <Grid container className="divider-section">
-                              <Grid item xs={4}>
+                              </div>
+                            </div>
+                            <div className="divider-section flex-row">
+                              <div className="right-divider">
                                 {this.state.internalReference && <p className="bold-text">Internal reference:</p>}
                                 {this.state.sampleLocation && <p className="bold-text">Sample location:</p>}
                                 {this.state.info && <p className="bold-text">Additional information:</p>}
-                              </Grid>
-                              <Grid item xs={8}>
+                              </div>
+                              <div className="left-divider">
                                 {this.state.internalReference &&
                                 <p>{this.state.internalReference}</p>
                                 }
                                 {this.state.sampleLocation && <p>{this.state.sampleLocation}</p>}
                                 {this.state.info && <p>{this.state.info}</p>}
-                              </Grid>
-                            </Grid>
+                              </div>
+                            </div>
                           </div>
-                          <div className="flex-row">
-                            <ProjectStatusButton
-                              projectId={this.props.match.params.id}
-                              projectStatus={this.state.status}
-                              setStatus={this.setStatus}
-                            />
-                            <ProjectUpdateDialog
-                              url={`/api/projects/${this.props.match.params.id}`}
-                              updateMainView={this.getProject}
-                              parentState={this.state}
-                            />
-                          </div>
+                          <ProjectUpdateDialog
+                            url={`/api/projects/${this.props.match.params.id}`}
+                            updateMainView={this.getProject}
+                            parentState={this.state}
+                          />
                         </div>
                       }
                     </div>
@@ -252,13 +258,21 @@ class Project extends React.Component {
                   <Grid item xs={7}>
                     <Card className="table-card">
                       <div className="table-card-head">
-                        <h2>Result files</h2>
+                        <h2>{`Result files (${this.state.storageFiles.length})`}</h2>
                         <Button variant="raised" className="primary-button text-button">
-                          <i className="material-icons text-button-icon">add_circle_outline</i>Add file
+                          <i className="material-icons text-button-icon">add_circle_outline</i>Add result file
                         </Button>
                       </div>
                       <div className="table-card-body">
-                        <p>Here be result files</p>
+                        {this.state.storageFiles.length > 0
+                          ?
+                            <ProjectFileList
+                              files={this.state.storageFiles}
+                              url={this.props.match.params.id}
+                              deleteStorageFileClick={this.deleteStorageFileClick}
+                            />
+                          : <p>No files added.</p>
+                        }
                       </div>
                     </Card>
                   </Grid>
@@ -276,7 +290,7 @@ class Project extends React.Component {
                 <div className="page-divider">
                   <Card className="table-card">
                     <div className="table-card-head">
-                      <h2>Files in progress</h2>
+                      <h2>{`Files in progress (${this.state.storageFiles.length})`}</h2>
                       <Button variant="raised" className="primary-button text-button" onClick={this.openFileDialog}>
                         <i className="material-icons text-button-icon">add_circle_outline</i>Add file
                       </Button>

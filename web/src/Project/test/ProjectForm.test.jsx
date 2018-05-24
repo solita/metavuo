@@ -24,7 +24,7 @@ describe('Project form', () => {
 
   it('has all fields', () => {
     expect(formComponent.find('.form-container').length).toBe(1);
-    expect(formComponent.find('.form-item').length).toBe(12);
+    expect(formComponent.find('.form-control').length).toBe(11);
     expect(formComponent.find('#name').length).toBe(1);
     expect(formComponent.find('#description').length).toBe(1);
     expect(formComponent.find('#organization').length).toBe(1);

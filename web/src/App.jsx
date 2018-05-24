@@ -1,6 +1,7 @@
 import React from 'react';
 import { Route, Switch } from 'react-router-dom';
 import axios from 'axios';
+import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles';
 import Header from './Header/components/Header';
 import ProjectList from './ProjectList/components/ProjectList';
 import Project from './Project/components/Project';
@@ -71,8 +72,21 @@ class App extends React.Component {
 
   render() {
     const routerPart = this.renderRouter();
+    const theme = createMuiTheme({
+      typography: {
+        // Use the system font instead of the default Roboto font.
+        fontFamily: [
+          'Source Sans Pro',
+          'sans-serif',
+          '"Apple Color Emoji"',
+          '"Segoe UI Emoji"',
+          '"Segoe UI Symbol"',
+        ].join(','),
+      },
+    });
+
     return (
-      <div>
+      <MuiThemeProvider theme={theme}>
         <Header
           userEmail={this.state.userEmail}
           isAdmin={this.state.isAdmin}
@@ -81,7 +95,7 @@ class App extends React.Component {
         <div className="content-container">
           {routerPart}
         </div>
-      </div>
+      </MuiThemeProvider>
     );
   }
 }

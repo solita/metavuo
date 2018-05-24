@@ -9,7 +9,6 @@ import ProjectStatusButton from './ProjectStatusButton';
 import MetadataSummary from './MetadataSummary';
 import StorageFileUpload from '../../common/components/StorageFileUpload';
 import ConfirmDialog from '../../common/components/ConfirmDialog';
-import UploadDialog from '../../common/components/UploadDialog';
 import ConvertStatus from '../../common/util/ProjectStatusConverter';
 import ProjectUpdateDialog from './ProjectUpdateDialog';
 import ProjectFileList from './ProjectFileList';
@@ -20,7 +19,7 @@ class Project extends React.Component {
     super(props);
     this.state = {
       fetching: true,
-      errorMsg: '',
+      errorMsg: 'Getting project',
       id: '',
       name: '',
       description: '',
@@ -28,10 +27,7 @@ class Project extends React.Component {
       createdbyEmail: '',
       status: '',
       showMetadata: false,
-      metadataError: '',
       metadataProps: {},
-      dialogOpen: false,
-      delDialogOpen: false,
       fileDialogOpen: false,
       organization: '',
       invoiceAddress: '',
@@ -45,18 +41,12 @@ class Project extends React.Component {
       storageFiles: [],
       storageDelDialogOpen: false,
       storageFileToDelete: '',
-
     };
-    this.openDialog = this.openDialog.bind(this);
-    this.closeDialog = this.closeDialog.bind(this);
+    this.getProject = this.getProject.bind(this);
+    this.setStatus = this.setStatus.bind(this);
+    this.passMetadataResponse = this.passMetadataResponse.bind(this);
     this.openFileDialog = this.openFileDialog.bind(this);
     this.closeFileDialog = this.closeFileDialog.bind(this);
-    this.passResponse = this.passResponse.bind(this);
-    this.discardMetadata = this.discardMetadata.bind(this);
-    this.setStatus = this.setStatus.bind(this);
-    this.discardMetadataClick = this.discardMetadataClick.bind(this);
-    this.closeDelDialog = this.closeDelDialog.bind(this);
-    this.getProject = this.getProject.bind(this);
     this.getProjectFiles = this.getProjectFiles.bind(this);
     this.deleteFile = this.deleteFile.bind(this);
     this.closeStorageDelDialog = this.closeStorageDelDialog.bind(this);
@@ -73,6 +63,7 @@ class Project extends React.Component {
       .then((res) => {
         const project = res.data;
         this.setState({
+          errorMsg: '',
           id: project.project_id,
           name: project.project_name,
           description: project.project_description,
@@ -89,7 +80,6 @@ class Project extends React.Component {
           sampleLocation: project.sample_location,
           info: project.additional_information,
           fetching: false,
-          hideContent: false,
         });
         if (res.data.sample_summary !== null) {
           this.setState({
@@ -100,7 +90,7 @@ class Project extends React.Component {
       })
       .catch((err) => {
         if (err.response.status === 403) {
-          this.setState({ errorMsg: 'No access', fetching: false, hideContent: true });
+          this.setState({ errorMsg: 'No access', fetching: false });
         } else if (err.response.status === 404) {
           this.setState({ errorMsg: 'no such project', fetching: false });
         } else {
@@ -108,6 +98,7 @@ class Project extends React.Component {
         }
       });
   }
+
   getProjectFiles() {
     axios.get(`/api/projects/${this.props.match.params.id}/files`).then((res) => {
       this.setState({ storageFiles: res.data });
@@ -120,38 +111,8 @@ class Project extends React.Component {
     this.setState({ status: value });
   }
 
-  openDialog() {
-    this.setState({ dialogOpen: true });
-  }
-
-  closeDialog() {
-    this.setState({ dialogOpen: false });
-  }
-
-  closeDelDialog() {
-    this.setState({ delDialogOpen: false });
-  }
-
-  passResponse(res) {
-    this.closeDialog();
-    this.setState({ metadataProps: res, showMetadata: true });
-  }
-
-  discardMetadataClick() {
-    this.setState({ delDialogOpen: true });
-  }
-
-  discardMetadata() {
-    axios.delete(`/api/projects/${this.props.match.params.id}/metadata`)
-      .then((res) => {
-        if (res.status === 204) {
-          this.setState({ metadataProps: {}, showMetadata: false });
-        }
-      })
-      .catch((err) => {
-        this.setState({ metadataError: `Metadata could not be removed: ${err}` });
-      });
-    this.closeDelDialog();
+  passMetadataResponse(res, showMetadata) {
+    this.setState({ metadataProps: res, showMetadata });
   }
 
   openFileDialog() {
@@ -185,17 +146,17 @@ class Project extends React.Component {
       <div>
         {this.state.fetching
           ?
-            <div>
+            <div className="page-divider">
               <p>Getting project</p>
               <CircularProgress />
             </div>
           :
             <div>
-              <Grid container>
+              <Grid container className="page-divider">
                 <Grid item xs={7}>
                   <Card className="table-card">
                     <div className="table-card-head">
-                      {!this.state.hideContent &&
+                      {!this.state.errorMsg &&
                       <div>
                         <h1>{this.state.name || 'not found'}</h1>
                         <p>ID: <span className="bold-text">{this.state.id}</span></p>
@@ -207,36 +168,57 @@ class Project extends React.Component {
                         ? <p>{this.state.errorMsg}</p>
                         :
                         <div>
-                          <p>Description: {this.state.description}</p>
-                          <p>Project started: {new Date(this.state.createdAt).toLocaleString()}</p>
-                          <p>Project creator: {this.state.createdbyEmail}</p>
-                          <p>Project status: {ConvertStatus(this.state.status)}</p>
-                          <h2>Customer details</h2>
-                          <p>Organization: {this.state.organization}</p>
-                          {this.state.invoiceAddress &&
-                            <p>Invoice address: {this.state.invoiceAddress}</p>
-                          }
-                          {this.state.customerName &&
-                            <p>Name: {this.state.customerName}</p>
-                          }
-                          {this.state.customerEmail &&
-                            <p>Email: {this.state.customerEmail}</p>
-                          }
-                          {this.state.customerPhone &&
-                            <p>Phone number: {this.state.customerPhone}</p>
-                          }
-                          {this.state.customerReference &&
-                            <p>Customer reference: {this.state.customerReference}</p>
-                          }
-                          {this.state.internalReference &&
-                            <p>Internal reference: {this.state.internalReference}</p>
-                          }
-                          {this.state.sampleLocation &&
-                            <p>Sample location: {this.state.sampleLocation}</p>
-                          }
-                          {this.state.info &&
-                            <p>Additional information: {this.state.info}</p>
-                          }
+                          <div>
+                            <Grid container className="divider-section">
+                              <Grid item xs={4}>
+                                <p className="bold-text">Description:</p>
+                                <p className="bold-text">Project started:</p>
+                                <p className="bold-text">Project creator:</p>
+                                <p className="bold-text">Project status:</p>
+                              </Grid>
+                              <Grid item xs={8}>
+                                <p>{this.state.description}</p>
+                                <p>{new Date(this.state.createdAt).toLocaleString()}</p>
+                                <p>{this.state.createdbyEmail}</p>
+                                <p>{ConvertStatus(this.state.status)}</p>
+                              </Grid>
+                            </Grid>
+                            <p className="bold-text">Customer details</p>
+                            <Grid container className="divider-section">
+                              <Grid item xs={4}>
+                                <p className="bold-text">Organization:</p>
+                                {this.state.invoiceAddress && <p className="bold-text">Invoice address:</p>}
+                                {this.state.customerName && <p className="bold-text">Name:</p>}
+                                {this.state.customerEmail && <p className="bold-text">Email:</p>}
+                                {this.state.customerPhone && <p className="bold-text">Phone number:</p>}
+                                {this.state.customerReference && <p className="bold-text">Customer reference:</p>}
+                              </Grid>
+                              <Grid item xs={8}>
+                                <p>{this.state.organization}</p>
+                                {this.state.invoiceAddress && <p>{this.state.invoiceAddress}</p>}
+                                {this.state.customerName && <p>{this.state.customerName}</p>}
+                                {this.state.customerEmail && <p>{this.state.customerEmail}</p>}
+                                {this.state.customerPhone && <p>{this.state.customerPhone}</p>}
+                                {this.state.customerReference &&
+                                  <p>{this.state.customerReference}</p>
+                                }
+                              </Grid>
+                            </Grid>
+                            <Grid container className="divider-section">
+                              <Grid item xs={4}>
+                                {this.state.internalReference && <p className="bold-text">Internal reference:</p>}
+                                {this.state.sampleLocation && <p className="bold-text">Sample location:</p>}
+                                {this.state.info && <p className="bold-text">Additional information:</p>}
+                              </Grid>
+                              <Grid item xs={8}>
+                                {this.state.internalReference &&
+                                <p>{this.state.internalReference}</p>
+                                }
+                                {this.state.sampleLocation && <p>{this.state.sampleLocation}</p>}
+                                {this.state.info && <p>{this.state.info}</p>}
+                              </Grid>
+                            </Grid>
+                          </div>
                           <div className="flex-row">
                             <ProjectStatusButton
                               projectId={this.props.match.params.id}
@@ -266,8 +248,8 @@ class Project extends React.Component {
                 </Grid>
               </Grid>
               {!this.state.errorMsg &&
-                <Grid container>
-                  <Grid xs={7}>
+                <Grid container className="page-divider">
+                  <Grid item xs={7}>
                     <Card className="table-card">
                       <div className="table-card-head">
                         <h2>Result files</h2>
@@ -280,50 +262,43 @@ class Project extends React.Component {
                       </div>
                     </Card>
                   </Grid>
-                  <Grid xs={5}>
-                    {this.state.showMetadata ?
-                      <div className="secondary-card">
-                        <MetadataSummary
-                          rowCount={this.state.metadataProps.rowcount}
-                          headers={this.state.metadataProps.headers.slice(4)}
-                          uploadedat={this.state.metadataProps.uploadedat}
-                          uploadedby={this.state.metadataProps.uploadedby}
-                          metadataError={this.state.metadataError}
-                          projectId={this.props.match.params.id}
-                          discardMetadata={this.discardMetadataClick}
-                        />
-                      </div>
-                      :
-                      <Button variant="raised" color="primary" onClick={this.openDialog}>
-                        <i className="material-icons icon-left">add_circle</i>Add metadata file
-                      </Button>
-                    }
+                  <Grid item xs={5}>
+                    <MetadataSummary
+                      showMetadata={this.state.showMetadata}
+                      metadataProps={this.state.metadataProps}
+                      projectId={this.props.match.params.id}
+                      passResponse={this.passMetadataResponse}
+                    />
                   </Grid>
-                  <Button variant="raised" color="primary" onClick={this.openFileDialog} style={{ margin: 12 }}>
-                    <i className="material-icons icon-left">add_circle</i>Add file
-                  </Button>
-
+                </Grid>
+              }
+              {!this.state.errorMsg &&
+                <div className="page-divider">
+                  <Card className="table-card">
+                    <div className="table-card-head">
+                      <h2>Files in progress</h2>
+                      <Button variant="raised" className="primary-button text-button" onClick={this.openFileDialog}>
+                        <i className="material-icons text-button-icon">add_circle_outline</i>Add file
+                      </Button>
+                    </div>
+                    <div className="table-card-body">
+                      {this.state.storageFiles.length > 0
+                        ?
+                          <ProjectFileList
+                            files={this.state.storageFiles}
+                            url={this.props.match.params.id}
+                            deleteStorageFileClick={this.deleteStorageFileClick}
+                          />
+                        : <p>No files added.</p>
+                      }
+                    </div>
+                  </Card>
                   <StorageFileUpload
                     dialogOpen={this.state.fileDialogOpen}
                     closeDialog={this.closeFileDialog}
                     titleText="Upload file"
                     url={`/api/projects/${this.props.match.params.id}/files/generate-upload-url`}
                     userEmail={this.props.userEmail}
-                  />
-                  <UploadDialog
-                    dialogOpen={this.state.dialogOpen}
-                    titleText="Metadata file upload"
-                    url={`/api/projects/${this.props.match.params.id}/metadata`}
-                    closeDialog={this.closeDialog}
-                    passResponse={this.passResponse}
-                  />
-                  <ConfirmDialog
-                    dialogOpen={this.state.delDialogOpen}
-                    closeDialog={this.closeDelDialog}
-                    titleText="Remove metadata"
-                    contentText="Are you sure you want to remove metadata permanently?"
-                    action={this.discardMetadata}
-                    actionButtonText="Delete metadata"
                   />
                   <ConfirmDialog
                     dialogOpen={this.state.storageDelDialogOpen}
@@ -333,16 +308,10 @@ class Project extends React.Component {
                     action={this.deleteFile}
                     actionButtonText="Delete file"
                   />
-                </Grid>
+                </div>
               }
             </div>
         }
-        {!this.state.fetching && !this.state.errorMsg && this.state.storageFiles.length > 0 &&
-        <ProjectFileList
-          files={this.state.storageFiles}
-          url={this.props.match.params.id}
-          deleteStorageFileClick={this.deleteStorageFileClick}
-        />}
       </div>
     );
   }

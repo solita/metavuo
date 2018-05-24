@@ -43,6 +43,17 @@ module.exports = {
         use: [ 'style-loader', 'css-loader', 'sass-loader' ]
       },
       {
+        test: /\.(png)$/,
+        use: [
+          {
+            loader: 'file-loader',
+            options: {
+              name: '[name].[ext]'
+            }
+          },
+        ],
+      },
+      {
         test: /\.html$/,
         use: [
           {
@@ -54,7 +65,7 @@ module.exports = {
     ]
   },
   plugins: [
-    new HtmlWebpackPlugin({ template: './src/index.html' }),
+    new HtmlWebpackPlugin({ template: './src/index.html', favicon: './src/favicon.png' }),
     new UglifyJsPlugin()
   ]
 };

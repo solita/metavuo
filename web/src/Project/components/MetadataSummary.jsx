@@ -1,22 +1,38 @@
 import React from 'react';
+import axios from 'axios';
 import Grid from 'material-ui/Grid';
 import Button from 'material-ui/Button';
 import Tooltip from 'material-ui/Tooltip';
 import PropTypes from 'prop-types';
+import UploadDialog from '../../common/components/UploadDialog';
+import ConfirmDialog from '../../common/components/ConfirmDialog';
 import '../css/MetadataSummary.scss';
 
 class MetadataSummary extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      metadataError: '',
       buttonDisabled: false,
+      dialogOpen: false,
+      delDialogOpen: false,
     };
+    this.openDialog = this.openDialog.bind(this);
+    this.closeDialog = this.closeDialog.bind(this);
+    this.passResponse = this.passResponse.bind(this);
+    this.discardMetadataClick = this.discardMetadataClick.bind(this);
     this.discardMetadata = this.discardMetadata.bind(this);
+    this.openDelDialog = this.openDelDialog.bind(this);
+    this.closeDelDialog = this.closeDelDialog.bind(this);
     this.disableButton = this.disableButton.bind(this);
   }
 
-  discardMetadata() {
-    this.props.discardMetadata();
+  openDialog() {
+    this.setState({ dialogOpen: true });
+  }
+
+  closeDialog() {
+    this.setState({ dialogOpen: false });
   }
 
   disableButton() {
@@ -26,69 +42,125 @@ class MetadataSummary extends React.Component {
     }, 1000);
   }
 
+  discardMetadataClick() {
+    this.setState({ delDialogOpen: true });
+  }
+
+  passResponse(res) {
+    this.closeDialog();
+    this.props.passResponse(res, true);
+  }
+
+  discardMetadata() {
+    axios.delete(`/api/projects/${this.props.projectId}/metadata`)
+      .then((res) => {
+        if (res.status === 204) {
+          this.props.passResponse({}, false);
+        }
+      })
+      .catch((err) => {
+        this.setState({ metadataError: `Metadata could not be removed: ${err}` });
+      });
+    this.closeDelDialog();
+  }
+
+  openDelDialog() {
+    this.setState({ delDialogOpen: true });
+  }
+
+  closeDelDialog() {
+    this.setState({ delDialogOpen: false });
+  }
+
   render() {
     return (
       <div>
-        <h2>Sample metadata</h2>
-        <div className="secondary-card-body">
-          <Grid container>
-            <Grid item xs={8}>
-              <p>{this.props.metadataError}</p>
-              <p className="secondary-card-rows bold-text">The metadata file has {this.props.rowCount || '?'} data rows.</p>
-              <p className="secondary-card-rows">
-                Custom fields:&nbsp;
-                <span className="light-text">
-                  {this.props.headers.length > 0
-                  ? this.props.headers
-                    .map((h, index) => (index ? ', ' : '') + h)
-                  : 'no custom fields'
-                  }
-                </span>
-              </p>
-              <p className="secondary-card-rows">
-                Uploaded at: <span className="light-text">{new Date(this.props.uploadedat).toLocaleString()}</span>
-              </p>
-              <p className="secondary-card-rows">Added by: <span className="light-text">{this.props.uploadedby}</span></p>
-            </Grid>
-            <Grid item xs={4} className="secondary-card-body-buttons">
-              <a
-                href={`/api/projects/${this.props.projectId}/metadata/download`}
-                onClick={this.disableButton}
-                className="button-link"
-              >
-                <Tooltip title="Download" placement="right">
-                  <Button variant="fab" className="transparent-button round-button" disabled={this.state.buttonDisabled}>
-                    <i className="material-icons">file_download</i>
-                  </Button>
-                </Tooltip>
-              </a>
-              <Tooltip id="tooltip-fab" title="Delete" placement="right">
-                <Button variant="fab" className="transparent-button round-button" onClick={this.discardMetadata}>
-                  <i className="material-icons">delete_outline</i>
-                </Button>
-              </Tooltip>
-            </Grid>
-          </Grid>
+        <div className="secondary-card">
+          <h2>Sample metadata</h2>
+          {this.props.showMetadata && this.props.metadataProps ?
+            <div className="secondary-card-body">
+              <Grid container>
+                <Grid item xs={8}>
+                  <p>{this.state.metadataError}</p>
+                  <p className="secondary-card-rows bold-text">The metadata file has {this.props.metadataProps.rowcount || '?'} data rows.</p>
+                  <p className="secondary-card-rows">
+                    Custom fields:&nbsp;
+                    <span className="light-text">
+                      {this.props.metadataProps.headers.length > 0
+                      ? this.props.metadataProps.headers.slice(4)
+                        .map((h, index) => (index ? ', ' : '') + h)
+                      : 'no custom fields'
+                      }
+                    </span>
+                  </p>
+                  <p className="secondary-card-rows">
+                    Uploaded at: <span className="light-text">{new Date(this.props.metadataProps.uploadedat).toLocaleString()}</span>
+                  </p>
+                  <p className="secondary-card-rows">Added by: <span className="light-text">{this.props.metadataProps.uploadedby}</span></p>
+                </Grid>
+                <Grid item xs={4} className="secondary-card-body-buttons">
+                  <a
+                    href={`/api/projects/${this.props.projectId}/metadata/download`}
+                    onClick={this.disableButton}
+                    className="button-link"
+                  >
+                    <Tooltip title="Download" placement="bottom">
+                      <Button variant="fab" className="transparent-button round-button" disabled={this.state.buttonDisabled}>
+                        <i className="material-icons">file_download</i>
+                      </Button>
+                    </Tooltip>
+                  </a>
+                  <Tooltip title="Delete" placement="bottom">
+                    <Button variant="fab" className="transparent-button round-button" onClick={this.openDelDialog}>
+                      <i className="material-icons">delete_outline</i>
+                    </Button>
+                  </Tooltip>
+                </Grid>
+              </Grid>
+            </div>
+          :
+            <p>
+              <Button variant="raised" className="primary-button text-button" onClick={this.openDialog}>
+                <i className="material-icons text-button-icon">add_circle_outline</i>Add metadata file
+              </Button>
+            </p>
+          }
         </div>
+
+        <UploadDialog
+          dialogOpen={this.state.dialogOpen}
+          titleText="Metadata file upload"
+          url={`/api/projects/${this.props.projectId}/metadata`}
+          closeDialog={this.closeDialog}
+          passResponse={this.passResponse}
+        />
+        <ConfirmDialog
+          dialogOpen={this.state.delDialogOpen}
+          closeDialog={this.closeDelDialog}
+          titleText="Remove metadata"
+          contentText="Are you sure you want to remove metadata permanently?"
+          action={this.discardMetadata}
+          actionButtonText="Delete metadata"
+        />
       </div>
     );
   }
 }
 
 MetadataSummary.propTypes = {
-  metadataError: PropTypes.string,
-  rowCount: PropTypes.number,
-  headers: PropTypes.arrayOf(PropTypes.string),
-  uploadedat: PropTypes.string.isRequired,
-  uploadedby: PropTypes.string.isRequired,
+  showMetadata: PropTypes.bool.isRequired,
   projectId: PropTypes.string.isRequired,
-  discardMetadata: PropTypes.func.isRequired,
+  metadataProps: PropTypes.shape({
+    rowcount: PropTypes.number,
+    headers: PropTypes.arrayOf(PropTypes.string),
+    uploadedat: PropTypes.string,
+    uploadedby: PropTypes.string,
+  }),
+  passResponse: PropTypes.func.isRequired,
 };
 
 MetadataSummary.defaultProps = {
-  metadataError: '',
-  rowCount: null,
-  headers: [],
+  metadataProps: null,
 };
 
 export default MetadataSummary;

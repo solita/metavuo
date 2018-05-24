@@ -13,7 +13,9 @@ $middle-gray:   #A0A0A0;
 $margin:              3%;
 $padding:             3%;
 $container-padding:   24px calc(3% + 24px);
-$card-padding:        30px calc(3% + 36px);
+$card-padding:        24px 70px;
 
-$button-dimension: 48px !important;
+// Other
+$round-button-dimension: 48px;
+$text-button-dimension: 44px;
 

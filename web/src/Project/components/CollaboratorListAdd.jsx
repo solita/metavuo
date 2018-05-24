@@ -78,6 +78,7 @@ class CollaboratorListAdd extends React.Component {
           open={this.state.isOpen}
           onClose={this.handleClose}
           onEnter={this.getUsers}
+          disableBackdropClick
         >
           <DialogTitle>Add collaborator</DialogTitle>
           <DialogContent>
@@ -101,9 +102,17 @@ class CollaboratorListAdd extends React.Component {
             </FormControl>
           </DialogContent>
           <DialogActions>
-            <Button onClick={this.handleClose}>Cancel</Button>
-            <Button type="submit" id="submit-project" variant="raised" color="primary" onClick={this.handleSubmit}>
-              Add
+            <Button className="secondary-button text-button" onClick={this.handleClose}>
+              <i className="material-icons text-button-icon">close</i>Cancel
+            </Button>
+            <Button
+              type="submit"
+              id="submit-project"
+              variant="raised"
+              className="primary-button text-button"
+              onClick={this.handleSubmit}
+            >
+              <i className="material-icons text-button-icon">add_circle_outline</i>Add
             </Button>
           </DialogActions>
         </Dialog>

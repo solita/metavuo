@@ -90,8 +90,8 @@ export class ProjectForm extends React.Component {
             customerReference={this.state.customerReference}
             handleChange={this.handleChange}
           />
-          <Button type="submit" id="submit-project" variant="raised" color="primary" style={{ marginTop: 12 }}>
-            <i className="material-icons margin-right">save</i> Save
+          <Button type="submit" id="submit-project" variant="raised" className="primary-button text-button">
+            <i className="material-icons text-button-icon">save</i> Save
           </Button>
         </ValidatorForm>
       </div>

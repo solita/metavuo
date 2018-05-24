@@ -76,6 +76,7 @@ class UpdateInfoDialog extends React.Component {
         onEnter={this.getContent}
         fullWidth
         maxWidth="md"
+        disableBackdropClick
       >
         <DialogTitle>Update info text</DialogTitle>
         <DialogContent>
@@ -104,11 +105,20 @@ class UpdateInfoDialog extends React.Component {
             margin="normal"
             fullWidth
           />
+          <DialogActions>
+            <Button variant="raised" className="secondary-button text-button" onClick={this.props.closeDialog}>
+              <i className="material-icons text-button-icon">close</i>Cancel
+            </Button>
+            <Button
+              variant="raised"
+              className="primary-button text-button"
+              onClick={this.handleSubmit}
+              disabled={this.state.updating}
+            >
+              <i className="material-icons text-button-icon">save</i>Save
+            </Button>
+          </DialogActions>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={this.props.closeDialog}>Close</Button>
-          <Button onClick={this.handleSubmit} disabled={this.state.updating}>Update</Button>
-        </DialogActions>
       </Dialog>
     );
   }

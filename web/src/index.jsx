@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import { Router } from 'react-router-dom';
 import createBrowserHistory from 'history/createBrowserHistory';
 import App from './App';
+import './favicon.png';
 
 const history = createBrowserHistory();
 

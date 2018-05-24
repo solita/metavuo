@@ -85,26 +85,18 @@ class StorageFileUpload extends React.Component {
         open={this.props.dialogOpen}
         onClose={this.closeDialog}
       >
-        <DialogActions>
-          <Button onClick={this.props.closeDialog}>
-            Close<i className="material-icons icon-right">close</i>
-          </Button>
-        </DialogActions>
         <DialogTitle>{this.props.titleText}</DialogTitle>
         <DialogContent>
           <p className="form-errors">{this.state.message}</p>
-          <form
-            id="form-object"
-            onSubmit={this.handleSubmit}
-          >
+          <form>
             <TextField
               name="description"
               label="Description"
-              className="form-item"
               value={this.state.description}
               margin="normal"
               onChange={this.handleChange}
               inputProps={{ maxLength: 200 }}
+              fullWidth
             />
             <FormControlLabel
               control={
@@ -116,11 +108,23 @@ class StorageFileUpload extends React.Component {
             }
               label="Save as a result?"
             />
-            <input type="file" name="file" className="form-item" onChange={this.addFile} />
-            <Button type="submit" id="submit-project" variant="raised" color="primary" disabled={!this.state.hasFile}>
-              Upload<i className="material-icons icon-right">file_upload</i>
-            </Button>
+            <input type="file" name="file" onChange={this.addFile} />
+
           </form>
+          <DialogActions>
+            <Button onClick={this.props.closeDialog} className="secondary-button text-button" >
+              <i className="material-icons text-button-icon">close</i>Cancel
+            </Button>
+            <Button
+              type="submit"
+              variant="raised"
+              className="primary-button text-button"
+              disabled={!this.state.hasFile}
+              onClick={this.handleSubmit}
+            >
+              <i className="material-icons text-button-icon">file_upload</i>Upload
+            </Button>
+          </DialogActions>
         </DialogContent>
       </Dialog>
     );

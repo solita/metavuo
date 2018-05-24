@@ -1,4 +1,6 @@
+@import '../../common/css/variables';
+
 .form-errors {
-    color: red;
+    color: $blue;
     white-space: pre-wrap;
 }

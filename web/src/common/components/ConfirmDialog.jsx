@@ -12,7 +12,6 @@ const ConfirmDialog = props => (
     open={props.dialogOpen}
     onClose={props.closeDialog}
     disableBackdropClick
-    // disableEscapeKeyDown
   >
     <DialogTitle>{props.titleText}</DialogTitle>
     <DialogContent>
@@ -21,10 +20,10 @@ const ConfirmDialog = props => (
       </DialogContentText>
     </DialogContent>
     <DialogActions>
-      <Button onClick={props.closeDialog}>
+      <Button onClick={props.closeDialog} className="secondary-button text-button" autoFocus>
         Cancel
       </Button>
-      <Button onClick={props.action} color="secondary">
+      <Button onClick={props.action} className="primary-button text-button">
         {props.actionButtonText}
       </Button>
     </DialogActions>

@@ -2,8 +2,6 @@ import React from 'react';
 import Dialog from 'material-ui/Dialog';
 import DialogTitle from 'material-ui/Dialog/DialogTitle';
 import DialogContent from 'material-ui/Dialog/DialogContent';
-import DialogActions from 'material-ui/Dialog/DialogActions';
-import Button from 'material-ui/Button';
 import PropTypes from 'prop-types';
 import AddUserForm from './AddUserForm';
 
@@ -13,11 +11,6 @@ const AdminAddUserDialog = props => (
     onClose={props.closeDialog}
     disableBackdropClick
   >
-    <DialogActions>
-      <Button onClick={props.closeDialog}>
-        Close<i className="material-icons icon-right">close</i>
-      </Button>
-    </DialogActions>
     <DialogTitle>Add user</DialogTitle>
     <DialogContent>
       <AddUserForm closeForm={props.closeForm} />

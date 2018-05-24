@@ -70,12 +70,18 @@ class ProjectUpdateDialog extends React.Component {
   render() {
     return (
       <div>
-        <Button onClick={this.handleClickOpen} variant="raised" className="primary-button text-button">
-          Edit project
+        <Button
+          onClick={this.handleClickOpen}
+          variant="raised"
+          className="primary-button text-button"
+        >
+          <i className="material-icons text-button-icon">edit</i>Edit project
         </Button>
         <Dialog
           open={this.state.isOpen}
           onClose={this.handleClose}
+          disableBackdropClick
+          disableEscapeKeyDown
         >
           <DialogTitle id="form-dialog-title">Edit project</DialogTitle>
           <DialogContent>
@@ -100,11 +106,11 @@ class ProjectUpdateDialog extends React.Component {
                 handleChange={this.handleChange}
               />
               <DialogActions>
-                <Button onClick={this.handleClose} variant="raised" color="primary" style={{ marginTop: 12 }}>
+                <Button onClick={this.handleClose} variant="raised" className="secondary-button text-button">
                 Cancel
                 </Button>
-                <Button type="submit" id="submit-update" variant="raised" color="primary" style={{ marginTop: 12 }}>
-                  <i className="material-icons margin-right">save</i> Save
+                <Button type="submit" id="submit-update" variant="raised" className="primary-button text-button">
+                  <i className="material-icons text-button-icon">save</i>Save
                 </Button>
               </DialogActions>
             </ValidatorForm>

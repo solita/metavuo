@@ -22,7 +22,7 @@ class InfoDialog extends React.Component {
     axios.get('/api/info')
       .then((res) => {
         if (res.data !== null) {
-          this.setState({ title: res.data.title || '', content: res.data.content || '' });
+          this.setState({ title: res.data.title || '', content: res.data.content || 'No info' });
         }
       })
       .catch((err) => {
@@ -45,12 +45,14 @@ class InfoDialog extends React.Component {
         fullWidth
         maxWidth="md"
       >
-        <DialogActions>
-          <Button onClick={this.props.closeDialog}>
-            Close<i className="material-icons icon-right">close</i>
-          </Button>
-        </DialogActions>
-        <DialogTitle>{this.state.title}</DialogTitle>
+        <DialogTitle>
+          <DialogActions>
+            <Button onClick={this.props.closeDialog} className="secondary-button text-button">
+              <i className="material-icons text-button-icon">close</i>Close
+            </Button>
+          </DialogActions>
+          {this.state.title}
+        </DialogTitle>
         <DialogContent>
           {this.state.message && <p className="message-errors">{this.state.message}</p>}
           <div className="show-newlines">

@@ -47,7 +47,7 @@ class App extends React.Component {
               <Route exact path="/" component={ProjectList} />
               <Route path="/projects/new" component={CreateProject} />
               <Route exact path="/projects" component={ProjectList} />
-              <Route path="/projects/:id" render={props => (<Project {...props} userEmail={this.state.userEmail} />)} />
+              <Route path="/projects/:id" render={props => (<Project {...props} userEmail={this.state.userEmail} isAdmin={this.state.isAdmin} />)} />
               <AdminRoute exact path="/admin" component={AdminView} isAdmin={this.state.isAdmin} />
               <Route exact path="*" component={NotFound} />
             </Switch>

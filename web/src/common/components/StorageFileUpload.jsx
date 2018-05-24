@@ -6,7 +6,7 @@ import DialogContent from 'material-ui/Dialog/DialogContent';
 import DialogActions from 'material-ui/Dialog/DialogActions';
 import PropTypes from 'prop-types';
 import axios from 'axios';
-import { Checkbox, FormControlLabel, TextField } from 'material-ui';
+import { TextField } from 'material-ui';
 
 const pattern = /^[\w_\-.]*$/;
 
@@ -20,13 +20,11 @@ class StorageFileUpload extends React.Component {
     this.addFile = this.addFile.bind(this);
     this.closeDialog = this.closeDialog.bind(this);
     this.handleChange = this.handleChange.bind(this);
-    this.toggleCheckBox = this.toggleCheckBox.bind(this);
     this.state = {
       file: null,
       hasFile: false,
       message: '',
       description: '',
-      isChecked: false,
     };
   }
 
@@ -35,7 +33,7 @@ class StorageFileUpload extends React.Component {
     const data = new FormData();
     data.append('filename', this.state.file.name);
     data.append('description', this.state.description);
-    data.append('fileType', this.state.isChecked ? 'result' : 'default');
+    data.append('fileType', this.props.isResult ? 'result' : 'default');
     axios.post(this.props.url, data).then((res) => {
       if (res.status === 200) {
         axios.put(
@@ -45,7 +43,7 @@ class StorageFileUpload extends React.Component {
               'Content-Type': 'text/plain',
               'x-goog-meta-description': this.state.description,
               'x-goog-meta-uploadedby': this.props.userEmail,
-              'x-goog-meta-filetype': this.state.isChecked ? 'result' : 'default',
+              'x-goog-meta-filetype': this.props.isResult ? 'result' : 'default',
             },
           },
         ).catch((err) => {
@@ -74,11 +72,6 @@ class StorageFileUpload extends React.Component {
     this.setState({ [event.target.name]: event.target.value });
   }
 
-  toggleCheckBox(event) {
-    const value = event.target.checked;
-    this.setState({ isChecked: value });
-  }
-
   render() {
     return (
       <Dialog
@@ -98,16 +91,6 @@ class StorageFileUpload extends React.Component {
               onChange={this.handleChange}
               inputProps={{ maxLength: 200 }}
               fullWidth
-            />
-            <FormControlLabel
-              control={
-                <Checkbox
-                  checked={this.state.isChecked}
-                  onChange={this.toggleCheckBox}
-                  color="primary"
-                />
-            }
-              label="Save as a result?"
             />
             <input type="file" name="file" onChange={this.addFile} />
 

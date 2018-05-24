@@ -1,3 +1,4 @@
+import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton } from 'material-ui';
 import React from 'react';
 import axios from 'axios';
 import Grid from 'material-ui/Grid';
@@ -41,6 +42,10 @@ class Project extends React.Component {
       storageFiles: [],
       storageDelDialogOpen: false,
       storageFileToDelete: '',
+      isResult: false,
+      projectDelDialogOpen: false,
+      projectDelResultDialogOpen: false,
+      projectDelResultMessage: '',
     };
     this.getProject = this.getProject.bind(this);
     this.setStatus = this.setStatus.bind(this);
@@ -51,6 +56,10 @@ class Project extends React.Component {
     this.deleteFile = this.deleteFile.bind(this);
     this.closeStorageDelDialog = this.closeStorageDelDialog.bind(this);
     this.deleteStorageFileClick = this.deleteStorageFileClick.bind(this);
+    this.deleteProject = this.deleteProject.bind(this);
+    this.closeProjectDelDialog = this.closeProjectDelDialog.bind(this);
+    this.openProjectDelDialog = this.openProjectDelDialog.bind(this);
+    this.handleClose = this.handleClose.bind(this);
   }
 
   componentDidMount() {
@@ -115,8 +124,8 @@ class Project extends React.Component {
     this.setState({ metadataProps: res, showMetadata });
   }
 
-  openFileDialog() {
-    this.setState({ fileDialogOpen: true });
+  openFileDialog(result) {
+    this.setState({ fileDialogOpen: true, isResult: result });
   }
 
   closeFileDialog() {
@@ -141,6 +150,37 @@ class Project extends React.Component {
     this.setState({ storageDelDialogOpen: true, storageFileToDelete: fileName });
   }
 
+  deleteProject() {
+    axios.delete(`/api/admin/project/${this.props.match.params.id}/`).then((res) => {
+      if (res.status === 204) {
+        this.setState({ id: '' });
+        this.showDeletionAlert('Project successfully deleted');
+      } else {
+        this.showDeletionAlert('Project deletion failed, please try again');
+      }
+    });
+  }
+
+  showDeletionAlert(message) {
+    this.setState({ projectDelResultDialogOpen: true, projectDelResultMessage: message });
+  }
+
+  handleClose() {
+    this.setState({ projectDelResultDialogOpen: false });
+    this.closeProjectDelDialog();
+    if (this.state.id.length === 0) {
+      this.props.history.push('/projects');
+    }
+  }
+
+  openProjectDelDialog() {
+    this.setState({ projectDelDialogOpen: true });
+  }
+
+  closeProjectDelDialog() {
+    this.setState({ projectDelDialogOpen: false });
+  }
+
   render() {
     return (
       <div>
@@ -161,6 +201,11 @@ class Project extends React.Component {
                         <h1>{this.state.name || 'not found'}</h1>
                         <p>ID: <span className="bold-text">{this.state.id}</span></p>
                       </div>
+                      }
+                      {!this.state.errorMsg && this.props.isAdmin &&
+                      <IconButton aria-label="Delete" onClick={this.openProjectDelDialog}>
+                        <i className="material-icons">delete</i>
+                      </IconButton>
                       }
                     </div>
                     <div className="table-card-body">
@@ -259,7 +304,7 @@ class Project extends React.Component {
                     <Card className="table-card">
                       <div className="table-card-head">
                         <h2>{`Result files (${this.state.storageFiles.length})`}</h2>
-                        <Button variant="raised" className="primary-button text-button">
+                        <Button variant="raised" className="primary-button text-button" onClick={this.openFileDialog}>
                           <i className="material-icons text-button-icon">add_circle_outline</i>Add result file
                         </Button>
                       </div>
@@ -291,7 +336,11 @@ class Project extends React.Component {
                   <Card className="table-card">
                     <div className="table-card-head">
                       <h2>{`Files in progress (${this.state.storageFiles.length})`}</h2>
-                      <Button variant="raised" className="primary-button text-button" onClick={this.openFileDialog}>
+                      <Button
+                        variant="raised"
+                        className="primary-button text-button"
+                        onClick={() => this.openFileDialog(false)}
+                      >
                         <i className="material-icons text-button-icon">add_circle_outline</i>Add file
                       </Button>
                     </div>
@@ -313,6 +362,7 @@ class Project extends React.Component {
                     titleText="Upload file"
                     url={`/api/projects/${this.props.match.params.id}/files/generate-upload-url`}
                     userEmail={this.props.userEmail}
+                    isResult={this.state.isResult}
                   />
                   <ConfirmDialog
                     dialogOpen={this.state.storageDelDialogOpen}
@@ -322,6 +372,32 @@ class Project extends React.Component {
                     action={this.deleteFile}
                     actionButtonText="Delete file"
                   />
+                  <ConfirmDialog
+                    dialogOpen={this.state.projectDelDialogOpen}
+                    closeDialog={this.closeProjectDelDialog}
+                    titleText="Delete project"
+                    contentText="Are you sure you want to remove this project and all its files permanently?"
+                    action={this.deleteProject}
+                    actionButtonText="Confirm"
+                  />
+                  <Dialog
+                    open={this.state.projectDelResultDialogOpen}
+                    onClose={this.handleClose}
+                    aria-labelledby="alert-dialog-title"
+                    aria-describedby="alert-dialog-description"
+                  >
+                    <DialogTitle id="alert-dialog-title">Alert</DialogTitle>
+                    <DialogContent>
+                      <DialogContentText id="alert-dialog-description">
+                        {this.state.projectDelResultMessage}
+                      </DialogContentText>
+                    </DialogContent>
+                    <DialogActions>
+                      <Button onClick={this.handleClose} color="primary">
+                        Ok
+                      </Button>
+                    </DialogActions>
+                  </Dialog>
                 </div>
               }
             </div>

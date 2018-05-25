@@ -187,10 +187,9 @@ func routeProjectFileList(w http.ResponseWriter, r *http.Request, id int64) {
 			item.Metadata["filetype"],
 		})
 	}
-
-	if len(files) > 1 {
+	if len(files) > 0 {
 		w.Header().Set("Content-Type", "application/json")
-		w.Write(mustJSON(files[1:]))
+		w.Write(mustJSON(files))
 	}
 }
 

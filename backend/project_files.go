@@ -177,15 +177,18 @@ func routeProjectFileList(w http.ResponseWriter, r *http.Request, id int64) {
 			http.Error(w, "", http.StatusInternalServerError)
 			return
 		}
-		files = append(files, ProjectFile{
-			item.Generation,
-			filepath.Base(item.Name),
-			item.Size,
-			item.Created,
-			item.Metadata["uploadedby"],
-			item.Metadata["description"],
-			item.Metadata["filetype"],
-		})
+
+		if item.Size > 0 {
+			files = append(files, ProjectFile{
+				item.Generation,
+				filepath.Base(item.Name),
+				item.Size,
+				item.Created,
+				item.Metadata["uploadedby"],
+				item.Metadata["description"],
+				item.Metadata["filetype"],
+			})
+		}
 	}
 	if len(files) > 0 {
 		w.Header().Set("Content-Type", "application/json")

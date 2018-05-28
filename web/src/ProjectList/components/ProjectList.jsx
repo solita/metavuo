@@ -1,10 +1,9 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import axios from 'axios';
 import Card from '@material-ui/core/Card';
-import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ProjectListTable from './ProjectListTable';
+import CreateProjectDialog from './CreateProjectDialog';
 
 class ProjectList extends React.Component {
   constructor(props) {
@@ -46,11 +45,7 @@ class ProjectList extends React.Component {
             <div className="table-card-head">
               <h2>Projects</h2>
               <div>
-                <Link to="/projects/new" className="button-link">
-                  <Button variant="raised" className="primary-button text-button">
-                    <i className="material-icons text-button-icon">add_circle_outline</i>Add project
-                  </Button>
-                </Link>
+                <CreateProjectDialog />
               </div>
             </div>
             <div className="table-card-body">

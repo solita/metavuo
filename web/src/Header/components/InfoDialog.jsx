@@ -1,9 +1,6 @@
 import React from 'react';
 import axios from 'axios';
 import Dialog from '@material-ui/core/Dialog';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 
@@ -45,20 +42,18 @@ class InfoDialog extends React.Component {
         fullWidth
         maxWidth="md"
       >
-        <DialogTitle className="dialog-header">
-          <DialogActions>
-            <Button onClick={this.props.closeDialog} className="secondary-button text-button">
-              <i className="material-icons text-button-icon">close</i>Close
-            </Button>
-          </DialogActions>
-          {this.state.title}
-        </DialogTitle>
-        <DialogContent>
+        <div className="info-header">
+          <div><h2>{this.state.title}</h2></div>
+          <Button onClick={this.props.closeDialog} className="secondary-button text-button">
+            <i className="material-icons text-button-icon">close</i>Close
+          </Button>
+        </div>
+        <div className="info-content">
           {this.state.message && <p className="message-errors">{this.state.message}</p>}
           <div className="show-newlines">
             {this.state.content.split('/n').map(row => <p key={row}>{row}</p>)}
           </div>
-        </DialogContent>
+        </div>
       </Dialog>
     );
   }

@@ -74,81 +74,78 @@ class MetadataSummary extends React.Component {
 
   render() {
     return (
-      <div>
-        <div className="secondary-card">
-          <h2>Sample metadata</h2>
-          {this.props.showMetadata && this.props.metadataProps ?
-            <div className="secondary-card-body">
-              <Grid container>
-                <Grid item xs={9}>
-                  <p>{this.state.metadataError}</p>
-                  <p className="secondary-card-rows bold-text">Sample metadata file has {this.props.metadataProps.rowcount || '?'} data rows.</p>
-                  <Grid container className="secondary-card-rows">
-                    <Grid item xs={5}>
-                      <p className="bold-text">Custom fields:</p>
-                    </Grid>
-                    <Grid item xs={7}>
-                      <p className="light-text">
-                        {this.props.metadataProps.headers.length > 0
-                          ? this.props.metadataProps.headers.slice(4)
-                            .map((h, index) => (index ? ', ' : '') + h)
-                          : 'no custom fields'
-                        }
-                      </p>
-                    </Grid>
+      <div className="secondary-card">
+        <h2>Sample metadata</h2>
+        {this.props.showMetadata && this.props.metadataProps ?
+          <div className="secondary-card-body">
+            <Grid container>
+              <Grid item xs={9}>
+                <p>{this.state.metadataError}</p>
+                <p className="secondary-card-rows bold-text">Sample metadata file has {this.props.metadataProps.rowcount || '?'} data rows.</p>
+                <Grid container className="secondary-card-rows">
+                  <Grid item xs={5}>
+                    <p className="bold-text">Custom fields:</p>
                   </Grid>
-
-                  <Grid container className="secondary-card-rows">
-                    <Grid item xs={5}>
-                      <p className="bold-text">Uploaded at:</p>
-                    </Grid>
-                    <Grid item xs={7}>
-                      <p className="light-text">
-                        {new Date(this.props.metadataProps.uploadedat).toLocaleString()}
-                      </p>
-                    </Grid>
-                  </Grid>
-
-                  <Grid container className="secondary-card-rows">
-                    <Grid item xs={5}>
-                      <p className="bold-text">Added by:</p>
-                    </Grid>
-                    <Grid item xs={7}>
-                      <p className="light-text">
-                        {this.props.metadataProps.uploadedby}
-                      </p>
-                    </Grid>
+                  <Grid item xs={7}>
+                    <p className="light-text">
+                      {this.props.metadataProps.headers.length > 0
+                        ? this.props.metadataProps.headers.slice(4)
+                          .map((h, index) => (index ? ', ' : '') + h)
+                        : 'no custom fields'
+                      }
+                    </p>
                   </Grid>
                 </Grid>
-                <Grid item xs={3} className="secondary-card-body-buttons">
-                  <a
-                    href={`/api/projects/${this.props.projectId}/metadata/download`}
-                    onClick={this.disableButton}
-                    className="button-link"
-                  >
-                    <Tooltip title="Download" placement="bottom">
-                      <Button variant="fab" className="gray-button round-button" disabled={this.state.buttonDisabled}>
-                        <i className="material-icons">file_download</i>
-                      </Button>
-                    </Tooltip>
-                  </a>
-                  <Tooltip title="Delete" placement="bottom">
-                    <Button variant="fab" className="gray-button round-button" onClick={this.openDelDialog}>
-                      <i className="material-icons">delete_outline</i>
-                    </Button>
-                  </Tooltip>
+
+                <Grid container className="secondary-card-rows">
+                  <Grid item xs={5}>
+                    <p className="bold-text">Uploaded at:</p>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <p className="light-text">
+                      {new Date(this.props.metadataProps.uploadedat).toLocaleString()}
+                    </p>
+                  </Grid>
+                </Grid>
+
+                <Grid container className="secondary-card-rows">
+                  <Grid item xs={5}>
+                    <p className="bold-text">Added by:</p>
+                  </Grid>
+                  <Grid item xs={7}>
+                    <p className="light-text">
+                      {this.props.metadataProps.uploadedby}
+                    </p>
+                  </Grid>
                 </Grid>
               </Grid>
-            </div>
-          :
-            <p>
-              <Button variant="raised" className="primary-button text-button" onClick={this.openDialog}>
-                <i className="material-icons text-button-icon">add_circle_outline</i>Add metadata file
-              </Button>
-            </p>
-          }
-        </div>
-
+              <Grid item xs={3} className="secondary-card-body-buttons">
+                <a
+                  href={`/api/projects/${this.props.projectId}/metadata/download`}
+                  onClick={this.disableButton}
+                  className="button-link"
+                >
+                  <Tooltip title="Download" placement="bottom">
+                    <Button variant="fab" className="gray-button round-button" disabled={this.state.buttonDisabled}>
+                      <i className="material-icons">file_download</i>
+                    </Button>
+                  </Tooltip>
+                </a>
+                <Tooltip title="Delete" placement="bottom">
+                  <Button variant="fab" className="gray-button round-button" onClick={this.openDelDialog}>
+                    <i className="material-icons">delete_outline</i>
+                  </Button>
+                </Tooltip>
+              </Grid>
+            </Grid>
+          </div>
+        :
+          <p>
+            <Button variant="raised" className="primary-button text-button" onClick={this.openDialog}>
+              <i className="material-icons text-button-icon">add_circle_outline</i>Add metadata file
+            </Button>
+          </p>
+        }
         <UploadDialog
           dialogOpen={this.state.dialogOpen}
           titleText="Metadata file upload"
@@ -156,6 +153,7 @@ class MetadataSummary extends React.Component {
           closeDialog={this.closeDialog}
           passResponse={this.passResponse}
         />
+
         <ConfirmDialog
           dialogOpen={this.state.delDialogOpen}
           closeDialog={this.closeDelDialog}

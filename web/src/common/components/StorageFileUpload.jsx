@@ -46,9 +46,13 @@ class StorageFileUpload extends React.Component {
               'x-goog-meta-filetype': this.props.isResult ? 'result' : 'default',
             },
           },
-        ).catch((err) => {
-          console.log(err);
-        });
+        )
+          .then(() => {
+            this.closeDialog();
+          })
+          .catch(() => {
+            this.setState({ message: 'File upload failed' });
+          });
       }
     }).catch((err) => {
       this.setState({ message: err.response.data });

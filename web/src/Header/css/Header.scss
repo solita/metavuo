@@ -42,6 +42,20 @@
 }
 
 // info dialog
-.show-newlines {
-    white-space: pre-line;
+.info-header {
+    background-color: #E9F5F8;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 40px;
+    min-height: fit-content;
+}
+
+.info-content {
+    padding: 20px 40px;
+
+    .show-newlines {
+        white-space: pre-line;
+    }
 }

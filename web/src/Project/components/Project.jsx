@@ -9,16 +9,15 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
-import IconButton from '@material-ui/core/IconButton';
 import PropTypes from 'prop-types';
 import ProjectStatusButton from './ProjectStatusButton';
 import MetadataSummary from './MetadataSummary';
-import StorageFileUpload from '../../common/components/StorageFileUpload';
 import ConfirmDialog from '../../common/components/ConfirmDialog';
 import ConvertStatus from '../../common/util/ProjectStatusConverter';
 import ProjectUpdateDialog from './ProjectUpdateDialog';
 import ProjectFileList from './ProjectFileList';
 import CollaboratorList from './CollaboratorList';
+import StorageFileUpload from '../../common/components/StorageFileUpload';
 
 class Project extends React.Component {
   constructor(props) {
@@ -34,7 +33,6 @@ class Project extends React.Component {
       status: '',
       showMetadata: false,
       metadataProps: {},
-      fileDialogOpen: false,
       organization: '',
       invoiceAddress: '',
       customerName: '',
@@ -45,9 +43,6 @@ class Project extends React.Component {
       sampleLocation: '',
       info: '',
       storageFiles: [],
-      storageDelDialogOpen: false,
-      storageFileToDelete: '',
-      isResult: false,
       projectDelDialogOpen: false,
       projectDelResultDialogOpen: false,
       projectDelResultMessage: '',
@@ -55,12 +50,7 @@ class Project extends React.Component {
     this.getProject = this.getProject.bind(this);
     this.setStatus = this.setStatus.bind(this);
     this.passMetadataResponse = this.passMetadataResponse.bind(this);
-    this.openFileDialog = this.openFileDialog.bind(this);
-    this.closeFileDialog = this.closeFileDialog.bind(this);
     this.getProjectFiles = this.getProjectFiles.bind(this);
-    this.deleteFile = this.deleteFile.bind(this);
-    this.closeStorageDelDialog = this.closeStorageDelDialog.bind(this);
-    this.deleteStorageFileClick = this.deleteStorageFileClick.bind(this);
     this.deleteProject = this.deleteProject.bind(this);
     this.closeProjectDelDialog = this.closeProjectDelDialog.bind(this);
     this.openProjectDelDialog = this.openProjectDelDialog.bind(this);
@@ -114,11 +104,14 @@ class Project extends React.Component {
   }
 
   getProjectFiles() {
-    axios.get(`/api/projects/${this.props.match.params.id}/files`).then((res) => {
-      this.setState({ storageFiles: res.data });
-    }).catch((err) => {
-      console.log(err);
-    });
+    axios.get(`/api/projects/${this.props.match.params.id}/files`)
+      .then((res) => {
+        if (res.data.length > 0) {
+          this.setState({ storageFiles: res.data });
+        }
+      }).catch((err) => {
+        console.log(err);
+      });
   }
 
   setStatus(value) {
@@ -127,32 +120,6 @@ class Project extends React.Component {
 
   passMetadataResponse(res, showMetadata) {
     this.setState({ metadataProps: res, showMetadata });
-  }
-
-  openFileDialog(result) {
-    this.setState({ fileDialogOpen: true, isResult: result });
-  }
-
-  closeFileDialog() {
-    this.setState({ fileDialogOpen: false });
-  }
-
-  deleteFile() {
-    axios.delete(`/api/projects/${this.props.match.params.id}/files/${this.state.storageFileToDelete}`)
-      .then((res) => {
-        if (res.status === 204) {
-          this.getProjectFiles();
-        }
-      });
-    this.closeStorageDelDialog();
-  }
-
-  closeStorageDelDialog() {
-    this.setState({ storageDelDialogOpen: false });
-  }
-
-  deleteStorageFileClick(fileName) {
-    this.setState({ storageDelDialogOpen: true, storageFileToDelete: fileName });
   }
 
   deleteProject() {
@@ -208,9 +175,9 @@ class Project extends React.Component {
                       </div>
                       }
                       {!this.state.errorMsg && this.props.isAdmin &&
-                      <IconButton aria-label="Delete" onClick={this.openProjectDelDialog}>
-                        <i className="material-icons">delete</i>
-                      </IconButton>
+                      <Button aria-label="Delete" onClick={this.openProjectDelDialog} className="secondary-button text-button">
+                        <i className="material-icons text-button-icon">delete</i>Delete project
+                      </Button>
                       }
                     </div>
                     <div className="table-card-body">
@@ -294,115 +261,91 @@ class Project extends React.Component {
                 </Grid>
                 <Grid item xs={5}>
                   {!this.state.errorMsg &&
-                  <div className="secondary-card">
+                  <div>
                     <CollaboratorList
                       projectId={this.props.match.params.id}
                       projectCreatorEmail={this.state.createdbyEmail}
                       userEmail={this.props.userEmail}
                     />
-                  </div>}
-                </Grid>
-              </Grid>
-              {!this.state.errorMsg &&
-                <Grid container className="page-divider">
-                  <Grid item xs={7}>
-                    <Card className="table-card">
-                      <div className="table-card-head">
-                        <h2>{`Result files (${this.state.storageFiles.length})`}</h2>
-                        <Button variant="raised" className="primary-button text-button" onClick={() => this.openFileDialog(true)}>
-                          <i className="material-icons text-button-icon">add_circle_outline</i>Add result file
-                        </Button>
-                      </div>
-                      <div className="table-card-body">
-                        {this.state.storageFiles.length > 0
-                          ?
-                            <ProjectFileList
-                              files={this.state.storageFiles}
-                              url={this.props.match.params.id}
-                              deleteStorageFileClick={this.deleteStorageFileClick}
-                            />
-                          : <p>No files added.</p>
-                        }
-                      </div>
-                    </Card>
-                  </Grid>
-                  <Grid item xs={5}>
                     <MetadataSummary
                       showMetadata={this.state.showMetadata}
                       metadataProps={this.state.metadataProps}
                       projectId={this.props.match.params.id}
                       passResponse={this.passMetadataResponse}
                     />
-                  </Grid>
+                  </div>
+                  }
                 </Grid>
-              }
+              </Grid>
               {!this.state.errorMsg &&
-                <div className="page-divider">
-                  <Card className="table-card">
-                    <div className="table-card-head">
-                      <h2>{`Files in progress (${this.state.storageFiles.length})`}</h2>
-                      <Button
-                        variant="raised"
-                        className="primary-button text-button"
-                        onClick={() => this.openFileDialog(false)}
-                      >
-                        <i className="material-icons text-button-icon">add_circle_outline</i>Add file
-                      </Button>
-                    </div>
-                    <div className="table-card-body">
-                      {this.state.storageFiles.length > 0
-                        ?
-                          <ProjectFileList
-                            files={this.state.storageFiles}
-                            url={this.props.match.params.id}
-                            deleteStorageFileClick={this.deleteStorageFileClick}
-                          />
-                        : <p>No files added.</p>
-                      }
-                    </div>
-                  </Card>
-                  <StorageFileUpload
-                    dialogOpen={this.state.fileDialogOpen}
-                    closeDialog={this.closeFileDialog}
-                    titleText="Upload file"
-                    url={`/api/projects/${this.props.match.params.id}/files/generate-upload-url`}
-                    userEmail={this.props.userEmail}
-                    isResult={this.state.isResult}
-                  />
-                  <ConfirmDialog
-                    dialogOpen={this.state.storageDelDialogOpen}
-                    closeDialog={this.closeStorageDelDialog}
-                    titleText="Remove file"
-                    contentText="Are you sure you want to remove this file permanently?"
-                    action={this.deleteFile}
-                    actionButtonText="Delete file"
-                  />
-                  <ConfirmDialog
-                    dialogOpen={this.state.projectDelDialogOpen}
-                    closeDialog={this.closeProjectDelDialog}
-                    titleText="Delete project"
-                    contentText="Are you sure you want to remove this project and all its files permanently?"
-                    action={this.deleteProject}
-                    actionButtonText="Confirm"
-                  />
-                  <Dialog
-                    open={this.state.projectDelResultDialogOpen}
-                    onClose={this.handleClose}
-                    aria-labelledby="alert-dialog-title"
-                    aria-describedby="alert-dialog-description"
-                  >
-                    <DialogTitle id="alert-dialog-title">Alert</DialogTitle>
-                    <DialogContent>
-                      <DialogContentText id="alert-dialog-description">
-                        {this.state.projectDelResultMessage}
-                      </DialogContentText>
-                    </DialogContent>
-                    <DialogActions>
-                      <Button onClick={this.handleClose} color="primary">
-                        Ok
-                      </Button>
-                    </DialogActions>
-                  </Dialog>
+                <div>
+                  <div className="page-divider">
+                    <ProjectFileList
+                      dialogTitle="Result files"
+                      isResult
+                      buttonText="Add result file"
+                      files={this.state.storageFiles.filter(f => f.filetype === 'result')}
+                      projectId={this.props.match.params.id}
+                      userEmail={this.props.userEmail}
+                      updateFileList={this.getProjectFiles}
+                    />
+                  </div>
+
+                  <div className="page-divider">
+                    <ProjectFileList
+                      dialogTitle="Files in progress"
+                      isResult={false}
+                      buttonText="Add file"
+                      files={this.state.storageFiles.filter(f => f.filetype !== 'result')}
+                      projectId={this.props.match.params.id}
+                      userEmail={this.props.userEmail}
+                      updateFileList={this.getProjectFiles}
+                    />
+
+                    <StorageFileUpload
+                      dialogOpen={this.state.fileDialogOpen}
+                      closeDialog={this.closeFileDialog}
+                      titleText="Upload file"
+                      url={`/api/projects/${this.props.projectId}/files/generate-upload-url`}
+                      userEmail={this.props.userEmail}
+                      isResult={this.props.isResult}
+                    />
+                    <ConfirmDialog
+                      dialogOpen={this.state.storageDelDialogOpen}
+                      closeDialog={this.closeStorageDelDialog}
+                      titleText="Remove file"
+                      contentText="Are you sure you want to remove this file permanently?"
+                      action={this.deleteFile}
+                      actionButtonText="Delete file"
+                    />
+
+                    <ConfirmDialog
+                      dialogOpen={this.state.projectDelDialogOpen}
+                      closeDialog={this.closeProjectDelDialog}
+                      titleText="Delete project"
+                      contentText="Are you sure you want to remove this project and all its files permanently?"
+                      action={this.deleteProject}
+                      actionButtonText="Confirm"
+                    />
+                    <Dialog
+                      open={this.state.projectDelResultDialogOpen}
+                      onClose={this.handleClose}
+                      aria-labelledby="alert-dialog-title"
+                      aria-describedby="alert-dialog-description"
+                    >
+                      <DialogTitle id="alert-dialog-title">Alert</DialogTitle>
+                      <DialogContent>
+                        <DialogContentText id="alert-dialog-description">
+                          {this.state.projectDelResultMessage}
+                        </DialogContentText>
+                      </DialogContent>
+                      <DialogActions>
+                        <Button onClick={this.handleClose} color="primary">
+                          Ok
+                        </Button>
+                      </DialogActions>
+                    </Dialog>
+                  </div>
                 </div>
               }
             </div>

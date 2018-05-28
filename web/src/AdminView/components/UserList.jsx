@@ -99,40 +99,42 @@ class UserList extends React.Component {
             {this.state.message && <p>{this.state.message}</p>}
             {this.state.users.length > 0
             ?
-              <Table>
-                <TableHead>
-                  <TableRow>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Email</TableCell>
-                    <TableCell>Organization</TableCell>
-                    <TableCell>Added</TableCell>
-                    <TableCell />
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {this.state.users.map(user => (
-                    <TableRow key={user.email}>
-                      <TableCell>{user.name}</TableCell>
-                      <TableCell>{user.email}</TableCell>
-                      <TableCell>{user.organization}</TableCell>
-                      <TableCell>{new Date(user.created_at).toLocaleString()}</TableCell>
-                      <TableCell numeric>
-                        <Tooltip title="Delete" placement="left">
-                          <Button
-                            variant="fab"
-                            mini
-                            className="white-button round-button"
-                            onClick={() => this.deleteUserClick(user.user_id, user.name)}
-                            disabled={this.state.deleting}
-                          >
-                            <i className="material-icons">delete</i>
-                          </Button>
-                        </Tooltip>
-                      </TableCell>
+              <div>
+                <Table>
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>Name</TableCell>
+                      <TableCell>Email</TableCell>
+                      <TableCell>Organization</TableCell>
+                      <TableCell>Added</TableCell>
+                      <TableCell />
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHead>
+                  <TableBody>
+                    {this.state.users.map(user => (
+                      <TableRow key={user.email}>
+                        <TableCell>{user.name}</TableCell>
+                        <TableCell>{user.email}</TableCell>
+                        <TableCell>{user.organization}</TableCell>
+                        <TableCell>{new Date(user.created_at).toLocaleString()}</TableCell>
+                        <TableCell numeric>
+                          <Tooltip title="Delete" placement="left">
+                            <Button
+                              variant="fab"
+                              mini
+                              className="white-button round-button"
+                              onClick={() => this.deleteUserClick(user.user_id, user.name)}
+                              disabled={this.state.deleting}
+                            >
+                              <i className="material-icons">delete</i>
+                            </Button>
+                          </Tooltip>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             : <p>No users added</p>
             }
           </div>

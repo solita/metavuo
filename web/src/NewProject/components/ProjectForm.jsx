@@ -1,6 +1,7 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
+import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import { ValidatorForm } from 'react-material-ui-form-validator';
@@ -90,9 +91,14 @@ export class ProjectForm extends React.Component {
             customerReference={this.state.customerReference}
             handleChange={this.handleChange}
           />
-          <Button type="submit" id="submit-project" variant="raised" className="primary-button text-button">
-            <i className="material-icons text-button-icon">save</i> Save
-          </Button>
+          <DialogActions>
+            <Button onClick={this.props.handleClose} variant="raised" className="secondary-button text-button">
+              Cancel
+            </Button>
+            <Button type="submit" id="submit-project" variant="raised" className="primary-button text-button">
+              <i className="material-icons text-button-icon">save</i> Save
+            </Button>
+          </DialogActions>
         </ValidatorForm>
       </div>
     );
@@ -101,6 +107,7 @@ export class ProjectForm extends React.Component {
 
 ProjectForm.propTypes = {
   history: PropTypes.object.isRequired,
+  handleClose: PropTypes.func.isRequired,
 };
 
 export default withRouter(ProjectForm);

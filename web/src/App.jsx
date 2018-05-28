@@ -5,7 +5,6 @@ import { MuiThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import Header from './Header/components/Header';
 import ProjectList from './ProjectList/components/ProjectList';
 import Project from './Project/components/Project';
-import CreateProject from './NewProject/components/CreateProject';
 import AdminView from './AdminView/components/AdminView';
 import NotFound from './common/components/NotFound';
 import NoAccess from './common/components/NoAccess';
@@ -45,7 +44,6 @@ class App extends React.Component {
           ? (
             <Switch>
               <Route exact path="/" component={ProjectList} />
-              <Route path="/projects/new" component={CreateProject} />
               <Route exact path="/projects" component={ProjectList} />
               <Route path="/projects/:id" render={props => (<Project {...props} userEmail={this.state.userEmail} isAdmin={this.state.isAdmin} />)} />
               <AdminRoute exact path="/admin" component={AdminView} isAdmin={this.state.isAdmin} />

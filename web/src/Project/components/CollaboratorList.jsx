@@ -81,7 +81,7 @@ class CollaboratorList extends React.Component {
 
   render() {
     return (
-      <div>
+      <div className="secondary-card">
         <h2>Collaborators</h2>
         <div className="secondary-card-body">
           {this.state.collaborators.map(collaborator => (

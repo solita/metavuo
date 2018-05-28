@@ -9,20 +9,22 @@ import ProjectListTableHead from './ProjectListTableHead';
 import convertStatus from '../../common/util/ProjectStatusConverter';
 
 const ProjectListTable = props => (
-  <Table>
-    <ProjectListTableHead />
-    <TableBody>
-      {props.projects.map(project => (
-        <TableRow key={project.ID} hover onClick={() => props.history.push(`/projects/${project.ID}`)}>
-          <TableCell>{project.project_id}</TableCell>
-          <TableCell>{project.project_name}</TableCell>
-          <TableCell>{new Date(Date.parse(project.Created)).toLocaleDateString()}</TableCell>
-          <TableCell>{project.project_description} </TableCell>
-          <TableCell>{convertStatus(project.project_status)} </TableCell>
-        </TableRow>
-      ))}
-    </TableBody>
-  </Table>
+  <div>
+    <Table>
+      <ProjectListTableHead />
+      <TableBody>
+        {props.projects.map(project => (
+          <TableRow key={project.ID} hover onClick={() => props.history.push(`/projects/${project.ID}`)}>
+            <TableCell>{project.project_id}</TableCell>
+            <TableCell>{project.project_name}</TableCell>
+            <TableCell>{new Date(Date.parse(project.Created)).toLocaleDateString()}</TableCell>
+            <TableCell>{project.project_description} </TableCell>
+            <TableCell>{convertStatus(project.project_status)} </TableCell>
+          </TableRow>
+        ))}
+      </TableBody>
+    </Table>
+  </div>
 );
 
 ProjectListTable.propTypes = {

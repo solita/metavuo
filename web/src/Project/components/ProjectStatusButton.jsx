@@ -1,7 +1,7 @@
 import React from 'react';
-import Button from 'material-ui/Button';
-import Menu from 'material-ui/Menu';
-import MenuItem from 'material-ui/Menu/MenuItem';
+import Button from '@material-ui/core/Button';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import axios from 'axios';
 import PropTypes from 'prop-types';
 import '../css/ProjectStatusButton.scss';

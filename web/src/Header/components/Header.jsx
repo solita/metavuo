@@ -1,12 +1,12 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import AppBar from 'material-ui/AppBar';
-import Button from 'material-ui/Button';
-import Toolbar from 'material-ui/Toolbar';
-import Tooltip from 'material-ui/Tooltip';
+import AppBar from '@material-ui/core/AppBar';
+import Button from '@material-ui/core/Button';
+import Toolbar from '@material-ui/core/Toolbar';
+import Tooltip from '@material-ui/core/Tooltip';
 import PropTypes from 'prop-types';
-import '../css/Header.scss';
 import InfoDialog from './InfoDialog';
+import '../css/Header.scss';
 
 class Header extends React.Component {
   constructor(props) {

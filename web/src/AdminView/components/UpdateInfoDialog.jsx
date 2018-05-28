@@ -1,13 +1,13 @@
 import React from 'react';
 import axios from 'axios';
-import Dialog from 'material-ui/Dialog';
-import DialogTitle from 'material-ui/Dialog/DialogTitle';
-import DialogContent from 'material-ui/Dialog/DialogContent';
-import DialogContentText from 'material-ui/Dialog/DialogContentText';
-import DialogActions from 'material-ui/Dialog/DialogActions';
-import TextField from 'material-ui/TextField';
-import Button from 'material-ui/Button';
-import CircularProgress from 'material-ui/Progress/CircularProgress';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogActions from '@material-ui/core/DialogActions';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
 
 class UpdateInfoDialog extends React.Component {

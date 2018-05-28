@@ -1,10 +1,15 @@
-import { Dialog, DialogActions, DialogContent, DialogContentText, DialogTitle, IconButton } from 'material-ui';
 import React from 'react';
 import axios from 'axios';
-import Grid from 'material-ui/Grid';
-import Card from 'material-ui/Card';
-import Button from 'material-ui/Button';
-import CircularProgress from 'material-ui/Progress/CircularProgress';
+import Grid from '@material-ui/core/Grid';
+import Card from '@material-ui/core/Card';
+import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogActions from '@material-ui/core/DialogActions';
+import IconButton from '@material-ui/core/IconButton';
 import PropTypes from 'prop-types';
 import ProjectStatusButton from './ProjectStatusButton';
 import MetadataSummary from './MetadataSummary';
@@ -304,7 +309,7 @@ class Project extends React.Component {
                     <Card className="table-card">
                       <div className="table-card-head">
                         <h2>{`Result files (${this.state.storageFiles.length})`}</h2>
-                        <Button variant="raised" className="primary-button text-button" onClick={this.openFileDialog}>
+                        <Button variant="raised" className="primary-button text-button" onClick={() => this.openFileDialog(true)}>
                           <i className="material-icons text-button-icon">add_circle_outline</i>Add result file
                         </Button>
                       </div>
@@ -414,6 +419,8 @@ Project.propTypes = {
     }).isRequired,
   }).isRequired,
   userEmail: PropTypes.string.isRequired,
+  history: PropTypes.object.isRequired,
+  isAdmin: PropTypes.bool.isRequired,
 };
 
 export default Project;

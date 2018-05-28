@@ -1,12 +1,12 @@
 import React from 'react';
-import Button from 'material-ui/Button';
-import Dialog from 'material-ui/Dialog';
-import DialogTitle from 'material-ui/Dialog/DialogTitle';
-import DialogContent from 'material-ui/Dialog/DialogContent';
-import DialogActions from 'material-ui/Dialog/DialogActions';
-import PropTypes from 'prop-types';
 import axios from 'axios';
-import { TextField } from 'material-ui';
+import Button from '@material-ui/core/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogTitle from '@material-ui/core/DialogTitle';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogActions from '@material-ui/core/DialogActions';
+import TextField from '@material-ui/core/TextField';
+import PropTypes from 'prop-types';
 
 const pattern = /^[\w_\-.]*$/;
 
@@ -121,6 +121,7 @@ StorageFileUpload.propTypes = {
   titleText: PropTypes.string,
   url: PropTypes.string.isRequired,
   userEmail: PropTypes.string.isRequired,
+  isResult: PropTypes.bool.isRequired,
 };
 
 StorageFileUpload.defaultProps = {

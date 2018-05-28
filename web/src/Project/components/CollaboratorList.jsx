@@ -1,8 +1,8 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
-import Button from 'material-ui/Button';
-import Tooltip from 'material-ui/Tooltip';
+import Button from '@material-ui/core/Button';
+import Tooltip from '@material-ui/core/Tooltip';
 import PropTypes from 'prop-types';
 import CollaboratorListAdd from './CollaboratorListAdd';
 import ConfirmDialog from '../../common/components/ConfirmDialog';
@@ -131,7 +131,7 @@ CollaboratorList.propTypes = {
   projectId: PropTypes.string.isRequired,
   projectCreatorEmail: PropTypes.string.isRequired,
   userEmail: PropTypes.string.isRequired,
-  history: PropTypes.any.isRequired,
+  history: PropTypes.object.isRequired,
 };
 
 export default withRouter(CollaboratorList);

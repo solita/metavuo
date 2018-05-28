@@ -1,9 +1,9 @@
 import React from 'react';
 import axios from 'axios';
-import TextField from 'material-ui/TextField';
-import Button from 'material-ui/Button';
-import DialogActions from 'material-ui/Dialog/DialogActions';
-import CircularProgress from 'material-ui/Progress/CircularProgress';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import DialogActions from '@material-ui/core/DialogActions';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
 import '../css/FileUpload.scss';
 

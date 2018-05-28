@@ -1,7 +1,7 @@
 import React from 'react';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
-import Button from 'material-ui/Button';
+import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 import { ValidatorForm } from 'react-material-ui-form-validator';
 import ProjectFormFields from './ProjectFormFields';

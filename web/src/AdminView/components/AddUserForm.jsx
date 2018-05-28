@@ -1,8 +1,8 @@
 import React from 'react';
 import axios from 'axios';
 import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
-import DialogActions from 'material-ui/Dialog/DialogActions';
-import Button from 'material-ui/Button';
+import DialogActions from '@material-ui/core/DialogActions/DialogActions';
+import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
 
 class AddUserForm extends React.Component {

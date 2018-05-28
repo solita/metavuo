@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import Card from 'material-ui/Card';
-import Button from 'material-ui/Button';
-import { CircularProgress } from 'material-ui/Progress';
+import Card from '@material-ui/core/Card';
+import Button from '@material-ui/core/Button';
+import CircularProgress from '@material-ui/core/CircularProgress';
 import ProjectListTable from './ProjectListTable';
 
 class ProjectList extends React.Component {

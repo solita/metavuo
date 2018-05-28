@@ -24,7 +24,7 @@ const (
 type ProjectStatus int
 
 const (
-	Unknown ProjectStatus = iota
+	Unknown    ProjectStatus = iota
 	InProgress
 	Complete
 	Archived
@@ -53,21 +53,21 @@ type Project struct {
 
 type ProjectDetailsDTO struct {
 	ID                int64
-	Name              string        `json:"project_name"`
-	ProjectID         string        `json:"project_id"`
-	Description       string        `json:"project_description"`
-	CreatedBy         string        `json:"createdby_email"`
-	Status            ProjectStatus `json:"project_status"`
-	CustomerOrg       string        `json:"customer_organization"`
-	InvoiceAddr       string        `json:"customer_invoice_address"`
-	CustomerName      string        `json:"customer_name"`
-	CustomerEmail     string        `json:"customer_email"`
-	CustomerPhone     string        `json:"customer_phone"`
-	CustomerReference string        `json:"customer_reference"`
-	InternalReference string        `json:"customer_internal_reference"`
-	SampleLocation    string        `json:"sample_location"`
-	AdditionalInfo    string        `json:"additional_information"`
-	Collaborators     []int64       `json:"collaborators"`
+	Name              string           `json:"project_name"`
+	ProjectID         string           `json:"project_id"`
+	Description       string           `json:"project_description"`
+	CreatedBy         string           `json:"createdby_email"`
+	Status            ProjectStatus    `json:"project_status"`
+	CustomerOrg       string           `json:"customer_organization"`
+	InvoiceAddr       string           `json:"customer_invoice_address"`
+	CustomerName      string           `json:"customer_name"`
+	CustomerEmail     string           `json:"customer_email"`
+	CustomerPhone     string           `json:"customer_phone"`
+	CustomerReference string           `json:"customer_reference"`
+	InternalReference string           `json:"customer_internal_reference"`
+	SampleLocation    string           `json:"sample_location"`
+	AdditionalInfo    string           `json:"additional_information"`
+	Collaborators     []int64          `json:"collaborators"`
 	Created           time.Time
 	SampleSummary     *MetadataSummary `json:"sample_summary"`
 }
@@ -236,13 +236,24 @@ func routeProjectsCreate(w http.ResponseWriter, r *http.Request, userId int64) {
 
 func createProjectId(c context.Context) string {
 	currentBOY := time.Date(time.Now().UTC().Year(), 01, 01, 00, 00, 00, 000, time.UTC)
-	q := datastore.NewQuery(projectKind).KeysOnly().Filter("Created >=", currentBOY)
-	count, err := q.Count(c)
+	var projectArray []Project
+	q := datastore.NewQuery(projectKind).Filter("Created >=", currentBOY).Order("Created")
+	_, err := q.GetAll(c, &projectArray)
 	if err != nil {
 		log.Errorf(c, "Creating project id failed", err)
+		return ""
 	}
 	var letter = string('A' + (time.Now().UTC().Year() - 2018))
-	var number = count + 1
+	var number = 0
+	if len(projectArray) > 0 {
+		number, err = strconv.Atoi(projectArray[len(projectArray)-1].ProjectID[1:])
+		if err != nil {
+			log.Errorf(c, "Creating project id failed", err)
+			return ""
+		}
+	}
+	number = number + 1
+
 	return letter + strconv.Itoa(number)
 }
 

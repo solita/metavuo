@@ -1,6 +1,8 @@
 ### Getting started
 Run with `dev_appserver.py app.yaml --default_gcs_bucket_name <your-bucket-name-here>`
 
+To enable Storage-operations, authenticate yourself by running `gcloud auth application-default login`
+
 Comment out the line `login: required` from the `app.yaml` if you want to test the APIs with `curl/postman` etc.
 
 Add your project's service account to the commented sections in `project_files.go` if you want to use Storage locally.

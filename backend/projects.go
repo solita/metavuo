@@ -114,14 +114,12 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
 			routeProjectsCreate(w, r, userId)
-			return
 		case http.MethodGet:
 			routeProjectsList(w, r, userId)
-			return
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
-			return
 		}
+		return
 	}
 
 	// /api/projects/123
@@ -154,44 +152,27 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodGet:
 			routeProjectsGet(w, r, p, id)
-			return
 		case http.MethodPut:
 			routeProjectUpdate(w, r, p, key)
-			return
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
-			return
 		}
-
 	case "status":
 		switch r.Method {
 		case http.MethodPost:
 			routeProjectStatusUpdate(w, r, p, key)
-			return
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
-			return
 		}
-
 	case "metadata":
 		routeProjectMetadata(w, r, id, p, userId)
-		return
-
 	case "files":
 		routeProjectFile(w, r, id)
-		return
-
 	case "collaborators":
 		routeProjectCollaborators(w, r, p, key)
-		return
-
 	default:
 		http.Error(w, "", http.StatusMethodNotAllowed)
-		return
 	}
-
-	http.Error(w, "", http.StatusMethodNotAllowed)
-	return
 }
 
 func routeProjectsCreate(w http.ResponseWriter, r *http.Request, userId int64) {

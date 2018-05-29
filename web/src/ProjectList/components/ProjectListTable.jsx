@@ -7,6 +7,7 @@ import TableCell from '@material-ui/core/TableCell';
 import PropTypes from 'prop-types';
 import ProjectListTableHead from './ProjectListTableHead';
 import convertStatus from '../../common/util/ProjectStatusConverter';
+import LocaleConverter from '../../common/util/LocaleConverter';
 
 const ProjectListTable = props => (
   <div>
@@ -17,7 +18,7 @@ const ProjectListTable = props => (
           <TableRow key={project.ID} hover onClick={() => props.history.push(`/projects/${project.ID}`)}>
             <TableCell>{project.project_id}</TableCell>
             <TableCell>{project.project_name}</TableCell>
-            <TableCell>{new Date(Date.parse(project.Created)).toLocaleDateString()}</TableCell>
+            <TableCell>{LocaleConverter(project.Created)}</TableCell>
             <TableCell>{project.project_description} </TableCell>
             <TableCell>{convertStatus(project.project_status)} </TableCell>
           </TableRow>

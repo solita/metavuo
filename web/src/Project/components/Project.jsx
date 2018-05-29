@@ -18,6 +18,7 @@ import ProjectUpdateDialog from './ProjectUpdateDialog';
 import ProjectFileList from './ProjectFileList';
 import CollaboratorList from './CollaboratorList';
 import StorageFileUpload from '../../common/components/StorageFileUpload';
+import LocaleConverter from '../../common/util/LocaleConverter';
 
 class Project extends React.Component {
   constructor(props) {
@@ -186,23 +187,45 @@ class Project extends React.Component {
                         :
                         <div>
                           <div>
-                            <div className="divider-section flex-row">
-                              <div className="right-divider">
-                                <p className="bold-text">Description:</p>
-                                <p className="bold-text">Project started:</p>
-                                <p className="bold-text">Project creator:</p>
+                            <div className="divider-section border-bottom">
+                              <div className="flex-row">
+                                <div className="left-divider"><p className="bold-text">Description:</p></div>
+                                <div className="right-divider"><p>{this.state.description}</p></div>
                               </div>
-                              <div className="left-divider">
-                                <p>{this.state.description}</p>
-                                <p>{new Date(this.state.createdAt).toLocaleString()}</p>
-                                <p>{this.state.createdbyEmail}</p>
+                              <div className="flex-row">
+                                <div className="left-divider"><p className="bold-text">Project started:</p></div>
+                                <div className="right-divider"><p>{LocaleConverter(this.state.createdAt)}</p></div>
                               </div>
+                              <div className="flex-row">
+                                <div className="left-divider"><p className="bold-text">Project creator:</p></div>
+                                <div className="right-divider"><p>{this.state.createdbyEmail}</p></div>
+                              </div>
+                              {this.state.internalReference &&
+                              <div className="flex-row">
+                                <div className="left-divider"><p className="bold-text">Internal reference::</p></div>
+                                <div className="right-divider"><p>{this.state.internalReference}</p></div>
+                              </div>
+                              }
+
+                              {this.state.sampleLocation &&
+                              <div className="flex-row">
+                                <div className="left-divider"><p className="bold-text">Sample location:</p></div>
+                                <div className="right-divider"><p>{this.state.sampleLocation}</p></div>
+                              </div>
+                              }
+
+                              {this.state.info &&
+                              <div className="flex-row">
+                                <div className="left-divider"><p className="bold-text">Additional information:</p></div>
+                                <div className="right-divider"><p>{this.state.info}</p></div>
+                              </div>
+                              }
                             </div>
-                            <div className="divider-section flex-row">
-                              <div className="right-divider button-container">
+                            <div className="divider-section border-bottom flex-row">
+                              <div className="left-divider button-container">
                                 <p className="bold-text">Project status:</p>
                               </div>
-                              <div className="left-divider">
+                              <div className="right-divider">
                                 <div className="status-row">
                                   <p>{ConvertStatus(this.state.status)}</p>
                                   <ProjectStatusButton
@@ -213,47 +236,55 @@ class Project extends React.Component {
                                 </div>
                               </div>
                             </div>
-                            <p className="bold-text">Customer details</p>
-                            <div className="divider-section flex-row">
-                              <div className="right-divider">
-                                <p className="bold-text">Organization:</p>
-                                {this.state.invoiceAddress && <p className="bold-text">Invoice address:</p>}
-                                {this.state.customerName && <p className="bold-text">Name:</p>}
-                                {this.state.customerEmail && <p className="bold-text">Email:</p>}
-                                {this.state.customerPhone && <p className="bold-text">Phone number:</p>}
-                                {this.state.customerReference && <p className="bold-text">Customer reference:</p>}
+                            <div className="divider-section"><h2>Customer details</h2></div>
+                            <div className="divider-section">
+                              <div className="flex-row">
+                                <div className="left-divider"><p className="bold-text">Organization:</p></div>
+                                <div className="right-divider"><p>{this.state.organization}</p></div>
                               </div>
-                              <div className="left-divider">
-                                <p>{this.state.organization}</p>
-                                {this.state.invoiceAddress && <p>{this.state.invoiceAddress}</p>}
-                                {this.state.customerName && <p>{this.state.customerName}</p>}
-                                {this.state.customerEmail && <p>{this.state.customerEmail}</p>}
-                                {this.state.customerPhone && <p>{this.state.customerPhone}</p>}
-                                {this.state.customerReference &&
-                                  <p>{this.state.customerReference}</p>
-                                }
+                              {this.state.invoiceAddress &&
+                              <div className="flex-row">
+                                <div className="left-divider"><p className="bold-text">Invoice address:</p></div>
+                                <div className="right-divider"><p>{this.state.invoiceAddress}</p></div>
                               </div>
-                            </div>
-                            <div className="divider-section flex-row">
-                              <div className="right-divider">
-                                {this.state.internalReference && <p className="bold-text">Internal reference:</p>}
-                                {this.state.sampleLocation && <p className="bold-text">Sample location:</p>}
-                                {this.state.info && <p className="bold-text">Additional information:</p>}
+                              }
+
+                              {this.state.customerName &&
+                              <div className="flex-row">
+                                <div className="left-divider"><p className="bold-text">Name:</p></div>
+                                <div className="right-divider"><p>{this.state.customerName}</p></div>
                               </div>
-                              <div className="left-divider">
-                                {this.state.internalReference &&
-                                <p>{this.state.internalReference}</p>
-                                }
-                                {this.state.sampleLocation && <p>{this.state.sampleLocation}</p>}
-                                {this.state.info && <p>{this.state.info}</p>}
+                              }
+
+                              {this.state.customerEmail &&
+                              <div className="flex-row">
+                                <div className="left-divider"><p className="bold-text">Email:</p></div>
+                                <div className="right-divider"><p>{this.state.customerEmail}</p></div>
                               </div>
+                              }
+
+                              {this.state.customerPhone &&
+                              <div className="flex-row">
+                                <div className="left-divider"><p className="bold-text">Phone numbe:</p></div>
+                                <div className="right-divider"><p>{this.state.customerPhone}</p></div>
+                              </div>
+                              }
+
+                              {this.state.customerReference &&
+                              <div className="flex-row">
+                                <div className="left-divider"><p className="bold-text">Customer reference:</p></div>
+                                <div className="right-divider"><p>{this.state.customerReference}</p></div>
+                              </div>
+                              }
                             </div>
                           </div>
-                          <ProjectUpdateDialog
-                            url={`/api/projects/${this.props.match.params.id}`}
-                            updateMainView={this.getProject}
-                            parentState={this.state}
-                          />
+                          <div className="divider-section">
+                            <ProjectUpdateDialog
+                              url={`/api/projects/${this.props.match.params.id}`}
+                              updateMainView={this.getProject}
+                              parentState={this.state}
+                            />
+                          </div>
                         </div>
                       }
                     </div>

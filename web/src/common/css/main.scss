@@ -88,7 +88,7 @@ body {
 }
 
 .text-button {
-  border-radius: 20px !important;
+  border-radius: 25px !important;
   font-family: 'Source Sans Pro', sans-serif !important;
   font-weight: 400 !important;
   letter-spacing: 0.8px !important;
@@ -150,37 +150,28 @@ p {
 }
 
 .divider-section {
-  border-bottom: 2px solid $light-gray;
   padding: 12px 0;
+  overflow-wrap: break-word;
 
-  .right-divider {
-    min-width: 180px;
+  p {
+    margin: 6px 0;
+  }
+
+  .sub-divider-section {
+    margin: 0 0 -20px 0;
   }
 
   .left-divider {
-    width: calc(100% - 180px);
-  }
-
-  &:last-child {
-    border-bottom: 0;
-  }
-}
-
-.sub-divider-section {
-  margin: 0 0 -20px 0;
-
-  .right-divider {
     min-width: 180px;
   }
 
-  .left-divider {
+  .right-divider {
     width: calc(100% - 180px);
   }
 }
 
-.description-color {
-  background-color: $light-orange;
-  padding: 3px;
+.border-bottom {
+  border-bottom: 2px solid $light-gray;
 }
 
 th {

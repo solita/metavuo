@@ -1,11 +1,13 @@
 import React from 'react';
 import axios from 'axios';
 import Card from '@material-ui/core/Card';
+import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
 import PropTypes from 'prop-types';
 import StorageFileUpload from '../../common/components/StorageFileUpload';
 import ConfirmDialog from '../../common/components/ConfirmDialog';
+import LocaleConverter from '../../common/util/LocaleConverter';
 
 const getFileSize = (number) => {
   if (number < 1024) {
@@ -75,13 +77,13 @@ class ProjectFileList extends React.Component {
                 {this.props.files.map(file => (
                   <div key={file.id} className="divider-section">
                     <div className="sub-divider-section flex-row">
-                      <div className="right-divider button-container">
-                        <p className="bold-text">File name:</p>
+                      <div className="left-divider button-container">
+                        <p className="bold-text">Description:</p>
                       </div>
-                      <div className="left-divider">
+                      <div className="right-divider">
                         <div className="status-row">
-                          <p className="bold-text">{file.fileName}</p>
-                          <div>
+                          {file.description && <p>{file.description}</p>}
+                          <div className="flex-row">
                             <a
                               href={`/api/projects/${this.props.projectId}/files/${file.fileName}`}
                               className="button-link"
@@ -106,22 +108,29 @@ class ProjectFileList extends React.Component {
                         </div>
                       </div>
                     </div>
-
-                    <div className="divider-section flex-row">
-                      <div className="right-divider">
-                        <p className="bold-text">Size:</p>
-                        <p className="bold-text">Added:</p>
-                        <p className="bold-text">Added by:</p>
-                        <p className="bold-text">Description:</p>
-                      </div>
-                      <div className="left-divider">
-                        <div>
-                          <p>{getFileSize(file.fileSize)}</p>
-                          <p>{new Date(Date.parse(file.created)).toLocaleDateString()}</p>
-                          <p>{file.createdBy}</p>
-                          {file.description && <p className="description-color">{file.description}</p>}
-                        </div>
-                      </div>
+                    <div className="divider-section border-bottom flex-row">
+                      <Grid container>
+                        <Grid item xs={6}>
+                          <div className="flex-row">
+                            <div className="left-divider"><p className="bold-text">File name:</p></div>
+                            <div className="right-divider"><p className="bold-text">{file.fileName}</p></div>
+                          </div>
+                          <div className="flex-row">
+                            <div className="left-divider"><p className="bold-text">Size:</p></div>
+                            <div className="right-divider"><p>{getFileSize(file.fileSize)}</p></div>
+                          </div>
+                        </Grid>
+                        <Grid item xs={6}>
+                          <div className="flex-row">
+                            <div className="left-divider"><p className="bold-text">Added:</p></div>
+                            <div className="right-divider"><p>{LocaleConverter(file.created)}</p></div>
+                          </div>
+                          <div className="flex-row">
+                            <div className="left-divider"><p className="bold-text">Added by:</p></div>
+                            <div className="right-divider"><p>{file.createdBy}</p></div>
+                          </div>
+                        </Grid>
+                      </Grid>
                     </div>
                   </div>
                 ))}

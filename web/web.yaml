@@ -23,17 +23,17 @@ skip_files:
 handlers:
     - url: /(.*\..*)
       secure: always
-      login: admin
+      login: required
       static_files: dist/\1
       upload: dist/(.*\..*)
 
     - url: /.*
       secure: always
-      login: admin
+      login: required
       static_files: dist/index.html
       upload: dist/index\.html
 
     - url: /
       secure: always
-      login: admin
+      login: required
       static_dir: dist/

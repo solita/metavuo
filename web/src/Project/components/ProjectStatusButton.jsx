@@ -7,7 +7,7 @@ import PropTypes from 'prop-types';
 import '../css/ProjectStatusButton.scss';
 
 const options = [
-  'Change status:',
+  '',
   'In Progress',
   'Complete',
   'Archived',
@@ -24,8 +24,8 @@ class ProjectStatusButton extends React.Component {
     this.handleClick = this.handleClick.bind(this);
   }
 
-  handleClick(event) {
-    this.setState({ anchorEl: event.currentTarget });
+  handleClick(e) {
+    this.setState({ anchorEl: e.currentTarget });
   }
 
   handleClose() {
@@ -44,6 +44,7 @@ class ProjectStatusButton extends React.Component {
     }
     this.setState({ anchorEl: null });
   }
+
   render() {
     return (
       <div>
@@ -56,13 +57,19 @@ class ProjectStatusButton extends React.Component {
         </Button>
         <Menu
           anchorEl={this.state.anchorEl}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left',
+          }}
+          getContentAnchorEl={null}
           open={Boolean(this.state.anchorEl)}
           onClose={this.handleClose}
         >
           {options.map((option, index) => (
+            index !== 0 &&
             <MenuItem
               key={option}
-              disabled={index === 0}
+              disabled={index === this.props.projectStatus}
               onClick={event => this.handleSubmit(event, index)}
             >
               {this.props.projectStatus === index ? <span className="selected-item">{option}</span> : option}

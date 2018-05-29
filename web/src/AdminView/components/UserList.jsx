@@ -10,6 +10,7 @@ import Button from '@material-ui/core/Button';
 import Tooltip from '@material-ui/core/Tooltip';
 import ConfirmDialog from '../../common/components/ConfirmDialog';
 import AdminAddUserDialog from './AdminAddUserDialog';
+import LocaleConverter from '../../common/util/LocaleConverter';
 
 class UserList extends React.Component {
   constructor(props) {
@@ -116,7 +117,7 @@ class UserList extends React.Component {
                         <TableCell>{user.name}</TableCell>
                         <TableCell>{user.email}</TableCell>
                         <TableCell>{user.organization}</TableCell>
-                        <TableCell>{new Date(user.created_at).toLocaleString()}</TableCell>
+                        <TableCell>{LocaleConverter(user.created_at)}</TableCell>
                         <TableCell numeric>
                           <Tooltip title="Delete" placement="left">
                             <Button

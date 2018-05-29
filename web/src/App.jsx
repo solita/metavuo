@@ -18,6 +18,7 @@ class App extends React.Component {
       isAdmin: false,
       isUser: false,
       userEmail: '',
+      logoutUrl: '',
     };
   }
 
@@ -29,11 +30,17 @@ class App extends React.Component {
             userEmail: res.data.email,
             isAdmin: res.data.roles.includes('admin'),
             isUser: res.data.roles.includes('user'),
+            logoutUrl: res.data.logout_url,
           });
         }
       })
       .catch(() => {
-        this.setState({ userEmail: '', isAdmin: false, isUser: false });
+        this.setState({
+          userEmail: '',
+          isAdmin: false,
+          isUser: false,
+          logoutUrl: '',
+        });
       });
   }
 
@@ -89,6 +96,7 @@ class App extends React.Component {
           userEmail={this.state.userEmail}
           isAdmin={this.state.isAdmin}
           isUser={this.state.isUser}
+          logoutUrl={this.state.logoutUrl}
         />
         <div className="content-container">
           {routerPart}

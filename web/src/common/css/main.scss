@@ -15,6 +15,13 @@ body {
   text-decoration: none;
 }
 
+ul a {
+  text-decoration: none !important;
+  &:hover, &:focus {
+    outline: none !important;
+  }
+}
+
 .button-container {
   display: flex;
   align-items: center;

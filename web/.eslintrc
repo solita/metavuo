@@ -13,7 +13,7 @@
   "extends": "airbnb",
   "rules": {
     "react/prefer-stateless-function": 0,
-    "react/forbid-prop-types": 1,
+    "react/forbid-prop-types": ["error", { "forbid": [ "any", "array" ] }],
     "react/prop-types": 1,
     "linebreak-style": 1,
     "import/extensions": 1,

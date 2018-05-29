@@ -1,6 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import AppBar from '@material-ui/core/AppBar';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import Button from '@material-ui/core/Button';
 import Toolbar from '@material-ui/core/Toolbar';
 import Tooltip from '@material-ui/core/Tooltip';
@@ -13,9 +15,12 @@ class Header extends React.Component {
     super(props);
     this.state = {
       infoOpen: false,
+      anchorEl: null,
     };
     this.openInfo = this.openInfo.bind(this);
     this.closeInfo = this.closeInfo.bind(this);
+    this.handleClose = this.handleClose.bind(this);
+    this.handleClick = this.handleClick.bind(this);
   }
 
   openInfo() {
@@ -24,6 +29,15 @@ class Header extends React.Component {
 
   closeInfo() {
     this.setState({ infoOpen: false });
+  }
+
+  handleClick(e) {
+    console.log(this.props.logoutUrl);
+    this.setState({ anchorEl: e.currentTarget });
+  }
+
+  handleClose() {
+    this.setState({ anchorEl: null });
   }
 
   render() {
@@ -56,12 +70,28 @@ class Header extends React.Component {
               </div>
               }
               <div className="header-button-margin" />
+              {(this.props.isAdmin || this.props.isUser) &&
               <div className="header-user">
-                <Button variant="fab" className="black-button round-button">
+                <Button variant="fab" className="black-button round-button" onClick={this.handleClick}>
                   <i className="material-icons button-icon">perm_identity</i>
                 </Button>
+                <Menu
+                  anchorEl={this.state.anchorEl}
+                  open={Boolean(this.state.anchorEl)}
+                  anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'left',
+                  }}
+                  getContentAnchorEl={null}
+                  onClose={this.handleClose}
+                >
+                  <a href={this.props.logoutUrl}>
+                    <MenuItem>Log out</MenuItem>
+                  </a>
+                </Menu>
                 {this.props.userEmail}
               </div>
+              }
             </div>
           </Toolbar>
         </AppBar>
@@ -75,12 +105,14 @@ Header.propTypes = {
   isAdmin: PropTypes.bool,
   isUser: PropTypes.bool,
   userEmail: PropTypes.string,
+  logoutUrl: PropTypes.string,
 };
 
 Header.defaultProps = {
   isAdmin: false,
   isUser: false,
   userEmail: '',
+  logoutUrl: '',
 };
 
 export default Header;

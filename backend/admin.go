@@ -21,6 +21,10 @@ const (
 	infoKind = "InfoText"
 )
 
+var (
+	emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
+)
+
 type AppUser struct {
 	ID           int64     `datastore:"-" json:"user_id"`
 	Name         string    `json:"name"`
@@ -32,7 +36,6 @@ type AppUser struct {
 }
 
 type InfoText struct {
-	ID      int64  `datastore:"-" json:"-"`
 	Title   string `json:"title"`
 	Content string `datastore:",noindex" json:"content"`
 }
@@ -45,54 +48,17 @@ func routeAdmin(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodPost:
 			routeInfoCreate(w, r)
-			return
 		case http.MethodPut:
 			routeInfoUpdate(w, r)
-			return
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
-			return
 		}
+		return
 	}
 
 	if head == "users" {
-		var head string
-		head, r.URL.Path = shiftPath(r.URL.Path)
-
-		if head == "" {
-			switch r.Method {
-			case http.MethodGet:
-				routeAdminUsersGet(w, r)
-				return
-			case http.MethodPost:
-				routeAdminUsersCreate(w, r)
-				return
-			default:
-				http.Error(w, "", http.StatusMethodNotAllowed)
-				return
-			}
-		}
-
-		// /api/admin/users/123
-		id, err := strconv.ParseInt(head, 10, 64)
-		if err != nil {
-			http.Error(w, "", http.StatusNotFound)
-			return
-		}
-
-		head, r.URL.Path = shiftPath(r.URL.Path)
-
-		if head == "" {
-			switch r.Method {
-			case http.MethodDelete:
-				routeAdminUsersDelete(w, r, id)
-				return
-			default:
-				http.Error(w, "", http.StatusMethodNotAllowed)
-				return
-			}
-		}
-
+		routeAdminUsers(w, r)
+		return
 	}
 
 	if head == "project" {
@@ -105,15 +71,49 @@ func routeAdmin(w http.ResponseWriter, r *http.Request) {
 		switch r.Method {
 		case http.MethodDelete:
 			routeAdminProjectDelete(w, r, id)
-			return
 		default:
 			http.Error(w, "", http.StatusMethodNotAllowed)
-			return
 		}
+		return
 	}
 
 	http.Error(w, "", http.StatusMethodNotAllowed)
-	return
+}
+
+func routeAdminUsers(w http.ResponseWriter, r *http.Request) {
+	var head string
+	head, r.URL.Path = shiftPath(r.URL.Path)
+
+	if head == "" {
+		switch r.Method {
+		case http.MethodGet:
+			routeAdminUsersGet(w, r)
+		case http.MethodPost:
+			routeAdminUsersCreate(w, r)
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+		}
+		return
+	}
+
+	// /api/admin/users/123
+	id, err := strconv.ParseInt(head, 10, 64)
+	if err != nil {
+		http.Error(w, "", http.StatusNotFound)
+		return
+	}
+
+	head, r.URL.Path = shiftPath(r.URL.Path)
+
+	if head == "" {
+		switch r.Method {
+		case http.MethodDelete:
+			routeAdminUsersDelete(w, r, id)
+		default:
+			http.Error(w, "", http.StatusMethodNotAllowed)
+		}
+		return
+	}
 }
 
 func routeAdminUsersGet(w http.ResponseWriter, r *http.Request) {
@@ -131,7 +131,8 @@ func routeAdminUsersGet(w http.ResponseWriter, r *http.Request) {
 		}
 		if err != nil {
 			log.Errorf(c, "Could not fetch next user: %v", err)
-			break
+			http.Error(w, "", http.StatusInternalServerError)
+			return
 		}
 
 		u.ID = key.IntID()
@@ -145,10 +146,10 @@ func routeAdminUsersGet(w http.ResponseWriter, r *http.Request) {
 func routeAdminUsersCreate(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
-	dec := json.NewDecoder(r.Body)
 	var appUser AppUser
 
-	if err := dec.Decode(&appUser); err != nil {
+	err := json.NewDecoder(r.Body).Decode(&appUser)
+	if err != nil {
 		log.Errorf(c, "Decoding JSON failed while creating user %v", err)
 		http.Error(w, "", http.StatusBadRequest)
 		return
@@ -160,7 +161,13 @@ func routeAdminUsersCreate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, errorMsg, http.StatusBadRequest)
 		return
 	}
-	isValid, errorMsg = validateEmailUniqueness(c, appUser.Email)
+	isValid, errorMsg, err = validateEmailUniqueness(c, appUser.Email)
+	if err != nil {
+		log.Errorf(c, "Counting users failed %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+
 	if !isValid {
 		log.Errorf(c, "%s", errorMsg)
 		http.Error(w, errorMsg, http.StatusBadRequest)
@@ -176,7 +183,7 @@ func routeAdminUsersCreate(w http.ResponseWriter, r *http.Request) {
 	appUser.CreatedAt = time.Now().UTC()
 
 	key := datastore.NewIncompleteKey(c, userKind, nil)
-	key, err := datastore.Put(c, key, &appUser)
+	_, err = datastore.Put(c, key, &appUser)
 
 	if err != nil {
 		log.Errorf(c, "Adding user failed %v", err)
@@ -186,11 +193,6 @@ func routeAdminUsersCreate(w http.ResponseWriter, r *http.Request) {
 }
 
 func validateEmailAddress(email string) (bool, string) {
-	emailRegex, err := regexp.Compile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-	if err != nil {
-		return false, "Email address is not valid"
-	}
-
 	if emailRegex.MatchString(email) == true {
 		return true, ""
 	} else {
@@ -198,15 +200,18 @@ func validateEmailAddress(email string) (bool, string) {
 	}
 }
 
-func validateEmailUniqueness(c context.Context, email string) (bool, string) {
+func validateEmailUniqueness(c context.Context, email string) (bool, string, error) {
 	q := datastore.NewQuery(userKind).KeysOnly().Filter("Email = ", email).Limit(1)
-	t := q.Run(c)
-	key, _ := t.Next(nil)
-
-	if key != nil {
-		return false, "User with email already exists"
+	n, err := q.Count(c)
+	if err != nil {
+		return false, "", err
 	}
-	return true, ""
+
+	if n > 0 {
+		return false, "User with email already exists", nil
+	}
+
+	return true, "", nil
 }
 
 func routeAdminUsersDelete(w http.ResponseWriter, r *http.Request, userId int64) {

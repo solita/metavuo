@@ -20,30 +20,26 @@ func routeApi(w http.ResponseWriter, r *http.Request) {
 	// /api/admin/
 	case "admin":
 		routeAdmin(w, r)
-		return
 
 	// /api/projects/
 	case "projects":
 		routeProjects(w, r)
-		return
 
 	// /api/users/
 	case "users":
 		routeUsers(w, r)
-		return
 
-		// /api/info
+	// /api/info
 	case "info":
 		routeInfo(w, r)
-		return
 
 	// /api/tasks
 	case "tasks":
 		routeTasks(w, r)
-		return
-	}
 
-	http.Error(w, "", http.StatusNotFound)
+	default:
+		http.Error(w, "", http.StatusNotFound)
+	}
 }
 
 func shiftPath(p string) (head, tail string) {

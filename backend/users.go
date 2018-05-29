@@ -10,8 +10,9 @@ import (
 )
 
 type CurrentUser struct {
-	Email string   `json:"email"`
-	Roles []string `json:"roles"`
+	Email     string   `json:"email"`
+	Roles     []string `json:"roles"`
+	LogoutUrl string   `json:"logout_url"`
 }
 
 type CollaboratorUser struct {
@@ -85,6 +86,12 @@ func routeUsersGetMe(w http.ResponseWriter, r *http.Request) {
 	var currentUser CurrentUser
 	currentUser.Email = user.Current(c).Email
 	currentUser.Roles = roles
+	currentUser.LogoutUrl, err = user.LogoutURL(c, "/")
+
+	if err != nil {
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write(mustJSON(currentUser))

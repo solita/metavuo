@@ -32,7 +32,6 @@ class Header extends React.Component {
   }
 
   handleClick(e) {
-    console.log(this.props.logoutUrl);
     this.setState({ anchorEl: e.currentTarget });
   }
 
@@ -86,7 +85,7 @@ class Header extends React.Component {
                   onClose={this.handleClose}
                 >
                   <a href={this.props.logoutUrl}>
-                    <MenuItem>Log out</MenuItem>
+                    <MenuItem>Log out from Google</MenuItem>
                   </a>
                 </Menu>
                 {this.props.userEmail}

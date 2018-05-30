@@ -7,7 +7,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import { ValidatorForm } from 'react-material-ui-form-validator';
 import PropTypes from 'prop-types';
-import ProjectFormFields from '../../NewProject/components/ProjectFormFields';
+import ProjectFormFields from '../../CreateProject/components/ProjectFormFields';
 
 class ProjectUpdateDialog extends React.Component {
   constructor(props) {

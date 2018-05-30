@@ -63,7 +63,6 @@ class AddUserForm extends React.Component {
         >
           <TextValidator
             className="form-control"
-            id="name"
             name="name"
             label="Name *"
             value={this.state.name}
@@ -75,7 +74,6 @@ class AddUserForm extends React.Component {
           />
           <TextValidator
             className="form-control"
-            id="email"
             name="email"
             label="Email *"
             value={this.state.email}
@@ -87,7 +85,6 @@ class AddUserForm extends React.Component {
           />
           <TextValidator
             className="form-control"
-            id="organization"
             name="organization"
             label="Organization *"
             value={this.state.organization}

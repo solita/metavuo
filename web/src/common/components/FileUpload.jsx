@@ -59,7 +59,6 @@ class FileUpload extends React.Component {
       <div>
         <p className="form-errors">{this.state.message}</p>
         <form
-          id="form-object"
           autoComplete="off"
         >
           <input type="file" name="file" onChange={this.addFile} />

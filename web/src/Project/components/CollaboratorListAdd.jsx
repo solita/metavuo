@@ -111,7 +111,6 @@ class CollaboratorListAdd extends React.Component {
             </Button>
             <Button
               type="submit"
-              id="submit-project"
               variant="raised"
               className="primary-button text-button"
               onClick={this.handleSubmit}

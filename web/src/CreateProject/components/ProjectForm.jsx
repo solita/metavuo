@@ -73,7 +73,6 @@ export class ProjectForm extends React.Component {
       <div>
         <p className="message-errors">{this.state.message}</p>
         <ValidatorForm
-          id="form-object"
           onSubmit={this.handleSubmit}
           autoComplete="off"
         >

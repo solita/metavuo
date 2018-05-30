@@ -17,7 +17,7 @@ import ConvertStatus from '../../common/util/ProjectStatusConverter';
 import ProjectUpdateDialog from './ProjectUpdateDialog';
 import ProjectFileList from './ProjectFileList';
 import CollaboratorList from './CollaboratorList';
-import StorageFileUpload from '../../common/components/StorageFileUpload';
+import CardDataRow from './CardDataRow';
 import LocaleConverter from '../../common/util/LocaleConverter';
 
 class Project extends React.Component {
@@ -188,37 +188,17 @@ class Project extends React.Component {
                         <div>
                           <div>
                             <div className="divider-section border-bottom">
-                              <div className="flex-row">
-                                <div className="left-divider"><p className="bold-text">Description:</p></div>
-                                <div className="right-divider"><p>{this.state.description}</p></div>
-                              </div>
-                              <div className="flex-row">
-                                <div className="left-divider"><p className="bold-text">Project started:</p></div>
-                                <div className="right-divider"><p>{LocaleConverter(this.state.createdAt)}</p></div>
-                              </div>
-                              <div className="flex-row">
-                                <div className="left-divider"><p className="bold-text">Project creator:</p></div>
-                                <div className="right-divider"><p>{this.state.createdbyEmail}</p></div>
-                              </div>
+                              <CardDataRow name="Description" content={this.state.description} />
+                              <CardDataRow name="Project started" content={LocaleConverter(this.state.createdAt)} />
+                              <CardDataRow name="Project creator" content={this.state.createdbyEmail} />
                               {this.state.internalReference &&
-                              <div className="flex-row">
-                                <div className="left-divider"><p className="bold-text">Internal reference::</p></div>
-                                <div className="right-divider"><p>{this.state.internalReference}</p></div>
-                              </div>
+                              <CardDataRow name="Internal reference" content={this.state.internalReference} />
                               }
-
                               {this.state.sampleLocation &&
-                              <div className="flex-row">
-                                <div className="left-divider"><p className="bold-text">Sample location:</p></div>
-                                <div className="right-divider"><p>{this.state.sampleLocation}</p></div>
-                              </div>
+                              <CardDataRow name="Sample location" content={this.state.sampleLocation} />
                               }
-
                               {this.state.info &&
-                              <div className="flex-row">
-                                <div className="left-divider"><p className="bold-text">Additional information:</p></div>
-                                <div className="right-divider"><p>{this.state.info}</p></div>
-                              </div>
+                              <CardDataRow name="Additional information" content={this.state.info} />
                               }
                             </div>
                             <div className="divider-section border-bottom flex-row">
@@ -238,43 +218,21 @@ class Project extends React.Component {
                             </div>
                             <div className="divider-section"><h2>Customer details</h2></div>
                             <div className="divider-section">
-                              <div className="flex-row">
-                                <div className="left-divider"><p className="bold-text">Organization:</p></div>
-                                <div className="right-divider"><p>{this.state.organization}</p></div>
-                              </div>
+                              <CardDataRow name="Organization" content={this.state.organization} />
                               {this.state.invoiceAddress &&
-                              <div className="flex-row">
-                                <div className="left-divider"><p className="bold-text">Invoice address:</p></div>
-                                <div className="right-divider"><p>{this.state.invoiceAddress}</p></div>
-                              </div>
+                              <CardDataRow name="Invoice address" content={this.state.invoiceAddress} />
                               }
-
                               {this.state.customerName &&
-                              <div className="flex-row">
-                                <div className="left-divider"><p className="bold-text">Name:</p></div>
-                                <div className="right-divider"><p>{this.state.customerName}</p></div>
-                              </div>
+                              <CardDataRow name="Name" content={this.state.customerName} />
                               }
-
                               {this.state.customerEmail &&
-                              <div className="flex-row">
-                                <div className="left-divider"><p className="bold-text">Email:</p></div>
-                                <div className="right-divider"><p>{this.state.customerEmail}</p></div>
-                              </div>
+                              <CardDataRow name="Email" content={this.state.customerEmail} />
                               }
-
                               {this.state.customerPhone &&
-                              <div className="flex-row">
-                                <div className="left-divider"><p className="bold-text">Phone numbe:</p></div>
-                                <div className="right-divider"><p>{this.state.customerPhone}</p></div>
-                              </div>
+                              <CardDataRow name="Phone number" content={this.state.customerPhone} />
                               }
-
                               {this.state.customerReference &&
-                              <div className="flex-row">
-                                <div className="left-divider"><p className="bold-text">Customer reference:</p></div>
-                                <div className="right-divider"><p>{this.state.customerReference}</p></div>
-                              </div>
+                              <CardDataRow name="Customer reference" content={this.state.customerReference} />
                               }
                             </div>
                           </div>
@@ -333,23 +291,6 @@ class Project extends React.Component {
                       updateFileList={this.getProjectFiles}
                     />
 
-                    <StorageFileUpload
-                      dialogOpen={this.state.fileDialogOpen}
-                      closeDialog={this.closeFileDialog}
-                      titleText="Upload file"
-                      url={`/api/projects/${this.props.projectId}/files/generate-upload-url`}
-                      userEmail={this.props.userEmail}
-                      isResult={this.props.isResult}
-                    />
-                    <ConfirmDialog
-                      dialogOpen={this.state.storageDelDialogOpen}
-                      closeDialog={this.closeStorageDelDialog}
-                      titleText="Remove file"
-                      contentText="Are you sure you want to remove this file permanently?"
-                      action={this.deleteFile}
-                      actionButtonText="Delete file"
-                    />
-
                     <ConfirmDialog
                       dialogOpen={this.state.projectDelDialogOpen}
                       closeDialog={this.closeProjectDelDialog}
@@ -364,9 +305,9 @@ class Project extends React.Component {
                       aria-labelledby="alert-dialog-title"
                       aria-describedby="alert-dialog-description"
                     >
-                      <DialogTitle id="alert-dialog-title">Alert</DialogTitle>
+                      <DialogTitle>Alert</DialogTitle>
                       <DialogContent>
-                        <DialogContentText id="alert-dialog-description">
+                        <DialogContentText>
                           {this.state.projectDelResultMessage}
                         </DialogContentText>
                       </DialogContent>

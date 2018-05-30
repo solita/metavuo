@@ -103,6 +103,7 @@ ul a {
   font-size: 16px !important;
   margin-right: 8px !important;
   height: $text-button-dimension !important;
+  min-width: fit-content !important;
 }
 
 .text-button-icon {
@@ -233,38 +234,38 @@ td {
 
 .secondary-card {
   padding: $card-padding;
-}
 
-.secondary-card-body {
-  margin-bottom: 12px;
+  .secondary-card-body {
+    margin-bottom: 12px;
 
-  .secondary-card-items {
-    margin: 12px 0;
-    border-bottom: 2px solid $middle-gray;
-    display: flex;
-    align-items: center;
-    flex-direction: row;
-    justify-content: space-between;
+    .secondary-card-items {
+      margin: 12px 0;
+      border-bottom: 2px solid $middle-gray;
+      display: flex;
+      align-items: center;
+      flex-direction: row;
+      justify-content: space-between;
 
-    &:last-child {
-      border-bottom: 0;
+      &:last-child {
+        border-bottom: 0;
+      }
     }
-  }
 
-  .secondary-card-rows {
-    padding: 6px 0;
-    border-bottom: 2px solid $middle-gray;
+    .secondary-card-rows {
+      padding: 6px 0;
+      border-bottom: 2px solid $middle-gray;
 
-    &:last-child {
-      border-bottom: 0;
+      &:last-child {
+        border-bottom: 0;
+      }
     }
-  }
 
-  .secondary-card-body-buttons {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: flex-end;
+    .secondary-card-body-buttons {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: flex-end;
+    }
   }
 }
 

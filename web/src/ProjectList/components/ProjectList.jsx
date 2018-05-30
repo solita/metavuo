@@ -3,7 +3,7 @@ import axios from 'axios';
 import Card from '@material-ui/core/Card';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import ProjectListTable from './ProjectListTable';
-import CreateProjectDialog from './CreateProjectDialog';
+import CreateProjectDialog from '../../CreateProject/components/CreateProjectDialog';
 
 class ProjectList extends React.Component {
   constructor(props) {
@@ -17,23 +17,39 @@ class ProjectList extends React.Component {
   }
 
   componentDidMount() {
-    axios.get('/api/projects')
+    this.recursiveGet('/api/projects', [])
       .then((res) => {
-        if (res.data.projects !== null) {
-        // sort newest first
-          const projects = res.data.projects
+        if (res !== null && res.length > 0) {
+          // sort newest first
+          const projects = res
             .sort((a, b) => new Date(b.Created) - new Date(a.Created));
           this.setState({ projects, fetching: false });
         } else {
           this.setState({ message: 'No projects found.', fetching: false });
         }
-      })
-      .catch((err) => {
+      }).catch((err) => {
+        console.log('got err');
         if (err.response.status === 403) {
           this.setState({ message: 'Access denied', fetching: false, hideContent: true });
         } else {
           this.setState({ message: 'Something went wrong.', fetching: false });
         }
+      });
+  }
+
+  recursiveGet(url, projects) {
+    return axios.get(url)
+      .then((res) => {
+        if (res.data.projects === null) {
+          return projects;
+        }
+        if (res.data.next) {
+          return this.recursiveGet(res.data.next, projects.concat(res.data.projects));
+        }
+        return projects.concat(res.data.projects);
+      })
+      .catch((err) => {
+        throw err;
       });
   }
 

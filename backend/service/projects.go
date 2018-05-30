@@ -137,7 +137,7 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	p, key, err := getProject(w, r, id)
+	p, key, err := getProject(r, id)
 	if err != nil {
 		if err == datastore.ErrNoSuchEntity {
 			http.Error(w, "", http.StatusNotFound)
@@ -306,7 +306,7 @@ func routeProjectsList(w http.ResponseWriter, r *http.Request, userId int64) {
 	w.Write(mustJSON(pList))
 }
 
-func getProject(w http.ResponseWriter, r *http.Request, id int64) (Project, *datastore.Key, error) {
+func getProject(r *http.Request, id int64) (Project, *datastore.Key, error) {
 	c := appengine.NewContext(r)
 
 	var p Project

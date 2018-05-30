@@ -1,17 +1,26 @@
-package main
+package service
 
 import (
 	"net/http"
 
+	"github.com/solita/metavuo/backend/users"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
+	"google.golang.org/appengine/user"
 )
 
 func routeInfo(w http.ResponseWriter, r *http.Request) {
-	userId := getAppUserId(w, r)
-	if userId == 0 {
-		http.Error(w, "", http.StatusForbidden)
+	c := appengine.NewContext(r)
+	_, err := users.GetIDByEmail(c, user.Current(c).Email)
+	if err != nil {
+		log.Errorf(c, "Failed to get userid", err)
+		switch err {
+		case users.ErrNoSuchUser:
+			http.Error(w, "", http.StatusForbidden)
+		default:
+			http.Error(w, "", http.StatusInternalServerError)
+		}
 		return
 	}
 

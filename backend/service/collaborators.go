@@ -1,11 +1,10 @@
-package main
+package service
 
 import (
-	"context"
-	"encoding/json"
 	"net/http"
-	"strconv"
+	"encoding/json"
 
+	"github.com/solita/metavuo/backend/users"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
@@ -37,29 +36,24 @@ func routeProjectCollaboratorsAdd(w http.ResponseWriter, r *http.Request, p Proj
 		http.Error(w, "", http.StatusBadRequest)
 	}
 
-	q := datastore.NewQuery(userKind).Filter("Email = ", email).Limit(1).KeysOnly()
-	cuKeyArray, err := q.GetAll(c, nil)
+	userId, err := users.GetIDByEmail(c, email)
 	if err != nil {
-		log.Errorf(c, "Error while getting collaborator to add: %v", err)
-		http.Error(w, "", http.StatusInternalServerError)
+		log.Errorf(c, "Failed to get userid", err)
+		switch err {
+		case users.ErrNoSuchUser:
+			http.Error(w, "", http.StatusBadRequest)
+		default:
+			http.Error(w, "", http.StatusInternalServerError)
+		}
 		return
 	}
 
-	if len(cuKeyArray) <= 0 {
-		log.Errorf(c, "No collaborators found to add")
-		http.Error(w, "", http.StatusInternalServerError)
+	if !isCollaboratorUnique(&p, userId) {
+		http.Error(w, "Collaborator is already in project", http.StatusBadRequest)
 		return
 	}
 
-	uKey := cuKeyArray[0]
-
-	isValid, errorMsg := validateCollaboratorUniqueness(c, &p, uKey.IntID())
-	if !isValid {
-		http.Error(w, errorMsg, http.StatusBadRequest)
-		return
-	}
-
-	p.Collaborators = append(p.Collaborators, uKey.IntID())
+	p.Collaborators = append(p.Collaborators, userId)
 
 	_, err = datastore.Put(c, key, &p)
 
@@ -70,40 +64,27 @@ func routeProjectCollaboratorsAdd(w http.ResponseWriter, r *http.Request, p Proj
 	}
 }
 
-func validateCollaboratorUniqueness(c context.Context, p *Project, userId int64) (bool, string) {
+func isCollaboratorUnique(p *Project, userId int64) bool {
 	for _, cId := range p.Collaborators {
 		if cId == userId {
-			return false, "Collaborator is already in project"
+			return false
 		}
 	}
-	return true, ""
+	return true
 }
 
 func routeProjectCollaboratorsList(w http.ResponseWriter, r *http.Request, p Project) {
 	c := appengine.NewContext(r)
 
-	if len(p.Collaborators) <= 0 {
-		log.Debugf(c, "No collaborators found")
-		w.WriteHeader(http.StatusNoContent) // 204
-		return
-	}
+	collabs, err := users.GetMulti(c, p.Collaborators)
 
-	var keys []*datastore.Key
-	for _, collab := range p.Collaborators {
-		key := datastore.NewKey(c, userKind, "", collab, nil)
-		keys = append(keys, key)
-	}
-
-	var uArray = make([]AppUser, len(keys))
-	err := datastore.GetMulti(c, keys, uArray)
 	if err != nil {
 		log.Errorf(c, "Error while getting collaborators: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
-		return
 	}
 
 	var cuArray []CollaboratorUser
-	for _, u := range uArray {
+	for _, u := range collabs {
 		var cu CollaboratorUser
 		cu.Name = u.Name
 		cu.Email = u.Email
@@ -131,28 +112,21 @@ func routeProjectCollaboratorsDelete(w http.ResponseWriter, r *http.Request, p P
 		return
 	}
 
-	q := datastore.NewQuery(userKind).Filter("Email = ", delC.Email).Limit(1).KeysOnly()
-	cuKeyArray, err := q.GetAll(c, nil)
+	userId, err := users.GetIDByEmail(c, delC.Email)
 	if err != nil {
 		log.Errorf(c, "Error while getting collaborator to remove: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 
-	if len(cuKeyArray) <= 0 {
-		log.Errorf(c, "No collaborators found to remove")
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-
-	if strconv.FormatInt(cuKeyArray[0].IntID(), 10) == p.CreatedByID {
+	if userId == p.CreatedByID {
 		log.Errorf(c, "Cannot remove project creator")
 		http.Error(w, "Cannot remove project creator", http.StatusBadRequest)
 		return
 	}
 
 	for i, v := range p.Collaborators {
-		if v == cuKeyArray[0].IntID() {
+		if v == userId {
 			p.Collaborators = append(p.Collaborators[:i], p.Collaborators[i+1:]...)
 			break
 		}

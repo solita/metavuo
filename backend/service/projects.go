@@ -1,4 +1,4 @@
-package main
+package service
 
 import (
 	"context"
@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/solita/metavuo/backend/users"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
@@ -47,7 +48,7 @@ type Project struct {
 	SampleLocation    string        `json:"sample_location"`
 	AdditionalInfo    string        `json:"additional_information"`
 	Collaborators     []int64       `json:"-"`
-	CreatedByID       string
+	CreatedByID       int64
 	Created           time.Time
 }
 
@@ -101,9 +102,16 @@ type DelCollaborator struct {
 }
 
 func routeProjects(w http.ResponseWriter, r *http.Request) {
-	userId := getAppUserId(w, r)
-	if userId == 0 {
-		http.Error(w, "", http.StatusForbidden)
+	c := appengine.NewContext(r)
+	userId, err := users.GetIDByEmail(c, user.Current(c).Email)
+	if err != nil {
+		log.Errorf(c, "Failed to get userid", err)
+		switch err {
+		case users.ErrNoSuchUser:
+			http.Error(w, "", http.StatusForbidden)
+		default:
+			http.Error(w, "", http.StatusInternalServerError)
+		}
 		return
 	}
 
@@ -139,7 +147,7 @@ func routeProjects(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	isCollaborator := isUserCollaborator(w, r, userId, p)
+	isCollaborator := isUserCollaborator(r, userId, p)
 	if isCollaborator == false {
 		http.Error(w, "", http.StatusForbidden)
 		return
@@ -198,7 +206,7 @@ func routeProjectsCreate(w http.ResponseWriter, r *http.Request, userId int64) {
 	project.Created = time.Now().UTC()
 	project.Status = InProgress
 	project.CreatedBy = user.Current(c).Email
-	project.CreatedByID = strconv.FormatInt(userId, 10)
+	project.CreatedByID = userId
 
 	var cList []int64
 	cList = append(cList, userId)

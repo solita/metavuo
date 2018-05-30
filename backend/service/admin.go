@@ -1,39 +1,22 @@
-package main
+package service
 
 import (
 	"context"
 	"encoding/json"
 	"net/http"
 	"net/url"
-	"regexp"
 	"strconv"
-	"time"
 
+	"github.com/solita/metavuo/backend/users"
 	"google.golang.org/appengine"
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/taskqueue"
-	"google.golang.org/appengine/user"
 )
 
 const (
-	userKind = "AppUser"
 	infoKind = "InfoText"
 )
-
-var (
-	emailRegex = regexp.MustCompile("^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$")
-)
-
-type AppUser struct {
-	ID           int64     `datastore:"-" json:"user_id"`
-	Name         string    `json:"name"`
-	Email        string    `json:"email"`
-	Organization string    `json:"organization"`
-	CreatedBy    string    `json:"-"`
-	CreatedByID  string    `json:"-"`
-	CreatedAt    time.Time `json:"created_at"`
-}
 
 type InfoText struct {
 	Title   string `json:"title"`
@@ -119,24 +102,11 @@ func routeAdminUsers(w http.ResponseWriter, r *http.Request) {
 func routeAdminUsersGet(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
-	q := datastore.NewQuery(userKind).Limit(500).Order("Name")
-
-	var uList []AppUser
-	t := q.Run(c)
-	for {
-		var u AppUser
-		key, err := t.Next(&u)
-		if err == datastore.Done {
-			break
-		}
-		if err != nil {
-			log.Errorf(c, "Could not fetch next user: %v", err)
-			http.Error(w, "", http.StatusInternalServerError)
-			return
-		}
-
-		u.ID = key.IntID()
-		uList = append(uList, u)
+	uList, err := users.List(c)
+	if err != nil {
+		log.Errorf(c, "Could not get users: %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
 	}
 
 	w.Header().Set("Content-Type", "application/json")
@@ -146,83 +116,45 @@ func routeAdminUsersGet(w http.ResponseWriter, r *http.Request) {
 func routeAdminUsersCreate(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
-	var appUser AppUser
-
+	var appUser users.AppUser
 	err := json.NewDecoder(r.Body).Decode(&appUser)
 	if err != nil {
 		log.Errorf(c, "Decoding JSON failed while creating user %v", err)
 		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
-
-	isValid, errorMsg := validateEmailAddress(appUser.Email)
-	if !isValid {
-		log.Errorf(c, "%s", errorMsg)
-		http.Error(w, errorMsg, http.StatusBadRequest)
-		return
-	}
-	isValid, errorMsg, err = validateEmailUniqueness(c, appUser.Email)
+	_, err = users.Create(c, appUser.Name, appUser.Email, appUser.Organization)
 	if err != nil {
-		log.Errorf(c, "Counting users failed %v", err)
-		http.Error(w, "", http.StatusInternalServerError)
+		log.Errorf(c, "Could not create user %v", err)
+		switch err {
+		case users.ErrEmailNotUnique:
+			http.Error(w, "User already exists", http.StatusBadRequest)
+		case users.ErrEmailInvalid:
+			http.Error(w, "Invalid email", http.StatusBadRequest)
+		case users.ErrNameEmpty:
+			http.Error(w, "Name missing", http.StatusBadRequest)
+		case users.ErrOrgEmpty:
+			http.Error(w, "Organization missing", http.StatusBadRequest)
+		default:
+			http.Error(w, "", http.StatusInternalServerError)
+		}
 		return
 	}
 
-	if !isValid {
-		log.Errorf(c, "%s", errorMsg)
-		http.Error(w, errorMsg, http.StatusBadRequest)
-		return
-	}
-
-	if appUser.Name == "" || appUser.Organization == "" {
-		http.Error(w, "", http.StatusBadRequest)
-	}
-
-	appUser.CreatedByID = user.Current(c).ID
-	appUser.CreatedBy = user.Current(c).Email
-	appUser.CreatedAt = time.Now().UTC()
-
-	key := datastore.NewIncompleteKey(c, userKind, nil)
-	_, err = datastore.Put(c, key, &appUser)
-
-	if err != nil {
-		log.Errorf(c, "Adding user failed %v", err)
-		http.Error(w, "", http.StatusInternalServerError)
-		return
-	}
-}
-
-func validateEmailAddress(email string) (bool, string) {
-	if emailRegex.MatchString(email) == true {
-		return true, ""
-	} else {
-		return false, "Email address is not valid"
-	}
-}
-
-func validateEmailUniqueness(c context.Context, email string) (bool, string, error) {
-	q := datastore.NewQuery(userKind).KeysOnly().Filter("Email = ", email).Limit(1)
-	n, err := q.Count(c)
-	if err != nil {
-		return false, "", err
-	}
-
-	if n > 0 {
-		return false, "User with email already exists", nil
-	}
-
-	return true, "", nil
 }
 
 func routeAdminUsersDelete(w http.ResponseWriter, r *http.Request, userId int64) {
 	c := appengine.NewContext(r)
 
-	key := datastore.NewKey(c, userKind, "", userId, nil)
-	err := datastore.Delete(c, key)
-
+	err := users.Delete(c, userId)
 	if err != nil {
 		log.Errorf(c, "Error while removing user: %v", err)
-		http.Error(w, "", http.StatusInternalServerError)
+		switch err {
+		case users.ErrNoSuchUser:
+			http.Error(w, "", http.StatusBadRequest)
+		default:
+			http.Error(w, "", http.StatusInternalServerError)
+		}
 		return
 	}
 

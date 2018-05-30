@@ -1,4 +1,4 @@
-package main
+package service
 
 import (
 	"encoding/json"
@@ -21,19 +21,19 @@ func routeApi(w http.ResponseWriter, r *http.Request) {
 	case "admin":
 		routeAdmin(w, r)
 
-	// /api/projects/
+		// /api/projects/
 	case "projects":
 		routeProjects(w, r)
 
-	// /api/users/
+		// /api/users/
 	case "users":
 		routeUsers(w, r)
 
-	// /api/info
+		// /api/info
 	case "info":
 		routeInfo(w, r)
 
-	// /api/tasks
+		// /api/tasks
 	case "tasks":
 		routeTasks(w, r)
 

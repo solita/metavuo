@@ -153,8 +153,8 @@ func GetMulti(c context.Context, ids []int64) ([]AppUser, error) {
 		keys = append(keys, datastore.NewKey(c, userKind, "", id, nil))
 	}
 
-	var users []AppUser
-	err := datastore.GetMulti(c, keys, &users)
+	var users = make([]AppUser, len(keys))
+	err := datastore.GetMulti(c, keys, users)
 	if err != nil {
 		return nil, err
 	}

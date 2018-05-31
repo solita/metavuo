@@ -445,7 +445,7 @@ func routeProjectMetadataDownload(w http.ResponseWriter, r *http.Request, projec
 			}
 		}
 
-		headerString := fmt.Sprintf("attachment; filename=metadata-%d.xlsx", p.ProjectID)
+		headerString := fmt.Sprintf("attachment; filename=metadata-%s.xlsx", p.ProjectID)
 		w.Header().Set("Content-Disposition", headerString)
 		w.Header().Set("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
 

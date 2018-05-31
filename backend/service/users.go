@@ -29,7 +29,7 @@ func routeUsers(w http.ResponseWriter, r *http.Request) {
 		c := appengine.NewContext(r)
 		_, err := users.GetIDByEmail(c, user.Current(c).Email)
 		if err != nil {
-			log.Errorf(c, "Failed to get userid", err)
+			log.Errorf(c, "Failed to get userid: %v", err)
 			switch err {
 			case users.ErrNoSuchUser:
 				http.Error(w, "", http.StatusForbidden)
@@ -78,7 +78,7 @@ func routeUsersGetMe(w http.ResponseWriter, r *http.Request) {
 	if err == nil {
 		roles = append(roles, "user")
 	} else if err != users.ErrNoSuchUser {
-		log.Errorf(c, "Failed to get userid", err)
+		log.Errorf(c, "Failed to get userid: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}

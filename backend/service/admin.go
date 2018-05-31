@@ -146,7 +146,36 @@ func routeAdminUsersCreate(w http.ResponseWriter, r *http.Request) {
 func routeAdminUsersDelete(w http.ResponseWriter, r *http.Request, userId int64) {
 	c := appengine.NewContext(r)
 
-	err := users.Delete(c, userId)
+	// remove user from project collaborators
+	q := datastore.NewQuery(projectKind).Filter("Collaborators = ", userId).Limit(1000)
+	var projects []Project
+	pKeys, err := q.GetAll(c, &projects)
+	if err != nil {
+		log.Errorf(c, "Getting user¨s projects failed: %v", err)
+		http.Error(w, "", http.StatusInternalServerError)
+		return
+	}
+	for i, p := range projects {
+		found := false
+		for j, v := range p.Collaborators {
+			if v == userId {
+				p.Collaborators = append(p.Collaborators[:j], p.Collaborators[j+1:]...)
+				found = true
+				break
+			}
+		}
+		if found == true {
+			_, err = datastore.Put(c, pKeys[i], &p)
+			if err != nil {
+				log.Errorf(c, "Removing collaborator from project failed: %v", err)
+				http.Error(w, "", http.StatusInternalServerError)
+				return
+			}
+		}
+	}
+
+	// remove user
+	err = users.Delete(c, userId)
 	if err != nil {
 		log.Errorf(c, "Error while removing user: %v", err)
 		switch err {
@@ -189,7 +218,7 @@ func routeInfoCreate(w http.ResponseWriter, r *http.Request) {
 	key := datastore.NewIncompleteKey(c, infoKind, nil)
 	_, err = datastore.Put(c, key, &i)
 	if err != nil {
-		log.Errorf(c, "Adding info text failed %v", err)
+		log.Errorf(c, "Adding info text failed: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -233,7 +262,7 @@ func routeInfoUpdate(w http.ResponseWriter, r *http.Request) {
 
 	_, err = datastore.Put(c, key, &currInfo)
 	if err != nil {
-		log.Errorf(c, "Updating info text failed %v", err)
+		log.Errorf(c, "Updating info text failed: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
@@ -249,7 +278,7 @@ func routeAdminProjectDelete(w http.ResponseWriter, r *http.Request, id int64) {
 	err := datastore.Get(c, projectKey, &p)
 
 	if err != nil {
-		log.Errorf(c, "Getting project for deletion failed", err)
+		log.Errorf(c, "Getting project for deletion failed: %v", err)
 		return
 	}
 	var summaryArray []MetadataSummary

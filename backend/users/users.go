@@ -1,14 +1,14 @@
 package users
 
 import (
-	"time"
-	"regexp"
-	"errors"
 	"context"
-	
+	"errors"
+	"regexp"
+	"time"
+
+	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/user"
-	"google.golang.org/appengine/datastore"
 )
 
 const (
@@ -42,7 +42,7 @@ func Create(c context.Context, name, email, organization string) (*AppUser, erro
 	isUnique, err := isEmailUnique(c, email)
 
 	if err != nil {
-		log.Errorf(c, "Counting users failed %v", err)
+		log.Errorf(c, "Counting users failed: %v", err)
 		return nil, err
 	}
 
@@ -70,7 +70,7 @@ func Create(c context.Context, name, email, organization string) (*AppUser, erro
 	key, err = datastore.Put(c, key, &appUser)
 
 	if err != nil {
-		log.Errorf(c, "Adding user failed %v", err)
+		log.Errorf(c, "Adding user failed: %v", err)
 		return nil, err
 	}
 
@@ -96,6 +96,7 @@ func isEmailUnique(c context.Context, email string) (bool, error) {
 func Delete(c context.Context, id int64) error {
 
 	key := datastore.NewKey(c, userKind, "", id, nil)
+
 	err := datastore.Delete(c, key)
 
 	if err != nil {

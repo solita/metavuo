@@ -44,6 +44,7 @@ class Project extends React.Component {
       sampleLocation: '',
       info: '',
       storageFiles: [],
+      fileError: '',
       projectDelDialogOpen: false,
       projectDelResultDialogOpen: false,
       projectDelResultMessage: '',
@@ -110,8 +111,8 @@ class Project extends React.Component {
         if (res.data.length > 0) {
           this.setState({ storageFiles: res.data });
         }
-      }).catch((err) => {
-        console.log(err);
+      }).catch(() => {
+        this.setState({ fileError: 'Could not get files' });
       });
   }
 
@@ -277,6 +278,7 @@ class Project extends React.Component {
                       projectId={this.props.match.params.id}
                       userEmail={this.props.userEmail}
                       updateFileList={this.getProjectFiles}
+                      fileError={this.state.fileError}
                     />
                   </div>
 
@@ -289,6 +291,7 @@ class Project extends React.Component {
                       projectId={this.props.match.params.id}
                       userEmail={this.props.userEmail}
                       updateFileList={this.getProjectFiles}
+                      fileError={this.state.fileError}
                     />
 
                     <ConfirmDialog

@@ -7,6 +7,7 @@ import Tooltip from '@material-ui/core/Tooltip';
 import PropTypes from 'prop-types';
 import StorageFileUpload from '../../common/components/StorageFileUpload';
 import ConfirmDialog from '../../common/components/ConfirmDialog';
+import CardDataRow from './CardDataRow';
 import LocaleConverter from '../../common/util/LocaleConverter';
 
 const getFileSize = (number) => {
@@ -62,6 +63,63 @@ class ProjectFileList extends React.Component {
   }
 
   render() {
+    const fileList = (
+      this.props.files.length > 0
+        ? (
+          <div>
+            {this.props.files.map(file => (
+              <div key={file.id} className="divider-section">
+                <div className="sub-divider-section flex-row">
+                  <div className="left-divider button-container">
+                    <p className="bold-text">Description:</p>
+                  </div>
+                  <div className="right-divider">
+                    <div className="status-row">
+                      <p>{file.description}</p>
+                      <div className="flex-row">
+                        <a
+                          href={`/api/projects/${this.props.projectId}/files/${file.fileName}`}
+                          className="button-link"
+                        >
+                          <Tooltip title="Download" placement="bottom">
+                            <Button variant="fab" className="white-button round-button" aria-label="Download">
+                              <i className="material-icons">file_download</i>
+                            </Button>
+                          </Tooltip>
+                        </a>
+                        <Tooltip title="Delete" placement="bottom">
+                          <Button
+                            variant="fab"
+                            className="white-button round-button"
+                            onClick={() => this.deleteStorageFileClick(file.fileName)}
+                            aria-label="Delete"
+                          >
+                            <i className="material-icons">delete_outline</i>
+                          </Button>
+                        </Tooltip>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div className="divider-section border-bottom flex-row">
+                  <Grid container>
+                    <Grid item xs={6}>
+                      <CardDataRow name="File name" content={file.fileName} />
+                      <CardDataRow name="Size" content={getFileSize(file.fileSize)} />
+                    </Grid>
+                    <Grid item xs={6}>
+                      <CardDataRow name="Added" content={LocaleConverter(file.created)} />
+                      <CardDataRow name="Added by" content={file.createdBy} />
+                    </Grid>
+                  </Grid>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+        : <p>No files added.</p>
+    );
+
     return (
       <Card className="table-card">
         <div className="table-card-head">
@@ -71,71 +129,9 @@ class ProjectFileList extends React.Component {
           </Button>
         </div>
         <div className="table-card-body">
-          {this.props.files.length > 0
-            ?
-              <div>
-                {this.props.files.map(file => (
-                  <div key={file.id} className="divider-section">
-                    <div className="sub-divider-section flex-row">
-                      <div className="left-divider button-container">
-                        <p className="bold-text">Description:</p>
-                      </div>
-                      <div className="right-divider">
-                        <div className="status-row">
-                          {file.description && <p>{file.description}</p>}
-                          <div className="flex-row">
-                            <a
-                              href={`/api/projects/${this.props.projectId}/files/${file.fileName}`}
-                              className="button-link"
-                            >
-                              <Tooltip title="Download" placement="bottom">
-                                <Button variant="fab" className="white-button round-button" aria-label="Download">
-                                  <i className="material-icons">file_download</i>
-                                </Button>
-                              </Tooltip>
-                            </a>
-                            <Tooltip title="Delete" placement="bottom">
-                              <Button
-                                variant="fab"
-                                className="white-button round-button"
-                                onClick={() => this.deleteStorageFileClick(file.fileName)}
-                                aria-label="Delete"
-                              >
-                                <i className="material-icons">delete_outline</i>
-                              </Button>
-                            </Tooltip>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="divider-section border-bottom flex-row">
-                      <Grid container>
-                        <Grid item xs={6}>
-                          <div className="flex-row">
-                            <div className="left-divider"><p className="bold-text">File name:</p></div>
-                            <div className="right-divider"><p className="bold-text">{file.fileName}</p></div>
-                          </div>
-                          <div className="flex-row">
-                            <div className="left-divider"><p className="bold-text">Size:</p></div>
-                            <div className="right-divider"><p>{getFileSize(file.fileSize)}</p></div>
-                          </div>
-                        </Grid>
-                        <Grid item xs={6}>
-                          <div className="flex-row">
-                            <div className="left-divider"><p className="bold-text">Added:</p></div>
-                            <div className="right-divider"><p>{LocaleConverter(file.created)}</p></div>
-                          </div>
-                          <div className="flex-row">
-                            <div className="left-divider"><p className="bold-text">Added by:</p></div>
-                            <div className="right-divider"><p>{file.createdBy}</p></div>
-                          </div>
-                        </Grid>
-                      </Grid>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            : <p>No files added.</p>
+          {!this.props.fileError
+            ? fileList
+            : <p>{this.props.fileError}</p>
           }
           <StorageFileUpload
             dialogOpen={this.state.fileDialogOpen}
@@ -168,9 +164,11 @@ ProjectFileList.propTypes = {
   projectId: PropTypes.string.isRequired,
   userEmail: PropTypes.string.isRequired,
   updateFileList: PropTypes.func.isRequired,
+  fileError: PropTypes.string,
 };
 
 ProjectFileList.defaultProps = {
   dialogTitle: '',
   files: [],
+  fileError: '',
 };

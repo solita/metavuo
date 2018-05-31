@@ -1,8 +1,8 @@
 package service
 
 import (
-	"net/http"
 	"encoding/json"
+	"net/http"
 
 	"github.com/solita/metavuo/backend/users"
 	"google.golang.org/appengine"
@@ -38,7 +38,7 @@ func routeProjectCollaboratorsAdd(w http.ResponseWriter, r *http.Request, p Proj
 
 	userId, err := users.GetIDByEmail(c, email)
 	if err != nil {
-		log.Errorf(c, "Failed to get userid", err)
+		log.Errorf(c, "Failed to get userid: %v", err)
 		switch err {
 		case users.ErrNoSuchUser:
 			http.Error(w, "", http.StatusBadRequest)
@@ -58,15 +58,15 @@ func routeProjectCollaboratorsAdd(w http.ResponseWriter, r *http.Request, p Proj
 	_, err = datastore.Put(c, key, &p)
 
 	if err != nil {
-		log.Errorf(c, "Adding collaborator to project failed", err)
+		log.Errorf(c, "Adding collaborator to project failed: %v", err)
 		http.Error(w, "", http.StatusInternalServerError)
 		return
 	}
 }
 
 func isCollaboratorUnique(p *Project, userId int64) bool {
-	for _, cId := range p.Collaborators {
-		if cId == userId {
+	for _, cID := range p.Collaborators {
+		if cID == userId {
 			return false
 		}
 	}
@@ -125,19 +125,23 @@ func routeProjectCollaboratorsDelete(w http.ResponseWriter, r *http.Request, p P
 		return
 	}
 
+	found := false
 	for i, v := range p.Collaborators {
+
 		if v == userId {
 			p.Collaborators = append(p.Collaborators[:i], p.Collaborators[i+1:]...)
+			found = true
 			break
 		}
 	}
+	if found == true {
+		_, err = datastore.Put(c, key, &p)
 
-	_, err = datastore.Put(c, key, &p)
-
-	if err != nil {
-		log.Errorf(c, "Removing collaborator from project failed", err)
-		http.Error(w, "", http.StatusInternalServerError)
-		return
+		if err != nil {
+			log.Errorf(c, "Removing collaborator from project failed: %v", err)
+			http.Error(w, "", http.StatusInternalServerError)
+			return
+		}
 	}
 
 }

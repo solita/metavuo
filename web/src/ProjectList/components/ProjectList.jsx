@@ -28,7 +28,6 @@ class ProjectList extends React.Component {
           this.setState({ message: 'No projects found.', fetching: false });
         }
       }).catch((err) => {
-        console.log('got err');
         if (err.response.status === 403) {
           this.setState({ message: 'Access denied', fetching: false, hideContent: true });
         } else {

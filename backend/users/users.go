@@ -8,7 +8,6 @@ import (
 
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
-	"google.golang.org/appengine/user"
 )
 
 const (
@@ -34,7 +33,7 @@ type AppUser struct {
 	CreatedAt    time.Time `json:"created_at"`
 }
 
-func Create(c context.Context, name, email, organization string) (*AppUser, error) {
+func Create(c context.Context, name, email, organization, creatorID, creatorEmail string) (*AppUser, error) {
 
 	if !emailRegex.MatchString(email) {
 		return nil, ErrEmailInvalid
@@ -61,8 +60,8 @@ func Create(c context.Context, name, email, organization string) (*AppUser, erro
 		Name:         name,
 		Organization: organization,
 		Email:        email,
-		CreatedByID:  user.Current(c).ID,
-		CreatedBy:    user.Current(c).Email,
+		CreatedByID:  creatorID,
+		CreatedBy:    creatorEmail,
 		CreatedAt:    time.Now().UTC(),
 	}
 

@@ -12,6 +12,7 @@ import (
 	"google.golang.org/appengine/datastore"
 	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/taskqueue"
+	"google.golang.org/appengine/user"
 )
 
 const (
@@ -123,7 +124,7 @@ func routeAdminUsersCreate(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "", http.StatusBadRequest)
 		return
 	}
-	_, err = users.Create(c, appUser.Name, appUser.Email, appUser.Organization)
+	_, err = users.Create(c, appUser.Name, appUser.Email, appUser.Organization, user.Current(c).ID, user.Current(c).Email)
 	if err != nil {
 		log.Errorf(c, "Could not create user %v", err)
 		switch err {

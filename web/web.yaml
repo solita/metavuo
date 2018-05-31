@@ -1,6 +1,7 @@
 service: web
-runtime: go
-api_version: go1.9
+runtime: python27
+api_version: 1
+threadsafe: true
 
 skip_files:
   - node_modules/

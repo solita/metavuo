@@ -20,42 +20,32 @@ class StorageFileUpload extends React.Component {
     this.addFile = this.addFile.bind(this);
     this.closeDialog = this.closeDialog.bind(this);
     this.handleChange = this.handleChange.bind(this);
+    this.putFile = this.putFile.bind(this);
     this.state = {
       file: null,
       hasFile: false,
       message: '',
       description: '',
+      isUploading: false,
     };
   }
 
   handleSubmit(e) {
     e.preventDefault();
+    if (this.state.isUploading) {
+      return;
+    }
     const data = new FormData();
     data.append('filename', this.state.file.name);
     data.append('description', this.state.description);
     data.append('fileType', this.props.isResult ? 'result' : 'default');
     axios.post(this.props.url, data).then((res) => {
       if (res.status === 200) {
-        axios.put(
-          res.data, this.state.file,
-          {
-            headers: {
-              'Content-Type': 'text/plain',
-              'x-goog-meta-description': this.state.description,
-              'x-goog-meta-uploadedby': this.props.userEmail,
-              'x-goog-meta-filetype': this.props.isResult ? 'result' : 'default',
-            },
-          },
-        )
-          .then(() => {
-            this.closeDialog();
-          })
-          .catch(() => {
-            this.setState({ message: 'File upload failed' });
-          });
+        this.setState({ isUploading: true, message: 'Uploading... This dialog will close once the upload is complete.' });
+        this.putFile(res);
       }
     }).catch((err) => {
-      this.setState({ message: err.response.data });
+      this.setState({ message: err.response.data, isUploading: false });
     });
   }
 
@@ -74,6 +64,26 @@ class StorageFileUpload extends React.Component {
 
   handleChange(event) {
     this.setState({ [event.target.name]: event.target.value });
+  }
+
+  putFile(res) {
+    axios.put(
+      res.data, this.state.file,
+      {
+        headers: {
+          'Content-Type': 'text/plain',
+          'x-goog-meta-description': this.state.description,
+          'x-goog-meta-uploadedby': this.props.userEmail,
+          'x-goog-meta-filetype': this.props.isResult ? 'result' : 'default',
+        },
+      },
+    )
+      .then(() => {
+        this.closeDialog();
+      })
+      .catch(() => {
+        this.setState({ message: 'File upload failed', isUploading: false });
+      });
   }
 
   render() {
@@ -107,7 +117,7 @@ class StorageFileUpload extends React.Component {
               type="submit"
               variant="raised"
               className="primary-button text-button"
-              disabled={!this.state.hasFile}
+              disabled={!this.state.hasFile || this.state.isUploading}
               onClick={this.handleSubmit}
             >
               <i className="material-icons text-button-icon">file_upload</i>Upload

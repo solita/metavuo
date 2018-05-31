@@ -4,7 +4,6 @@ import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableRow from '@material-ui/core/TableRow';
 import TableCell from '@material-ui/core/TableCell';
-import Tooltip from '@material-ui/core/Tooltip';
 import PropTypes from 'prop-types';
 import ProjectListTableHead from './ProjectListTableHead';
 import convertStatus from '../../common/util/ProjectStatusConverter';
@@ -19,13 +18,9 @@ const ProjectListTable = props => (
         {props.projects.map(project => (
           <TableRow key={project.ID} hover onClick={() => props.history.push(`/projects/${project.ID}`)}>
             <TableCell>{project.project_id}</TableCell>
-            <Tooltip id="name-tooltip" title={project.project_name} palecemnt="bottom">
-              <TableCell className="projectlist-td">{project.project_name}</TableCell>
-            </Tooltip>
+            <TableCell className="projectlist-td">{project.project_name}</TableCell>
             <TableCell>{LocaleConverter(project.created_at)}</TableCell>
-            <Tooltip id="description-tooltip" title={project.project_description} palecemnt="bottom">
-              <TableCell className="projectlist-td">{project.project_description} </TableCell>
-            </Tooltip>
+            <TableCell className="projectlist-td">{project.project_description} </TableCell>
             <TableCell>{convertStatus(project.project_status)} </TableCell>
           </TableRow>
         ))}

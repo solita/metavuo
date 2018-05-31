@@ -69,8 +69,8 @@ class AddUserForm extends React.Component {
             onChange={this.handleChange}
             margin="normal"
             fullWidth
-            validators={['required']}
-            errorMessages={['Name is required.']}
+            validators={['required', 'maxStringLength:500']}
+            errorMessages={['Name is required.', 'Maximum length is 500 characters.']}
           />
           <TextValidator
             className="form-control"
@@ -91,8 +91,8 @@ class AddUserForm extends React.Component {
             onChange={this.handleChange}
             margin="normal"
             fullWidth
-            validators={['required']}
-            errorMessages={['Organization is required.']}
+            validators={['required', 'maxStringLength:500']}
+            errorMessages={['Organization is required.', 'Maximum length is 500 characters.']}
           />
           <DialogActions>
             <Button variant="raised" className="secondary-button text-button" onClick={this.props.closeForm}>

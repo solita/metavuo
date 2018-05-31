@@ -5,7 +5,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogActions from '@material-ui/core/DialogActions';
-import TextField from '@material-ui/core/TextField';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
@@ -80,44 +80,51 @@ class UpdateInfoDialog extends React.Component {
       >
         <DialogTitle className="dialog-header">Update info text</DialogTitle>
         <DialogContent>
-          <p>{this.state.message}</p>
+          <p className="message-errors">{this.state.message}</p>
           <DialogContentText>
             This text is shown in info text view. New lines are shown in content.
           </DialogContentText>
           {this.state.updating && <CircularProgress />}
-          <TextField
-            id="title"
-            name="title"
-            label="Title"
-            value={this.state.title}
-            onChange={this.handleChange}
-            margin="normal"
-            fullWidth
-          />
-          <TextField
-            id="content"
-            name="content"
-            label="Content"
-            multiline
-            rowsMax="1000"
-            value={this.state.content}
-            onChange={this.handleChange}
-            margin="normal"
-            fullWidth
-          />
-          <DialogActions>
-            <Button variant="raised" className="secondary-button text-button" onClick={this.props.closeDialog}>
-              <i className="material-icons text-button-icon">close</i>Cancel
-            </Button>
-            <Button
-              variant="raised"
-              className="primary-button text-button"
-              onClick={this.handleSubmit}
-              disabled={this.state.updating}
-            >
-              <i className="material-icons text-button-icon">save</i>Save
-            </Button>
-          </DialogActions>
+          <ValidatorForm
+            onSubmit={this.handleSubmit}
+            autoComplete="off"
+          >
+            <TextValidator
+              id="title"
+              name="title"
+              label="Title"
+              value={this.state.title}
+              onChange={this.handleChange}
+              margin="normal"
+              fullWidth
+              validators={['maxStringLength:500']}
+              errorMessages={['Maximum length is 500 characters.']}
+            />
+            <TextValidator
+              id="content"
+              name="content"
+              label="Content"
+              multiline
+              rowsMax="1000"
+              value={this.state.content}
+              onChange={this.handleChange}
+              margin="normal"
+              fullWidth
+            />
+            <DialogActions>
+              <Button variant="raised" className="secondary-button text-button" onClick={this.props.closeDialog}>
+                <i className="material-icons text-button-icon">close</i>Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="raised"
+                className="primary-button text-button"
+                disabled={this.state.updating}
+              >
+                <i className="material-icons text-button-icon">save</i>Save
+              </Button>
+            </DialogActions>
+          </ValidatorForm>
         </DialogContent>
       </Dialog>
     );

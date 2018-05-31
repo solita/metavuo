@@ -73,7 +73,7 @@ class CollaboratorListAdd extends React.Component {
   render() {
     return (
       <div>
-        {this.state.message && <p>{this.state.message}</p>}
+        {this.state.message && <p className="message-errors">{this.state.message}</p>}
         <Button variant="raised" className="primary-button text-button" onClick={this.openAddCollaboratorDialog}>
           <i className="material-icons text-button-icon">add_circle_outline</i>Add collaborator
         </Button>
@@ -86,42 +86,43 @@ class CollaboratorListAdd extends React.Component {
         >
           <DialogTitle className="dialog-header">Add collaborator</DialogTitle>
           <DialogContent>
-            {this.state.users.length > 0 ?
-              <FormControl>
-                <InputLabel htmlFor="user-select">User</InputLabel>
-                <Select
-                  value={this.state.userEmail}
-                  onChange={this.handleChange}
-                  name="userEmail"
-                  id="user-select"
-                  autoWidth
-                >
-                  <MenuItem value="" disabled />
-                  {this.state.users.map(user => (
-                    <MenuItem key={user.email} value={user.email}>
-                      {user.name}, {user.email}, {user.organization}
-                    </MenuItem>
-                  ))
-                  }
-                </Select>
-              </FormControl>
-              : <p>No users to add</p>
-            }
+            <div className="divider-section">
+              {this.state.users.length > 0 ?
+                <FormControl>
+                  <InputLabel htmlFor="user-select">User</InputLabel>
+                  <Select
+                    value={this.state.userEmail}
+                    onChange={this.handleChange}
+                    name="userEmail"
+                    id="user-select"
+                    autoWidth
+                  >
+                    {this.state.users.map(user => (
+                      <MenuItem key={user.email} value={user.email}>
+                        {user.name}, {user.email}, {user.organization}
+                      </MenuItem>
+                    ))
+                    }
+                  </Select>
+                </FormControl>
+                : <p>No users to add</p>
+              }
+            </div>
+            <DialogActions>
+              <Button className="secondary-button text-button" onClick={this.handleClose}>
+                <i className="material-icons text-button-icon">close</i>Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="raised"
+                className="primary-button text-button"
+                onClick={this.handleSubmit}
+                disabled={(this.state.users.length === 0) || (this.state.userEmail === '')}
+              >
+                <i className="material-icons text-button-icon">add_circle_outline</i>Add
+              </Button>
+            </DialogActions>
           </DialogContent>
-          <DialogActions>
-            <Button className="secondary-button text-button" onClick={this.handleClose}>
-              <i className="material-icons text-button-icon">close</i>Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="raised"
-              className="primary-button text-button"
-              onClick={this.handleSubmit}
-              disabled={(this.state.users.length === 0) || (this.state.userEmail === '')}
-            >
-              <i className="material-icons text-button-icon">add_circle_outline</i>Add
-            </Button>
-          </DialogActions>
         </Dialog>
       </div>
     );

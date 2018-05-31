@@ -71,25 +71,27 @@ export class ProjectForm extends React.Component {
   render() {
     return (
       <div>
-        <p className="message-errors">{this.state.message}</p>
+        {this.state.message && <p className="message-errors">{this.state.message}</p>}
         <ValidatorForm
           onSubmit={this.handleSubmit}
           autoComplete="off"
         >
-          <ProjectFormFields
-            name={this.state.name}
-            description={this.state.description}
-            internalReference={this.state.internalReference}
-            sampleLocation={this.state.sampleLocation}
-            info={this.state.info}
-            organization={this.state.organization}
-            invoiceAddress={this.state.invoiceAddress}
-            customerName={this.state.customerName}
-            customerEmail={this.state.customerEmail}
-            customerPhone={this.state.customerPhone}
-            customerReference={this.state.customerReference}
-            handleChange={this.handleChange}
-          />
+          <div className="divider-section">
+            <ProjectFormFields
+              name={this.state.name}
+              description={this.state.description}
+              internalReference={this.state.internalReference}
+              sampleLocation={this.state.sampleLocation}
+              info={this.state.info}
+              organization={this.state.organization}
+              invoiceAddress={this.state.invoiceAddress}
+              customerName={this.state.customerName}
+              customerEmail={this.state.customerEmail}
+              customerPhone={this.state.customerPhone}
+              customerReference={this.state.customerReference}
+              handleChange={this.handleChange}
+            />
+          </div>
           <DialogActions>
             <Button onClick={this.props.handleClose} variant="raised" className="secondary-button text-button">
               Cancel

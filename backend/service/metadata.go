@@ -86,7 +86,6 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request, projectI
 	}
 
 	file, _, err := r.FormFile("file")
-	// description := r.FormValue("description")
 
 	if err != nil {
 		log.Errorf(c, "Error getting file: %v", err)
@@ -104,7 +103,7 @@ func routeProjectMetadataUpload(w http.ResponseWriter, r *http.Request, projectI
 	xlFile, err := xlsx.OpenBinary(bytes)
 	if err != nil {
 		log.Errorf(c, "Error opening xlsx-file %v", err)
-		http.Error(w, "", http.StatusInternalServerError)
+		http.Error(w, "File format is not valid.", http.StatusBadRequest)
 		return
 	}
 

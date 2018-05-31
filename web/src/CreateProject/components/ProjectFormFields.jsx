@@ -1,6 +1,6 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { TextValidator } from 'react-material-ui-form-validator';
+import { TextValidator } from 'react-material-ui-form-validator/';
 
 const ProjectFormFields = props => (
   <div>
@@ -13,8 +13,12 @@ const ProjectFormFields = props => (
       onChange={props.handleChange}
       margin="dense"
       fullWidth
-      validators={['required', 'matchRegexp:^[\\w_-]*$']}
-      errorMessages={['Name cannot be blank.', 'Only alphanumeric characters including dash and underscore allowed']}
+      validators={['required', 'matchRegexp:^[\\w_-]*$', 'maxStringLength:500']}
+      errorMessages={[
+        'Name cannot be blank.',
+        'Only alphanumeric characters including dash and underscore allowed',
+        'Maximum length is 500 characters.',
+      ]}
     />
     <TextValidator
       className="form-control"
@@ -39,6 +43,8 @@ const ProjectFormFields = props => (
       onChange={props.handleChange}
       margin="dense"
       fullWidth
+      validators={['maxStringLength:500']}
+      errorMessages={['Maximum length is 500 characters.']}
     />
     <TextValidator
       className="form-control"
@@ -64,6 +70,7 @@ const ProjectFormFields = props => (
       validators={['maxStringLength:500']}
       errorMessages={['Maximum length is 500 characters.']}
     />
+    <div className="divider-section" />
     <h2>Customer details</h2>
     <TextValidator
       className="form-control"
@@ -74,8 +81,8 @@ const ProjectFormFields = props => (
       onChange={props.handleChange}
       margin="dense"
       fullWidth
-      validators={['required']}
-      errorMessages={['Organization cannot be blank.']}
+      validators={['required', 'maxStringLength:500']}
+      errorMessages={['Organization cannot be blank.', 'Maximum length is 500 characters.']}
     />
     <TextValidator
       className="form-control"
@@ -86,6 +93,8 @@ const ProjectFormFields = props => (
       onChange={props.handleChange}
       margin="dense"
       fullWidth
+      validators={['maxStringLength:500']}
+      errorMessages={['Maximum length is 500 characters.']}
     />
     <TextValidator
       className="form-control"
@@ -96,6 +105,8 @@ const ProjectFormFields = props => (
       onChange={props.handleChange}
       margin="dense"
       fullWidth
+      validators={['maxStringLength:500']}
+      errorMessages={['Maximum length is 500 characters.']}
     />
     <TextValidator
       className="form-control"
@@ -118,6 +129,8 @@ const ProjectFormFields = props => (
       onChange={props.handleChange}
       margin="dense"
       fullWidth
+      validators={['maxStringLength:500']}
+      errorMessages={['Maximum length is 500 characters.']}
     />
     <TextValidator
       className="form-control"
@@ -128,6 +141,8 @@ const ProjectFormFields = props => (
       onChange={props.handleChange}
       margin="dense"
       fullWidth
+      validators={['maxStringLength:500']}
+      errorMessages={['Maximum length is 500 characters.']}
     />
   </div>
 );

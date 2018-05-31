@@ -81,7 +81,7 @@ class MetadataSummary extends React.Component {
           <div className="secondary-card-body">
             <Grid container>
               <Grid item xs={9}>
-                <p>{this.state.metadataError}</p>
+                <p className="message-errors">{this.state.metadataError}</p>
                 <p className="secondary-card-rows bold-text">Sample metadata file has {this.props.metadataProps.rowcount || '?'} data rows.</p>
                 <Grid container className="secondary-card-rows">
                   <Grid item xs={5}>
@@ -141,11 +141,11 @@ class MetadataSummary extends React.Component {
             </Grid>
           </div>
         :
-          <p>
+          <div className="divider-section">
             <Button variant="raised" className="primary-button text-button" onClick={this.openDialog}>
               <i className="material-icons text-button-icon">add_circle_outline</i>Add metadata file
             </Button>
-          </p>
+          </div>
         }
         <UploadDialog
           dialogOpen={this.state.dialogOpen}

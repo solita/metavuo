@@ -20,9 +20,7 @@
     "import/no-named-as-default": 0,
     "jsx-a11y/anchor-is-valid": [ "error", {
       "components": [ "Link" ],
-      "specialLink": [ "to", "hrefLeft", "hrefRight" ],
-      "aspects": [ "noHref", "invalidHref", "preferButton" ]
-    }],
-    "no-confusing-arrow": 1
+      "specialLink": [ "to" ]
+    }]
   }
 }

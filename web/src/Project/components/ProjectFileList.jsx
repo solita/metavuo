@@ -28,6 +28,7 @@ class ProjectFileList extends React.Component {
       fileDialogOpen: false,
       storageDelDialogOpen: false,
       storageFileToDelete: '',
+      errorMsg: '',
     };
     this.openFileDialog = this.openFileDialog.bind(this);
     this.closeFileDialog = this.closeFileDialog.bind(this);
@@ -50,6 +51,9 @@ class ProjectFileList extends React.Component {
         if (res.status === 200) {
           this.props.updateFileList();
         }
+      })
+      .catch(() => {
+        this.setState({ errorMsg: `Couldn't delete file: ${this.state.storageFileToDelete}` });
       });
     this.closeStorageDelDialog();
   }
@@ -129,9 +133,10 @@ class ProjectFileList extends React.Component {
           </Button>
         </div>
         <div className="table-card-body">
-          {!this.props.fileError
-            ? fileList
-            : <p>{this.props.fileError}</p>
+          {this.state.errorMsg && <p className="message-errors">{this.state.errorMsg}</p>}
+          {this.props.fileError
+            ? <p className="message-errors">{this.props.fileError}</p>
+            : fileList
           }
           <StorageFileUpload
             dialogOpen={this.state.fileDialogOpen}

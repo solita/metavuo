@@ -30,6 +30,7 @@ class ProjectUpdateDialog extends React.Component {
       internalReference: this.props.parentState.internalReference,
       sampleLocation: this.props.parentState.sampleLocation,
       info: this.props.parentState.info,
+      errorMsg: '',
     };
   }
 
@@ -63,8 +64,8 @@ class ProjectUpdateDialog extends React.Component {
         sample_location: this.state.sampleLocation,
         additional_information: this.state.info,
       }),
-    ).catch((error) => {
-      console.log(error);
+    ).catch(() => {
+      this.setState({ errorMsg: 'Updating project failed' });
     }).finally(() => {
       this.props.updateMainView();
       this.handleClose();
@@ -89,26 +90,29 @@ class ProjectUpdateDialog extends React.Component {
         >
           <DialogTitle className="dialog-header">Edit project</DialogTitle>
           <DialogContent>
+            {this.state.errorMsg && <p className="message-errors">{this.state.errorMsg}</p>}
             <ValidatorForm
               id="form-object"
               onSubmit={this.handleSubmit}
               autoComplete="off"
             >
-              <h2>Project details</h2>
-              <ProjectFormFields
-                name={this.state.name}
-                description={this.state.description}
-                internalReference={this.state.internalReference}
-                sampleLocation={this.state.sampleLocation}
-                info={this.state.info}
-                organization={this.state.organization}
-                invoiceAddress={this.state.invoiceAddress}
-                customerName={this.state.customerName}
-                customerEmail={this.state.customerEmail}
-                customerPhone={this.state.customerPhone}
-                customerReference={this.state.customerReference}
-                handleChange={this.handleChange}
-              />
+              <div className="divider-section">
+                <h2>Project details</h2>
+                <ProjectFormFields
+                  name={this.state.name}
+                  description={this.state.description}
+                  internalReference={this.state.internalReference}
+                  sampleLocation={this.state.sampleLocation}
+                  info={this.state.info}
+                  organization={this.state.organization}
+                  invoiceAddress={this.state.invoiceAddress}
+                  customerName={this.state.customerName}
+                  customerEmail={this.state.customerEmail}
+                  customerPhone={this.state.customerPhone}
+                  customerReference={this.state.customerReference}
+                  handleChange={this.handleChange}
+                />
+              </div>
               <DialogActions>
                 <Button onClick={this.handleClose} variant="raised" className="secondary-button text-button">
                 Cancel
@@ -128,6 +132,19 @@ class ProjectUpdateDialog extends React.Component {
 ProjectUpdateDialog.propTypes = {
   url: PropTypes.string.isRequired,
   updateMainView: PropTypes.func.isRequired,
+  parentState: PropTypes.shape({
+    name: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    internalReference: PropTypes.string.isRequired,
+    sampleLocation: PropTypes.string.isRequired,
+    info: PropTypes.string.isRequired,
+    organization: PropTypes.string.isRequired,
+    invoiceAddress: PropTypes.string.isRequired,
+    customerName: PropTypes.string.isRequired,
+    customerEmail: PropTypes.string.isRequired,
+    customerPhone: PropTypes.string.isRequired,
+    customerReference: PropTypes.string.isRequired,
+  }).isRequired,
 };
 
 export default ProjectUpdateDialog;

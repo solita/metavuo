@@ -60,7 +60,7 @@ class Header extends React.Component {
               {this.props.isAdmin &&
               <div className="header-button-margin">
                 <Link to="/admin" className="button-link">
-                  <Tooltip id="tooltip-fab" title="Admin panel" placement="bottom">
+                  <Tooltip id="settings-tooltip" title="Admin panel" placement="bottom">
                     <Button variant="fab" className="primary-button round-button">
                       <i className="material-icons button-icon">settings</i>
                     </Button>

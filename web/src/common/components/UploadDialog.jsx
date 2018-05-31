@@ -15,7 +15,6 @@ const UploadDialog = props => (
     <DialogContent>
       <FileUpload
         url={props.url}
-        askDescription={false}
         passResponse={props.passResponse}
         closeDialog={props.closeDialog}
       />

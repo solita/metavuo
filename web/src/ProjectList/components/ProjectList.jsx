@@ -68,7 +68,7 @@ class ProjectList extends React.Component {
                 ? <CircularProgress />
                 :
                 <div>
-                  <p>{this.state.message}</p>
+                  <p className="message-errors">{this.state.message}</p>
                   {this.state.projects.length > 0 ? <ProjectListTable projects={this.state.projects} /> : '' }
                 </div>
               }

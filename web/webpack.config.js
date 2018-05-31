@@ -40,10 +40,12 @@ module.exports = {
       },
       {
         test: /\.(css|scss)$/,
+        exclude: /node_modules/,
         use: [ 'style-loader', 'css-loader', 'sass-loader' ]
       },
       {
         test: /\.(png)$/,
+        exclude: /node_modules/,
         use: [
           {
             loader: 'file-loader',
@@ -55,6 +57,7 @@ module.exports = {
       },
       {
         test: /\.html$/,
+        exclude: /node_modules/,
         use: [
           {
             loader: "html-loader",

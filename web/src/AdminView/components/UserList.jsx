@@ -97,7 +97,7 @@ class UserList extends React.Component {
             </Button>
           </div>
           <div className="table-card-body">
-            {this.state.message && <p>{this.state.message}</p>}
+            {this.state.message && <p className="message-errors">{this.state.message}</p>}
             {this.state.users.length > 0
             ?
               <div>

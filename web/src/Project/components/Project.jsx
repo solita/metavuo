@@ -43,6 +43,7 @@ class Project extends React.Component {
       internalReference: '',
       sampleLocation: '',
       info: '',
+      statusError: '',
       storageFiles: [],
       fileError: '',
       projectDelDialogOpen: false,
@@ -51,6 +52,7 @@ class Project extends React.Component {
     };
     this.getProject = this.getProject.bind(this);
     this.setStatus = this.setStatus.bind(this);
+    this.setStatusError = this.setStatusError.bind(this);
     this.passMetadataResponse = this.passMetadataResponse.bind(this);
     this.getProjectFiles = this.getProjectFiles.bind(this);
     this.deleteProject = this.deleteProject.bind(this);
@@ -120,19 +122,27 @@ class Project extends React.Component {
     this.setState({ status: value });
   }
 
+  setStatusError(value) {
+    this.setState({ statusError: value });
+  }
+
   passMetadataResponse(res, showMetadata) {
     this.setState({ metadataProps: res, showMetadata });
   }
 
   deleteProject() {
-    axios.delete(`/api/admin/project/${this.props.match.params.id}/`).then((res) => {
-      if (res.status === 204) {
-        this.setState({ id: '' });
-        this.showDeletionAlert('Project successfully deleted');
-      } else {
+    axios.delete(`/api/admin/project/${this.props.match.params.id}/`)
+      .then((res) => {
+        if (res.status === 204) {
+          this.setState({ id: '' });
+          this.showDeletionAlert('Project successfully deleted');
+        } else {
+          this.showDeletionAlert('Project deletion failed, please try again');
+        }
+      })
+      .catch(() => {
         this.showDeletionAlert('Project deletion failed, please try again');
-      }
-    });
+      });
   }
 
   showDeletionAlert(message) {
@@ -171,7 +181,7 @@ class Project extends React.Component {
                   <Card className="table-card">
                     <div className="table-card-head">
                       {!this.state.errorMsg &&
-                      <div>
+                      <div className="prevent-overflow">
                         <h1>{this.state.name || 'not found'}</h1>
                         <p>ID: <span className="bold-text">{this.state.id}</span></p>
                       </div>
@@ -184,7 +194,7 @@ class Project extends React.Component {
                     </div>
                     <div className="table-card-body">
                       {this.state.errorMsg
-                        ? <p>{this.state.errorMsg}</p>
+                        ? <p className="message-errors">{this.state.errorMsg}</p>
                         :
                         <div>
                           <div>
@@ -207,12 +217,15 @@ class Project extends React.Component {
                                 <p className="bold-text">Project status:</p>
                               </div>
                               <div className="right-divider">
+                                {this.state.statusError && <p className="message-errors">{this.state.statusError}</p>}
+
                                 <div className="status-row">
                                   <p>{ConvertStatus(this.state.status)}</p>
                                   <ProjectStatusButton
                                     projectId={this.props.match.params.id}
                                     projectStatus={this.state.status}
                                     setStatus={this.setStatus}
+                                    setError={this.setStatusError}
                                   />
                                 </div>
                               </div>

@@ -1,7 +1,7 @@
 import React from 'react';
 import axios from 'axios';
-import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
+import Input from '@material-ui/core/Input';
 import DialogActions from '@material-ui/core/DialogActions';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import PropTypes from 'prop-types';
@@ -12,7 +12,6 @@ class FileUpload extends React.Component {
     super(props);
     this.state = {
       file: null,
-      description: '',
       message: '',
       hasFile: false,
       buttonDisabled: false,
@@ -36,20 +35,23 @@ class FileUpload extends React.Component {
 
     const data = new FormData();
     data.append('file', this.state.file);
-    if (this.props.askDescription) data.append('description', this.state.description);
     axios.post(this.props.url, data, { headers: { 'content-type': 'multipart/form-data' } })
       .then((res) => {
         this.setState({ buttonDisabled: false });
         this.props.passResponse(res.data);
       })
       .catch((err) => {
-        if (err.response.data) {
+        if (Array.isArray(err.response.data)) {
           err.response.data.forEach((error) => {
             this.setState({
               message: this.state.message.concat(`${error.error}:\n${error.detail}\n`),
               buttonDisabled: false,
             });
           });
+        } else if (err.response.data.length > 3) {
+          this.setState({ message: err.response.data, buttonDisabled: false });
+        } else {
+          this.setState({ message: 'File upload failed.', buttonDisabled: false });
         }
       });
   }
@@ -57,26 +59,11 @@ class FileUpload extends React.Component {
   render() {
     return (
       <div>
-        <p className="form-errors">{this.state.message}</p>
-        <form
-          autoComplete="off"
-        >
-          <input type="file" name="file" onChange={this.addFile} />
-
-          {this.props.askDescription
-          ?
-            <TextField
-              name="description"
-              label="Description"
-              value={this.state.description}
-              margin="normal"
-              onChange={this.handleChange}
-              fullWidth
-            />
-            : ''
-          }
-          {this.state.buttonDisabled ? <CircularProgress /> : ''}
-        </form>
+        {this.state.message && <p className="message-errors">{this.state.message}</p>}
+        <div className="divider-section">
+          <Input type="file" name="file" onChange={this.addFile} />
+          {this.state.buttonDisabled && <CircularProgress />}
+        </div>
         <DialogActions>
           <Button className="secondary-button text-button" onClick={this.props.closeDialog}>
             <i className="material-icons text-button-icon">close</i>Cancel
@@ -98,13 +85,8 @@ class FileUpload extends React.Component {
 
 FileUpload.propTypes = {
   url: PropTypes.string.isRequired,
-  askDescription: PropTypes.bool,
   passResponse: PropTypes.func.isRequired,
   closeDialog: PropTypes.func.isRequired,
-};
-
-FileUpload.defaultProps = {
-  askDescription: true,
 };
 
 export default FileUpload;

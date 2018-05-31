@@ -5,7 +5,8 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
-import TextField from '@material-ui/core/TextField';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator/';
+import Input from '@material-ui/core/Input';
 import PropTypes from 'prop-types';
 
 const pattern = /^[\w_\-.]*$/;
@@ -89,40 +90,48 @@ class StorageFileUpload extends React.Component {
   render() {
     return (
       <Dialog
-
         open={this.props.dialogOpen}
         onClose={this.closeDialog}
       >
         <DialogTitle className="dialog-header">{this.props.titleText}</DialogTitle>
         <DialogContent>
-          <p className="form-errors">{this.state.message}</p>
-          <form>
-            <TextField
-              name="description"
-              label="Description"
-              value={this.state.description}
-              margin="normal"
-              onChange={this.handleChange}
-              inputProps={{ maxLength: 200 }}
-              fullWidth
-            />
-            <input type="file" name="file" onChange={this.addFile} />
-
-          </form>
-          <DialogActions>
-            <Button onClick={this.props.closeDialog} className="secondary-button text-button" >
-              <i className="material-icons text-button-icon">close</i>Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="raised"
-              className="primary-button text-button"
-              disabled={!this.state.hasFile || this.state.isUploading}
-              onClick={this.handleSubmit}
-            >
-              <i className="material-icons text-button-icon">file_upload</i>Upload
-            </Button>
-          </DialogActions>
+          {this.state.message && <p className="form-errors">{this.state.message}</p>}
+          <ValidatorForm
+            onSubmit={this.handleSubmit}
+            autoComplete="off"
+          >
+            <div className="divider-section">
+              <TextValidator
+                name="description"
+                label="Description"
+                value={this.state.description}
+                onChange={this.handleChange}
+                margin="normal"
+                fullWidth
+                validators={['maxStringLength:200']}
+                errorMessages={['Maximum length is 200 characters.']}
+              />
+              <Input
+                type="file"
+                name="file"
+                onChange={this.addFile}
+                fullWidth
+              />
+            </div>
+            <DialogActions>
+              <Button onClick={this.props.closeDialog} className="secondary-button text-button" >
+                <i className="material-icons text-button-icon">close</i>Cancel
+              </Button>
+              <Button
+                type="submit"
+                variant="raised"
+                className="primary-button text-button"
+                disabled={!this.state.hasFile || this.state.isUploading}
+              >
+                <i className="material-icons text-button-icon">file_upload</i>Upload
+              </Button>
+            </DialogActions>
+          </ValidatorForm>
         </DialogContent>
       </Dialog>
     );

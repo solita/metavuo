@@ -26,6 +26,7 @@ class ProjectStatusButton extends React.Component {
 
   handleClick(e) {
     this.setState({ anchorEl: e.currentTarget });
+    this.props.setError('');
   }
 
   handleClose() {
@@ -40,6 +41,9 @@ class ProjectStatusButton extends React.Component {
       axios.post(`/api/projects/${this.props.projectId}/status`, data)
         .then((res) => {
           this.props.setStatus(res.data);
+        })
+        .catch(() => {
+          this.props.setError('Changing status failed');
         });
     }
     this.setState({ anchorEl: null });
@@ -85,6 +89,7 @@ ProjectStatusButton.propTypes = {
   projectId: PropTypes.string.isRequired,
   projectStatus: PropTypes.number.isRequired,
   setStatus: PropTypes.func.isRequired,
+  setError: PropTypes.func.isRequired,
 };
 
 export default ProjectStatusButton;

@@ -108,7 +108,7 @@ class ProjectFileList extends React.Component {
                       <CardDataRow name="Size" content={getFileSize(file.fileSize)} />
                     </Grid>
                     <Grid item xs={6}>
-                      <CardDataRow name="Added" content={LocaleConverter(file.created)} />
+                      <CardDataRow name="Added" content={LocaleConverter(file.created_at)} />
                       <CardDataRow name="Added by" content={file.createdBy} />
                     </Grid>
                   </Grid>

@@ -22,7 +22,7 @@ type ProjectFile struct {
 	GenerationID int64     `json:"id"`
 	FileName     string    `json:"fileName"`
 	FileSize     int64     `json:"fileSize"`
-	Created      time.Time `json:"created"`
+	CreatedAt    time.Time `json:"created_at"`
 	CreatedBy    string    `json:"createdBy"`
 	Description  string    `json:"description"`
 	FileType     string    `json:"filetype"`

@@ -22,7 +22,7 @@ class ProjectList extends React.Component {
         if (res !== null && res.length > 0) {
           // sort newest first
           const projects = res
-            .sort((a, b) => new Date(b.Created) - new Date(a.Created));
+            .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
           this.setState({ projects, fetching: false });
         } else {
           this.setState({ message: 'No projects found.', fetching: false });

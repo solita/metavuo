@@ -18,7 +18,7 @@ const ProjectListTable = props => (
           <TableRow key={project.ID} hover onClick={() => props.history.push(`/projects/${project.ID}`)}>
             <TableCell>{project.project_id}</TableCell>
             <TableCell>{project.project_name}</TableCell>
-            <TableCell>{LocaleConverter(project.Created)}</TableCell>
+            <TableCell>{LocaleConverter(project.created_at)}</TableCell>
             <TableCell>{project.project_description} </TableCell>
             <TableCell>{convertStatus(project.project_status)} </TableCell>
           </TableRow>
@@ -32,7 +32,7 @@ ProjectListTable.propTypes = {
   projects: PropTypes.arrayOf(PropTypes.shape({
     project_id: PropTypes.string.isRequired,
     project_name: PropTypes.string.isRequired,
-    Created: PropTypes.string.isRequired,
+    created_at: PropTypes.string.isRequired,
     project_description: PropTypes.string.isRequired,
     project_status: PropTypes.number.isRequired,
   })).isRequired,

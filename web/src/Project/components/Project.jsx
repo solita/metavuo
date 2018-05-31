@@ -73,7 +73,7 @@ class Project extends React.Component {
           id: project.project_id,
           name: project.project_name,
           description: project.project_description,
-          createdAt: res.data.Created,
+          createdAt: res.data.created_at,
           createdbyEmail: res.data.createdby_email,
           status: res.data.project_status,
           organization: project.customer_organization,

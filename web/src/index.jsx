@@ -4,7 +4,7 @@ import { Router } from 'react-router-dom';
 import createBrowserHistory from 'history/createBrowserHistory';
 import App from './App';
 import './favicon.png';
-import ErrorBoundary from './ErrorBoundary';
+import ErrorBoundary from './common/components/ErrorBoundary';
 
 const history = createBrowserHistory();
 

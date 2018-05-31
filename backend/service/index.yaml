@@ -13,4 +13,4 @@ indexes:
 - kind: Project
   properties:
   - name: Collaborators
-  - name: Created
+  - name: CreatedAt

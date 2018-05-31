@@ -28,14 +28,15 @@ func TestMain(m *testing.M) {
 	// create instance
 	// this instance will use strongly consistent datastore so queries match
 	// the current state of test.
-	inst, err := aetest.NewInstance(&aetest.Options{StronglyConsistentDatastore: true})
+	var err error
+	mainInst, err = aetest.NewInstance(&aetest.Options{StronglyConsistentDatastore: true})
 	if err != nil {
 		panic(err)
 	}
-	defer inst.Close()
+	defer mainInst.Close()
 
 	// create dummy request to get the context
-	req, err := inst.NewRequest("GET", "/", nil)
+	req, err := mainInst.NewRequest("GET", "/", nil)
 	if err != nil {
 		panic(err)
 	}

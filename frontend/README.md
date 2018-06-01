@@ -26,7 +26,7 @@ Install dependencies by running `npm install`.
 
 Deploy to Google App Engine by running  `gcloud app deploy web.yaml`. Remember to build project first!
 
-##Dependencies
+## Dependencies
 
 Styling is based on Material-ui components.
 
@@ -56,7 +56,7 @@ This app has configuration files for:
 #### Project list
 - `ProjectList.jsx` - Main file for project list view
 
-#### Project 
+#### Project
 - `Project.jsx` - Main file for project view
 - `CollaboratorList.jsx` - Collaborator list component
 - `MetadataSummary.jsx` - Project sample metadata summary component

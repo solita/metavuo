@@ -3,4 +3,4 @@ dispatch:
    service: default
 
  - url: "*/*"
-   service: web
+   service: frontend

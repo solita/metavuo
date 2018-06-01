@@ -2,9 +2,9 @@
 .idea/
 
 # Front-end
-web/node_modules/
-web/package-lock.json
+frontend/node_modules/
+frontend/package-lock.json
 
-web/dist/
+frontend/dist/
 
 __snapshots__/

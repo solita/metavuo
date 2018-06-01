@@ -54,22 +54,22 @@ Deploy the application to use all Cloud Storage -features.
 
 **Projects**
 
-Method | Path | Path variables | Description
+Path | Method | Path variables | Description
 -------|------|-----------|------------
 `/api/projects` | GET | | List own projects (admin gets all)
 `/api/projects` | POST | | Create new project
 `/api/projects/{id}` | GET | `id` int | Get project
 `/api/projects/{id}` | PUT | `id` int | Update project
-`/api/projects/{id}/collaborators` | `id` int | GET | List collaborators
-`/api/projects/{id}/collaborators` | `id` int | POST | Add collaborator
-`/api/projects/{id}/collaborators` | `id` int | PUT | Delete collaborator
+`/api/projects/{id}/collaborators` | GET | `id` int | List collaborators
+`/api/projects/{id}/collaborators` | POST | `id` int | Add collaborator
+`/api/projects/{id}/collaborators` | PUT | `id` int | Delete collaborator
 `/api/projects/{id}/files` | GET | `id` int | List files attached to project
-`/api/projects/{id}/files/generate-upload-url` | `id` int | POST | Create storage upload url
-`/api/projects/{id}/files/{filename}` | `id` int, `filename` string | GET | Get file 
-`/api/projects/{id}/files/{filename}` | `id` int, `filename` string | DELETE | Delete file
-`/api/projects/{id}/metadata/` | `id` int | POST | Add sample metadata file
-`/api/projects/{id}/metadata/` | `id` int | DELETE | Delete sample metadata
-`/api/projects/{id}/metadata/download` | `id` int | GET | Get sample metadata file
+`/api/projects/{id}/files/generate-upload-url` | POST | `id` int | Create storage upload url
+`/api/projects/{id}/files/{filename}` | GET | `id` int, `filename` string | Get file 
+`/api/projects/{id}/files/{filename}` | DELETE | `id` int, `filename` string | Delete file
+`/api/projects/{id}/metadata/` | POST | `id` int | Add sample metadata file
+`/api/projects/{id}/metadata/` | DELETE | `id` int | Delete sample metadata
+`/api/projects/{id}/metadata/download` | GET | `id` int | Get sample metadata file
 `/api/projects/{id}/status` | POST | `id` int | Change project status
 
 **Users**
@@ -94,10 +94,10 @@ Path | Method | Path variables | Description
 -------|------|------------|------------
 `api/admin/info` | POST | | Create app information
 `api/admin/info` | PUT | | Update app information
-`/api/admin/project/{id}` | `id` int | DELETE | Delete project
+`/api/admin/project/{id}` | DELETE | `id` int | Delete project
 `/api/admin/users` | GET | | List all users
 `/api/admin/users` | POST | | Add user
-`/api/admin/users/{id}` | `id` int | DELETE | Delete user
+`/api/admin/users/{id}` | DELETE | `id` int | Delete user
 
 **Tasks**
 

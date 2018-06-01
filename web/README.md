@@ -70,6 +70,10 @@ This app has configuration files for:
 - `Header.jsx` - Header form application.
 - `InfoDialog.jsx` - Shows application information
 
+#### Common
+- `/src/common/components` - Include some common components
+- `/src/common/util` - Converters and router helper for admin
+
 
 ### Styling with CSS
 

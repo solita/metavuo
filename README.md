@@ -20,7 +20,7 @@ git clone https://github.com/solita/metavuo
 - Install dependencies with `npm install`.
 - Run in development mode with `npm start` in http://localhost:9000
 
-See more in [/web](https://github.com/solita/metavuo/tree/master/web)
+See more in [web](web/)
 
 ### Deploy
 

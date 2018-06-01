@@ -1,11 +1,15 @@
 # Frontend
 Frontend application for Metavuo is developed with React.
 
-## Installing dependencies
+* [Running](#running)
+* [Deploying](#deploying)
+* [Dependencies](#dependencies)
+* [For developers](#for-developers)
 
-Install dependencies by running `npm install`.
 
 ## Running
+
+Install dependencies by running `npm install`.
 
 #### Development mode
 `npm start` - Starts webpack-dev-server in localhost:9000
@@ -27,6 +31,7 @@ Deploy to Google App Engine by running  `gcloud app deploy web.yaml`. Remember t
 Styling is based on Material-ui components.
 
 Other dependencies: see `package.json`.
+
 
 ## For developers
 

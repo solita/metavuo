@@ -6,11 +6,9 @@ Metavuo is a platform for managing metabolomics projects. Metavuo is developed b
 
 ### Setup
 
-Clone repo:
+1. Clone repo:
 
         git clone https://github.com/solita/metavuo
-
-### Run locally
 
 1. Build frontend
 
@@ -18,6 +16,8 @@ Clone repo:
         npm install
         npm run build
         popd
+
+### Run locally
 
 1. Build and run
 
@@ -47,8 +47,8 @@ Frontend and backend can be deployed separately. Datastore composite indexes are
 
 1. Setup CORS configuration for Storage
 
-    echo '[{"method": ["GET", "PUT"], "origin": ["https://your-project-id.appspot.com"], "responseHeader": ["x-goog-meta-uploadedby", "x-goog-meta-description", "x-goog-meta-filetype"]}]' > cors.json
-    gsutil cors set cors.json gs://your-project-id.appspot.com/
+        echo '[{"method": ["GET", "PUT"], "origin": ["https://your-project-id.appspot.com"], "responseHeader": ["x-goog-meta-uploadedby", "x-goog-meta-description", "x-goog-meta-filetype"]}]' > cors.json
+        gsutil cors set cors.json gs://your-project-id.appspot.com/
 
 ## Versioning
 

@@ -80,6 +80,7 @@ class StorageFileUpload extends React.Component {
       },
     )
       .then(() => {
+        this.props.updateFileList();
         this.closeDialog();
       })
       .catch(() => {
@@ -145,6 +146,7 @@ StorageFileUpload.propTypes = {
   url: PropTypes.string.isRequired,
   userEmail: PropTypes.string.isRequired,
   isResult: PropTypes.bool.isRequired,
+  updateFileList: PropTypes.func.isRequired,
 };
 
 StorageFileUpload.defaultProps = {

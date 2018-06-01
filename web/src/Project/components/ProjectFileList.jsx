@@ -145,6 +145,7 @@ class ProjectFileList extends React.Component {
             url={`/api/projects/${this.props.projectId}/files/generate-upload-url`}
             userEmail={this.props.userEmail}
             isResult={this.props.isResult}
+            updateFileList={this.props.updateFileList}
           />
           <ConfirmDialog
             dialogOpen={this.state.storageDelDialogOpen}

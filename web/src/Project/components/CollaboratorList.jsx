@@ -30,8 +30,12 @@ class CollaboratorList extends React.Component {
   updateCollaborators() {
     axios.get(`/api/projects/${this.props.projectId}/collaborators`)
       .then((res) => {
-        if (res.status === 200 && res.data !== null) {
-          this.setState({ collaborators: res.data });
+        if (res.status === 200) {
+          if (res.data !== null) {
+            this.setState({ collaborators: res.data });
+          } else {
+            this.setState({ message: 'No collaborators found' });
+          }
         } else if (res.status === 204) {
           this.setState({ collaborators: [] });
         } else {

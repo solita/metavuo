@@ -15,6 +15,7 @@ class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
+      loading: true,
       isAdmin: false,
       isUser: false,
       userEmail: '',
@@ -31,6 +32,7 @@ class App extends React.Component {
             isAdmin: res.data.roles.includes('admin'),
             isUser: res.data.roles.includes('user'),
             logoutUrl: res.data.logout_url,
+            loading: false,
           });
         }
       })
@@ -40,6 +42,7 @@ class App extends React.Component {
           isAdmin: false,
           isUser: false,
           logoutUrl: '',
+          loading: false,
         });
       });
   }
@@ -99,7 +102,7 @@ class App extends React.Component {
           logoutUrl={this.state.logoutUrl}
         />
         <div className="content-container">
-          {routerPart}
+          {!this.state.loading && routerPart}
         </div>
       </MuiThemeProvider>
     );

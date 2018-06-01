@@ -2,11 +2,10 @@ import React from 'react';
 import { withRouter } from 'react-router-dom';
 import axios from 'axios';
 import DialogActions from '@material-ui/core/DialogActions';
+import { ValidatorForm } from 'react-material-ui-form-validator';
 import Button from '@material-ui/core/Button';
 import PropTypes from 'prop-types';
-import { ValidatorForm } from 'react-material-ui-form-validator';
 import ProjectFormFields from './ProjectFormFields';
-
 
 export class ProjectForm extends React.Component {
   constructor(props) {

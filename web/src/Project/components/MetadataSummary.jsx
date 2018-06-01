@@ -6,8 +6,8 @@ import Tooltip from '@material-ui/core/Tooltip';
 import PropTypes from 'prop-types';
 import UploadDialog from '../../common/components/UploadDialog';
 import ConfirmDialog from '../../common/components/ConfirmDialog';
-import '../css/MetadataSummary.scss';
 import LocaleConverter from '../../common/util/LocaleConverter';
+import '../css/MetadataSummary.scss';
 
 class MetadataSummary extends React.Component {
   constructor(props) {

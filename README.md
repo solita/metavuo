@@ -4,6 +4,27 @@ Metavuo is a platform for managing metabolomics projects. Metavuo is developed b
 
 ## Getting Started
 
+### Setup
+
+Clone repo:
+```
+git clone https://github.com/solita/metavuo
+```
+
+### Run locally
+
+**Backend**
+- ...
+
+**Frontend**
+- Install dependencies with `npm install`.
+- Run in development mode with `npm start` in http://localhost:9000
+
+See more in [/web](https://github.com/solita/metavuo/tree/master/web)
+
+### Deploy
+
+
 ## Versioning
 
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/solita/uef-projektipankki/tags).

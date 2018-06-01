@@ -7,23 +7,42 @@ Metavuo is a platform for managing metabolomics projects. Metavuo is developed b
 ### Setup
 
 Clone repo:
-```
-git clone https://github.com/solita/metavuo
-```
+        git clone https://github.com/solita/metavuo
 
 ### Run locally
 
-**Backend**
-- ...
+1. Build frontend
 
-**Frontend**
-- Install dependencies with `npm install`.
-- Run in development mode with `npm start` in http://localhost:9000
+        pushd frontend
+        npm install
+        npm run build
+        popd
 
-See more in [web](web/)
+1. Build and run
+
+        dev_appserver.py dispatch.yaml frontend/app.yaml backend/service/app.yaml
+
+1. Open and sign in
+
+        http://localhost:8080/
+
+See more about local development in [frontend](frontend/) and [backend](backend/).
 
 ### Deploy
 
+Frontend and backend can be deployed separately. Datastore composite indexes are defined in index.yaml
+
+1. Deploy datastore indexes
+
+        gcloud app deploy index.yaml
+
+1. Deploy frontend service
+
+        gcloud app deploy frontend/app.yaml
+
+1. Deploy backend service
+
+        gcloud app deploy backend/service/app.yaml
 
 ## Versioning
 

@@ -122,8 +122,8 @@ func getStorageUrl(c context.Context, fileName string, w http.ResponseWriter, id
 
 	bucket, err := file.DefaultBucketName(c)
 
-	if len(acc) == 0 {
-		acc = "Add the project's service account here when testing locally"
+	if appengine.IsDevAppServer() {
+		// acc = "Add the project's service account here when testing locally"
 	}
 
 	url, err := storage.SignedURL(bucket, strconv.Itoa(int(id))+"/"+fileName, &storage.SignedURLOptions{
@@ -203,8 +203,8 @@ func routeProjectFileGet(w http.ResponseWriter, r *http.Request, id int64, fileN
 
 	bucket, err := file.DefaultBucketName(c)
 
-	if len(acc) == 0 {
-		acc = "Add the project's service account here when testing locally"
+	if appengine.IsDevAppServer() {
+		// acc = "Add the project's service account here when testing locally"
 	}
 
 	url, err := storage.SignedURL(bucket, strconv.Itoa(int(id))+"/"+fileName, &storage.SignedURLOptions{

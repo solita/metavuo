@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strconv"
 	"time"
+	"encoding/base64"
 
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
@@ -122,6 +123,8 @@ func getStorageUrl(c context.Context, fileName string, w http.ResponseWriter, id
 
 	bucket, err := file.DefaultBucketName(c)
 
+	encodedDesc := base64.StdEncoding.EncodeToString([]byte(description))
+
 	if appengine.IsDevAppServer() {
 		// acc = "Add the project's service account here when testing locally"
 	}
@@ -132,7 +135,7 @@ func getStorageUrl(c context.Context, fileName string, w http.ResponseWriter, id
 		GoogleAccessID: acc,
 		ContentType:    "text/plain",
 		Headers: []string{"x-goog-meta-uploadedby:" + uploadedBy,
-			"x-goog-meta-description:" + description, "x-goog-meta-filetype:" + fileType},
+			"x-goog-meta-description:" + encodedDesc, "x-goog-meta-filetype:" + fileType},
 		SignBytes: func(b []byte) ([]byte, error) {
 			_, signedBytes, err := appengine.SignBytes(c, b)
 			return signedBytes, err
@@ -145,7 +148,13 @@ func getStorageUrl(c context.Context, fileName string, w http.ResponseWriter, id
 		return
 	}
 
-	w.Write([]byte(url))
+	w.Write(mustJSON(struct {
+		Url         string `json:"url"`
+		Description string `json:"description"`
+	}{
+		url,
+		encodedDesc,
+	}))
 
 }
 
@@ -179,13 +188,20 @@ func routeProjectFileList(w http.ResponseWriter, r *http.Request, id int64) {
 		}
 
 		if item.Size > 0 {
+			decodedDesc, err := base64.StdEncoding.DecodeString(item.Metadata["description"])
+			if err != nil {
+				log.Errorf(c, "Failed to decode item metadata: %v", err)
+				http.Error(w, "", http.StatusInternalServerError)
+				return
+			}
+
 			files = append(files, ProjectFile{
 				item.Generation,
 				filepath.Base(item.Name),
 				item.Size,
 				item.Created,
 				item.Metadata["uploadedby"],
-				item.Metadata["description"],
+				string(decodedDesc),
 				item.Metadata["filetype"],
 			})
 		}

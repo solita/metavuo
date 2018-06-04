@@ -69,11 +69,11 @@ class StorageFileUpload extends React.Component {
 
   putFile(res) {
     axios.put(
-      res.data, this.state.file,
+      res.data.url, this.state.file,
       {
         headers: {
           'Content-Type': 'text/plain',
-          'x-goog-meta-description': this.state.description,
+          'x-goog-meta-description': res.data.description,
           'x-goog-meta-uploadedby': this.props.userEmail,
           'x-goog-meta-filetype': this.props.isResult ? 'result' : 'default',
         },

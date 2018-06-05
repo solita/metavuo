@@ -53,6 +53,7 @@ class MetadataSummary extends React.Component {
   }
 
   discardMetadata() {
+    this.setState({ buttonDisabled: true });
     axios.delete(`/api/projects/${this.props.projectId}/metadata`)
       .then((res) => {
         if (res.status === 204) {
@@ -61,6 +62,9 @@ class MetadataSummary extends React.Component {
       })
       .catch((err) => {
         this.setState({ metadataError: `Metadata could not be removed: ${err}` });
+      })
+      .finally(() => {
+        this.setState({ buttonDisabled: false });
       });
     this.closeDelDialog();
   }
@@ -133,7 +137,12 @@ class MetadataSummary extends React.Component {
                   </Tooltip>
                 </a>
                 <Tooltip title="Delete" placement="bottom">
-                  <Button variant="fab" className="gray-button round-button" onClick={this.openDelDialog}>
+                  <Button
+                    variant="fab"
+                    className="gray-button round-button"
+                    onClick={this.openDelDialog}
+                    disabled={this.state.buttonDisabled}
+                  >
                     <i className="material-icons">delete_outline</i>
                   </Button>
                 </Tooltip>

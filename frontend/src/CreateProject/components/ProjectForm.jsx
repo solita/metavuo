@@ -92,7 +92,12 @@ export class ProjectForm extends React.Component {
             />
           </div>
           <DialogActions>
-            <Button onClick={this.props.handleClose} variant="raised" className="secondary-button text-button">
+            <Button
+              onClick={this.props.handleClose}
+              variant="raised"
+              className="secondary-button text-button"
+              disabled={!this.state.name || !this.state.description || !this.state.organization}
+            >
               Cancel
             </Button>
             <Button type="submit" id="submit-project" variant="raised" className="primary-button text-button">

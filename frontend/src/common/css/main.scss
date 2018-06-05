@@ -73,6 +73,10 @@ ul a {
   &:hover {
     background-color: $middle-gray !important;
   }
+
+  &:disabled {
+    color: $middle-gray !important;
+  }
 }
 
 .white-button {

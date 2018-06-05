@@ -117,7 +117,13 @@ class ProjectUpdateDialog extends React.Component {
                 <Button onClick={this.handleClose} variant="raised" className="secondary-button text-button">
                 Cancel
                 </Button>
-                <Button type="submit" id="submit-update" variant="raised" className="primary-button text-button">
+                <Button
+                  type="submit"
+                  id="submit-update"
+                  variant="raised"
+                  className="primary-button text-button"
+                  disabled={!this.state.name || !this.state.description || !this.state.organization}
+                >
                   <i className="material-icons text-button-icon">save</i>Save
                 </Button>
               </DialogActions>

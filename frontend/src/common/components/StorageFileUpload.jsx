@@ -17,11 +17,6 @@ class StorageFileUpload extends React.Component {
   }
   constructor(props) {
     super(props);
-    this.handleSubmit = this.handleSubmit.bind(this);
-    this.addFile = this.addFile.bind(this);
-    this.closeDialog = this.closeDialog.bind(this);
-    this.handleChange = this.handleChange.bind(this);
-    this.putFile = this.putFile.bind(this);
     this.state = {
       file: null,
       hasFile: false,
@@ -29,6 +24,11 @@ class StorageFileUpload extends React.Component {
       description: '',
       isUploading: false,
     };
+    this.handleSubmit = this.handleSubmit.bind(this);
+    this.addFile = this.addFile.bind(this);
+    this.closeDialog = this.closeDialog.bind(this);
+    this.handleChange = this.handleChange.bind(this);
+    this.putFile = this.putFile.bind(this);
   }
 
   handleSubmit(e) {
@@ -59,7 +59,13 @@ class StorageFileUpload extends React.Component {
   }
 
   closeDialog() {
-    this.setState({ hasFile: false, message: '', description: '' });
+    this.setState({
+      file: null,
+      hasFile: false,
+      message: '',
+      description: '',
+      isUploading: false,
+    });
     this.props.closeDialog();
   }
 
@@ -72,7 +78,7 @@ class StorageFileUpload extends React.Component {
       res.data.url, this.state.file,
       {
         headers: {
-          'Content-Type': 'text/plain',
+          'Content-Type': 'application/octet-stream',
           'x-goog-meta-description': res.data.description,
           'x-goog-meta-uploadedby': this.props.userEmail,
           'x-goog-meta-filetype': this.props.isResult ? 'result' : 'default',
@@ -116,7 +122,7 @@ class StorageFileUpload extends React.Component {
                 type="file"
                 name="file"
                 onChange={this.addFile}
-                fullWidth
+                disableUnderline
               />
             </div>
             <DialogActions>

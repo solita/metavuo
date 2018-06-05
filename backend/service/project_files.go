@@ -133,7 +133,7 @@ func getStorageUrl(c context.Context, fileName string, w http.ResponseWriter, id
 		Expires:        time.Now().Add(time.Hour * 24),
 		Method:         http.MethodPut,
 		GoogleAccessID: acc,
-		ContentType:    "text/plain",
+		ContentType:    "application/octet-stream",
 		Headers: []string{"x-goog-meta-uploadedby:" + uploadedBy,
 			"x-goog-meta-description:" + encodedDesc, "x-goog-meta-filetype:" + fileType},
 		SignBytes: func(b []byte) ([]byte, error) {

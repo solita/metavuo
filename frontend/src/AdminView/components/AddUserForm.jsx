@@ -98,7 +98,13 @@ class AddUserForm extends React.Component {
             <Button variant="raised" className="secondary-button text-button" onClick={this.props.closeForm}>
               <i className="material-icons text-button-icon">close</i>Cancel
             </Button>
-            <Button type="submit" id="submit-user" variant="raised" className="primary-button text-button">
+            <Button
+              type="submit"
+              id="submit-user"
+              variant="raised"
+              className="primary-button text-button"
+              disabled={!this.state.name || !this.state.email || !this.state.organization}
+            >
               <i className="material-icons text-button-icon">save</i>Save
             </Button>
           </DialogActions>

@@ -37,7 +37,7 @@ class FileUpload extends React.Component {
     data.append('file', this.state.file);
     axios.post(this.props.url, data, { headers: { 'content-type': 'multipart/form-data' } })
       .then((res) => {
-        this.setState({ buttonDisabled: false });
+        this.setState({ buttonDisabled: false, hasFile: false, file: null });
         this.props.passResponse(res.data);
       })
       .catch((err) => {
@@ -61,7 +61,7 @@ class FileUpload extends React.Component {
       <div>
         {this.state.message && <p className="message-errors">{this.state.message}</p>}
         <div className="divider-section">
-          <Input type="file" name="file" onChange={this.addFile} />
+          <Input type="file" name="file" onChange={this.addFile} disableUnderline />
           {this.state.buttonDisabled && <CircularProgress />}
         </div>
         <DialogActions>

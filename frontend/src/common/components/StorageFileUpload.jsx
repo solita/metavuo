@@ -5,21 +5,15 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogActions from '@material-ui/core/DialogActions';
-import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator/';
 import Input from '@material-ui/core/Input';
+import { ValidatorForm, TextValidator } from 'react-material-ui-form-validator/';
 import PropTypes from 'prop-types';
 
-const pattern = /^[\w_\-.]*$/;
-
 class StorageFileUpload extends React.Component {
-  static validateFileName(name) {
-    return pattern.test(name);
-  }
   constructor(props) {
     super(props);
     this.state = {
       file: null,
-      hasFile: false,
       message: '',
       description: '',
       isUploading: false,
@@ -32,6 +26,7 @@ class StorageFileUpload extends React.Component {
   }
 
   handleSubmit(e) {
+    this.setState({ message: '' });
     e.preventDefault();
     if (this.state.isUploading) {
       return;
@@ -46,22 +41,25 @@ class StorageFileUpload extends React.Component {
         this.putFile(res);
       }
     }).catch((err) => {
-      this.setState({ message: err.response.data, isUploading: false });
+      if (err.response.status === 400) {
+        this.setState({ message: err.response.data, isUploading: false });
+      } else {
+        this.setState({ message: 'Something went wrong', isUploading: false });
+      }
     });
   }
 
   addFile(event) {
-    if (StorageFileUpload.validateFileName(event.target.files[0].name)) {
-      this.setState({ file: event.target.files[0], hasFile: true, message: '' });
+    if (event.target.files.length > 0) {
+      this.setState({ file: event.target.files[0], message: '' });
     } else {
-      this.setState({ hasFile: false, message: 'Filename is invalid' });
+      this.setState({ file: null, message: '' });
     }
   }
 
   closeDialog() {
     this.setState({
       file: null,
-      hasFile: false,
       message: '',
       description: '',
       isUploading: false,
@@ -115,8 +113,8 @@ class StorageFileUpload extends React.Component {
                 onChange={this.handleChange}
                 margin="normal"
                 fullWidth
-                validators={['maxStringLength:200']}
-                errorMessages={['Maximum length is 200 characters.']}
+                validators={['maxStringLength:1000']}
+                errorMessages={['Maximum length is 1000 characters.']}
               />
               <Input
                 type="file"
@@ -126,14 +124,14 @@ class StorageFileUpload extends React.Component {
               />
             </div>
             <DialogActions>
-              <Button onClick={this.props.closeDialog} className="secondary-button text-button" >
+              <Button onClick={this.closeDialog} className="secondary-button text-button" >
                 <i className="material-icons text-button-icon">close</i>Cancel
               </Button>
               <Button
                 type="submit"
                 variant="raised"
                 className="primary-button text-button"
-                disabled={!this.state.hasFile || this.state.isUploading}
+                disabled={(this.state.file === null) || this.state.isUploading}
               >
                 <i className="material-icons text-button-icon">file_upload</i>Upload
               </Button>

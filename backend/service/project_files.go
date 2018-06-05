@@ -2,12 +2,11 @@ package service
 
 import (
 	"context"
+	"encoding/base64"
 	"net/http"
 	"path/filepath"
-	"regexp"
 	"strconv"
 	"time"
-	"encoding/base64"
 
 	"cloud.google.com/go/storage"
 	"google.golang.org/api/iterator"
@@ -16,8 +15,6 @@ import (
 	"google.golang.org/appengine/log"
 	"google.golang.org/appengine/user"
 )
-
-var fileNamePattern = regexp.MustCompile(`^[\w_\-.]*$`)
 
 type ProjectFile struct {
 	GenerationID int64     `json:"id"`
@@ -73,11 +70,6 @@ func routeProjectFileUrlRequest(w http.ResponseWriter, r *http.Request, id int64
 	fileName := r.FormValue("filename")
 	description := r.FormValue("description")
 	fileType := r.FormValue("fileType")
-
-	if !fileNamePattern.Match([]byte(fileName)) {
-		http.Error(w, "File name is invalid", http.StatusBadRequest)
-		return
-	}
 
 	if !isFileNameAvailable(c, fileName, id) {
 		http.Error(w, "Filename must be unique", http.StatusBadRequest)

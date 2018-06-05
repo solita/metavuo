@@ -47,7 +47,7 @@ Frontend and backend can be deployed separately. Datastore composite indexes are
 
 1. Setup CORS configuration for Storage
 
-        echo '[{"method": ["GET", "PUT"], "origin": ["https://your-project-id.appspot.com"], "responseHeader": ["x-goog-meta-uploadedby", "x-goog-meta-description", "x-goog-meta-filetype"]}]' > cors.json
+        echo '[{"method": ["GET", "PUT"], "origin": ["https://your-project-id.appspot.com"], "responseHeader": ["content-type", "x-goog-meta-uploadedby", "x-goog-meta-description", "x-goog-meta-filetype"]}]' > cors.json
         gsutil cors set cors.json gs://your-project-id.appspot.com/
 
 ## Versioning

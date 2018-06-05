@@ -39,7 +39,7 @@ In order to use Storage and signed urls, you need to change your project's CORS-
 
 Example configuration:
 
-`[{"method": ["GET", "PUT"], "origin": ["https://your-project.appspot.com", "http://localhost:9000"], "responseHeader": ["x-goog-meta-uploadedby", "x-goog-meta-description", "x-goog-meta-filetype"]}]`
+`[{"method": ["GET", "PUT"], "origin": ["https://your-project.appspot.com", "http://localhost:9000"], "responseHeader": ["content-type", "x-goog-meta-uploadedby", "x-goog-meta-description", "x-goog-meta-filetype"]}]`
 
 See [CORS-documentation](https://cloud.google.com/storage/docs/gsutil/commands/cors) for details.
 
@@ -65,7 +65,7 @@ Path | Method | Path variables | Description
 `/api/projects/{id}/collaborators` | PUT | `id` int | Delete collaborator
 `/api/projects/{id}/files` | GET | `id` int | List files attached to project
 `/api/projects/{id}/files/generate-upload-url` | POST | `id` int | Create storage upload url
-`/api/projects/{id}/files/{filename}` | GET | `id` int, `filename` string | Get file 
+`/api/projects/{id}/files/{filename}` | GET | `id` int, `filename` string | Get file
 `/api/projects/{id}/files/{filename}` | DELETE | `id` int, `filename` string | Delete file
 `/api/projects/{id}/metadata/` | POST | `id` int | Add sample metadata file
 `/api/projects/{id}/metadata/` | DELETE | `id` int | Delete sample metadata
